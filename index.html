@@ -28,9 +28,9 @@
       padding-bottom: 72px; -webkit-tap-highlight-color: transparent;
     }
     .page-container { padding: 0 16px 32px; }
-    .section-title { font-size: 18px; font-weight: 700; color: var(--text); margin: 20px 0 12px; padding-left: 12px; border-left: 3px solid var(--red); line-height: 1.3; }
-    .tag { display: inline-block; background: var(--red-bg); color: var(--red); font-size: 12px; padding: 2px 8px; border-radius: 4px; margin-right: 4px; font-weight: 500; }
-    .btn-primary { background: var(--red); color: #FFF; border: none; border-radius: 8px; padding: 12px 24px; font-size: 16px; font-weight: 600; cursor: pointer; }
+    .section-title { font-size: 20px; font-weight: 700; color: var(--text); margin: 20px 0 12px; padding-left: 12px; border-left: 3px solid var(--red); line-height: 1.3; }
+    .tag { display: inline-block; background: var(--red-bg); color: var(--red); font-size: 14px; padding: 2px 8px; border-radius: 4px; margin-right: 4px; font-weight: 500; }
+    .btn-primary { background: var(--red); color: #FFF; border: none; border-radius: 8px; padding: 12px 24px; font-size: 18px; font-weight: 600; cursor: pointer; }
     .btn-primary:active { opacity: 0.85; transform: scale(0.98); }
 
     /* SVG 图标通用 */
@@ -40,13 +40,13 @@
     /* TabBar */
     .tabbar { position: fixed; bottom: 0; left: 0; right: 0; background: #FFF; display: flex; border-top: 1px solid var(--border); z-index: 999; padding: 6px 0 env(safe-area-inset-bottom, 6px); }
     .amap-logo, .amap-copyright { display: none !important; }
-    .tab-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4px 0; cursor: pointer; font-size: 10px; color: var(--text3); transition: all 0.2s; }
-    .tab-item .tab-icon { font-size: 22px; margin-bottom: 1px; display: flex; align-items: center; justify-content: center; }
+    .tab-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4px 0; cursor: pointer; font-size: 12px; color: var(--text3); transition: all 0.2s; }
+    .tab-item .tab-icon { font-size: 24px; margin-bottom: 1px; display: flex; align-items: center; justify-content: center; }
     .tab-item .tab-icon svg { width: 22px; height: 22px; }
     .tab-item.active { color: var(--red); font-weight: 600; }
     .tab-item.active .tab-icon svg { stroke: var(--red); fill: none; }
-    .tab-item-mode { flex: 0 0 52px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; font-size: 10px; color: var(--text3); border-left: 1px solid var(--border); padding: 4px 0; }
-    .tab-item-mode .mode-icon { font-size: 20px; margin-bottom: 1px; transition: transform 0.3s; display: flex; align-items: center; justify-content: center; }
+    .tab-item-mode { flex: 0 0 52px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; font-size: 12px; color: var(--text3); border-left: 1px solid var(--border); padding: 4px 0; }
+    .tab-item-mode .mode-icon { font-size: 22px; margin-bottom: 1px; transition: transform 0.3s; display: flex; align-items: center; justify-content: center; }
     .tab-item-mode .mode-icon svg { width: 20px; height: 20px; }
     .tab-item-mode:active .mode-icon { transform: scale(1.15); }
     .tab-item-mode.viewing { color: var(--red); }
@@ -71,11 +71,11 @@
     .spot-panel.collapsed { transform: translateY(calc(100% - 48px)); }
     .spot-panel.collapsed .panel-body { display: none; }
     .panel-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; cursor: pointer; flex-shrink: 0; }
-    .panel-title { font-size: 16px; font-weight: 700; color: var(--text); }
-    .panel-toggle { font-size: 13px; color: var(--red); font-weight: 500; }
+    .panel-title { font-size: 18px; font-weight: 700; color: var(--text); }
+    .panel-toggle { font-size: 15px; color: var(--red); font-weight: 500; }
     .panel-body { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
     .panel-search { display: flex; align-items: center; padding: 8px 12px; margin: 8px 14px; background: #F5F5F5; border-radius: 20px; }
-    .panel-search input { flex: 1; border: none; outline: none; background: transparent; font-size: 14px; color: var(--text); }
+    .panel-search input { flex: 1; border: none; outline: none; background: transparent; font-size: 16px; color: var(--text); }
     .panel-search input::placeholder { color: var(--text3); }
     .panel-list { flex: 1; overflow-y: auto; padding: 0 12px 12px; }
     .panel-spot-item { display: flex; align-items: center; padding: 10px 8px; border-bottom: 1px solid #F0F0F0; cursor: pointer; gap: 10px; transition: background 0.15s; border-radius: 8px; margin-bottom: 2px; }
@@ -84,19 +84,19 @@
     .panel-spot-icon { width: 40px; height: 40px; border-radius: 10px; background: #F0F0F0; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     .panel-spot-icon svg { width: 20px; height: 20px; stroke: var(--red); }
     .panel-spot-info { flex: 1; min-width: 0; }
-    .panel-spot-name { font-size: 15px; font-weight: 600; display: block; color: var(--text); }
-    .panel-spot-detail { font-size: 12px; color: var(--text2); display: block; margin-top: 2px; }
-    .panel-spot-arrow { font-size: 16px; color: var(--text3); }
-    .panel-spot-highlight { font-size: 11px; color: #FFF; font-weight: 600; background: var(--red); padding: 1px 6px; border-radius: 4px; margin-left: 6px; }
+    .panel-spot-name { font-size: 17px; font-weight: 600; display: block; color: var(--text); }
+    .panel-spot-detail { font-size: 14px; color: var(--text2); display: block; margin-top: 2px; }
+    .panel-spot-arrow { font-size: 18px; color: var(--text3); }
+    .panel-spot-highlight { font-size: 13px; color: #FFF; font-weight: 600; background: var(--red); padding: 1px 6px; border-radius: 4px; margin-left: 6px; }
 
-    .custom-marker { width: 36px; height: 36px; border-radius: 50%; background: var(--red); display: flex; align-items: center; justify-content: center; cursor: pointer; border: 2px solid #FFF; font-size: 16px; box-shadow: 0 2px 6px rgba(231,76,60,0.3); }
+    .custom-marker { width: 36px; height: 36px; border-radius: 50%; background: var(--red); display: flex; align-items: center; justify-content: center; cursor: pointer; border: 2px solid #FFF; font-size: 18px; box-shadow: 0 2px 6px rgba(231,76,60,0.3); }
     .custom-marker svg { width: 18px; height: 18px; stroke: #FFF !important; }
     .custom-marker svg [fill]:not([fill="none"]) { fill: #FFF !important; }
     .custom-marker.active { background: #333; width: 42px; height: 42px; }
     .custom-marker.active svg { width: 20px; height: 20px; stroke: #FFF !important; }
-    .custom-marker.route-marker { width: 26px; height: 26px; font-size: 12px; background: #333; box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
+    .custom-marker.route-marker { width: 26px; height: 26px; font-size: 14px; background: #333; box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
     .custom-marker.route-marker svg { width: 14px; height: 14px; stroke: #FFF !important; }
-    .custom-marker.food-marker { width: 26px; height: 26px; font-size: 12px; background: var(--red); box-shadow: 0 2px 6px rgba(231,76,60,0.3); }
+    .custom-marker.food-marker { width: 26px; height: 26px; font-size: 14px; background: var(--red); box-shadow: 0 2px 6px rgba(231,76,60,0.3); }
     .custom-marker.food-marker svg { width: 14px; height: 14px; stroke: #FFF !important; }
 
     /* ========== 马蜂窝风格详情页 ========== */
@@ -112,9 +112,9 @@
     .detail-hero img { width: 100%; height: 100%; object-fit: cover; }
     .detail-hero::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 100px; background: linear-gradient(transparent, rgba(0,0,0,0.45)); z-index: 1; }
     .hero-info { position: absolute; bottom: 20px; left: 20px; right: 20px; z-index: 2; }
-    .hero-name { font-size: 26px; font-weight: 700; color: #FFF; display: block; line-height: 1.2; text-shadow: 0 1px 4px rgba(0,0,0,0.2); }
-    .hero-subtitle { font-size: 13px; color: rgba(255,255,255,0.85); margin-top: 6px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-    .hero-tag { font-size: 11px; color: #FFF; background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 10px; backdrop-filter: blur(10px); }
+    .hero-name { font-size: 28px; font-weight: 700; color: #FFF; display: block; line-height: 1.2; text-shadow: 0 1px 4px rgba(0,0,0,0.2); }
+    .hero-subtitle { font-size: 15px; color: rgba(255,255,255,0.85); margin-top: 6px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .hero-tag { font-size: 13px; color: #FFF; background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 10px; backdrop-filter: blur(10px); }
     .detail-body { padding: 0 16px 24px; position: relative; z-index: 2; margin-top: -16px; }
     /* 信息卡片 - 浮在头图下方 */
     .detail-info-card { background: #FFF; border-radius: 16px; padding: 16px; margin-bottom: 12px; box-shadow: 0 1px 8px rgba(0,0,0,0.04); }
@@ -122,172 +122,172 @@
     .info-cell { padding: 10px 12px; text-align: center; border-right: 1px solid #F0F0F0; border-bottom: 1px solid #F0F0F0; }
     .info-cell:nth-child(2n) { border-right: none; }
     .info-cell:nth-child(n+3) { border-bottom: none; }
-    .info-cell-label { font-size: 11px; color: #999; display: block; margin-bottom: 4px; }
-    .info-cell-val { font-size: 14px; font-weight: 600; display: block; color: #333; }
+    .info-cell-label { font-size: 13px; color: #999; display: block; margin-bottom: 4px; }
+    .info-cell-val { font-size: 16px; font-weight: 600; display: block; color: #333; }
     .info-cell-val.price { color: #FF6B35; }
     /* 段落卡片 */
     .mf-card { background: #FFF; border-radius: 16px; padding: 0; margin-bottom: 12px; overflow: hidden; box-shadow: 0 1px 8px rgba(0,0,0,0.04); }
-    .mf-card-header { display: flex; align-items: center; padding: 14px 16px; font-size: 16px; font-weight: 600; color: #1A1A1A; cursor: pointer; }
+    .mf-card-header { display: flex; align-items: center; padding: 16px; font-size: 18px; font-weight: 600; color: #1A1A1A; cursor: pointer; }
     .mf-card-header-icon { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; margin-right: 8px; flex-shrink: 0; }
     .mf-card-header-text { flex: 1; }
-    .mf-card-arrow { font-size: 14px; color: #CCC; transition: transform 0.2s; }
+    .mf-card-arrow { font-size: 16px; color: #CCC; transition: transform 0.2s; }
     .mf-card-arrow.open { transform: rotate(180deg); }
     .mf-card-body { padding: 0 16px 14px; display: none; }
     .mf-card-body.open { display: block; }
     .mf-card-body.no-collapse { display: block; padding: 0 16px 14px; }
     /* 介绍文本 */
-    .mf-intro { font-size: 14px; color: #555; line-height: 1.8; }
+    .mf-intro { font-size: 16px; color: #555; line-height: 1.8; }
     /* 路线 */
     .mf-route-item { display: flex; align-items: flex-start; padding: 8px 0; gap: 10px; }
-    .mf-route-dot { width: 20px; height: 20px; border-radius: 50%; background: #E74C3C; color: #FFF; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
-    .mf-route-text { font-size: 14px; color: #444; line-height: 1.6; flex: 1; }
+    .mf-route-dot { width: 22px; height: 22px; border-radius: 50%; background: #E74C3C; color: #FFF; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+    .mf-route-text { font-size: 16px; color: #444; line-height: 1.6; flex: 1; }
     .mf-route-divider { width: 20px; text-align: center; padding: 2px 0; }
     .mf-route-divider::before { content: ''; display: inline-block; width: 1px; height: 12px; background: #DDD; }
     /* 贴士 */
     .mf-tip-item { display: flex; align-items: flex-start; padding: 8px 0; gap: 10px; }
     .mf-tip-dot { width: 6px; height: 6px; border-radius: 50%; background: #E74C3C; flex-shrink: 0; margin-top: 6px; }
-    .mf-tip-text { font-size: 14px; color: #444; line-height: 1.5; flex: 1; }
+    .mf-tip-text { font-size: 16px; color: #444; line-height: 1.5; flex: 1; }
     /* 店铺卡片 */
     .mf-shop-card { background: #F8F8F8; border-radius: 12px; padding: 14px; margin-bottom: 8px; }
-    .mf-shop-name { font-size: 15px; font-weight: 600; color: #1A1A1A; display: flex; align-items: center; gap: 6px; }
-    .mf-shop-addr { font-size: 12px; color: #999; margin-top: 6px; display: flex; align-items: center; gap: 4px; }
-    .mf-shop-rec { font-size: 13px; color: #FF6B35; margin-top: 8px; padding: 8px 10px; background: #FFF5F0; border-radius: 8px; line-height: 1.5; }
-    .mf-shop-price { font-size: 12px; color: #FF6B35; font-weight: 600; background: #FFF5F0; padding: 2px 8px; border-radius: 8px; margin-left: auto; }
-    .mf-shop-btn { display: block; width: 100%; margin-top: 10px; padding: 10px; background: #E74C3C; color: #FFF; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; text-align: center; }
+    .mf-shop-name { font-size: 17px; font-weight: 600; color: #1A1A1A; display: flex; align-items: center; gap: 6px; }
+    .mf-shop-addr { font-size: 14px; color: #999; margin-top: 6px; display: flex; align-items: center; gap: 4px; }
+    .mf-shop-rec { font-size: 15px; color: #FF6B35; margin-top: 8px; padding: 8px 10px; background: #FFF5F0; border-radius: 8px; line-height: 1.5; }
+    .mf-shop-price { font-size: 14px; color: #FF6B35; font-weight: 600; background: #FFF5F0; padding: 2px 8px; border-radius: 8px; margin-left: auto; }
+    .mf-shop-btn { display: block; width: 100%; margin-top: 10px; padding: 10px; background: #E74C3C; color: #FFF; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; text-align: center; }
     .mf-shop-btn:active { opacity: 0.85; }
     /* 加入规划按钮 */
     .mf-add-bar { margin-top: 16px; }
-    .mf-add-btn { display: block; width: 100%; padding: 14px; background: #E74C3C; color: #FFF; border: none; border-radius: 14px; font-size: 16px; font-weight: 600; cursor: pointer; text-align: center; }
+    .mf-add-btn { display: block; width: 100%; padding: 16px; background: #E74C3C; color: #FFF; border: none; border-radius: 14px; font-size: 18px; font-weight: 600; cursor: pointer; text-align: center; }
     .mf-add-btn:active { opacity: 0.85; }
     /* 图集 */
     .mf-gallery { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; -webkit-overflow-scrolling: touch; }
     .mf-gallery::-webkit-scrollbar { display: none; }
     .mf-gallery-item { flex-shrink: 0; width: 160px; border-radius: 10px; overflow: hidden; cursor: pointer; }
     .mf-gallery-item img { width: 100%; height: 110px; object-fit: cover; display: block; }
-    .mf-gallery-cap { font-size: 11px; color: #999; display: block; padding: 4px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .mf-gallery-cap { font-size: 13px; color: #999; display: block; padding: 4px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     /* 地址行 */
-    .mf-addr-row { display: flex; align-items: flex-start; padding: 12px 16px; font-size: 13px; color: #666; gap: 6px; border-top: 1px solid #F0F0F0; }
+    .mf-addr-row { display: flex; align-items: flex-start; padding: 12px 16px; font-size: 15px; color: #666; gap: 6px; border-top: 1px solid #F0F0F0; }
     .mf-addr-row svg { flex-shrink: 0; margin-top: 1px; }
     .mf-addr-row-text { flex: 1; line-height: 1.5; }
 
     .food-tabs { display: flex; background: #F5F5F5; border-radius: 8px; padding: 3px; margin-bottom: 14px; gap: 3px; }
-    .food-tab { flex: 1; text-align: center; padding: 10px; border-radius: 6px; font-size: 14px; color: var(--text2); cursor: pointer; font-weight: 500; transition: all 0.2s; }
+    .food-tab { flex: 1; text-align: center; padding: 10px; border-radius: 6px; font-size: 16px; color: var(--text2); cursor: pointer; font-weight: 500; transition: all 0.2s; }
     .food-tab.active { background: #FFF; color: var(--red); font-weight: 600; }
     .warning-card { background: #FFF8E1; border: 1px solid #FFE082; border-radius: 8px; padding: 12px 14px; margin-bottom: 12px; }
     .warning-header { display: flex; align-items: center; }
-    .warning-icon { font-size: 16px; margin-right: 4px; color: #F57C00; }
-    .warning-title { flex: 1; font-size: 14px; font-weight: 600; color: #E65100; }
-    .warning-toggle { font-size: 12px; color: var(--red); font-weight: 500; }
-    .warning-text { font-size: 13px; color: var(--text2); line-height: 1.6; margin-top: 8px; padding: 10px; background: #FFF; border-radius: 6px; display: none; }
+    .warning-icon { font-size: 18px; margin-right: 4px; color: #F57C00; }
+    .warning-title { flex: 1; font-size: 16px; font-weight: 600; color: #E65100; }
+    .warning-toggle { font-size: 14px; color: var(--red); font-weight: 500; }
+    .warning-text { font-size: 15px; color: var(--text2); line-height: 1.6; margin-top: 8px; padding: 10px; background: #FFF; border-radius: 6px; display: none; }
     .dish-card { background: #FFF; border-radius: 10px; padding: 14px; margin-bottom: 10px; }
     .dish-header { display: flex; gap: 12px; }
-    .dish-icon { font-size: 32px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 8px; background: #F5F5F5; }
+    .dish-icon { font-size: 34px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 8px; background: #F5F5F5; }
     .dish-info { flex: 1; }
-    .dish-name { font-size: 17px; font-weight: 700; display: block; color: var(--text); }
-    .dish-desc { font-size: 13px; color: var(--text2); display: block; margin-top: 3px; line-height: 1.5; }
+    .dish-name { font-size: 19px; font-weight: 700; display: block; color: var(--text); }
+    .dish-desc { font-size: 15px; color: var(--text2); display: block; margin-top: 3px; line-height: 1.5; }
     .dish-shops { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
-    .shops-label { font-size: 12px; color: var(--text3); display: block; margin-bottom: 6px; }
+    .shops-label { font-size: 14px; color: var(--text3); display: block; margin-bottom: 6px; }
     .shop-tags { display: flex; flex-wrap: wrap; gap: 6px; }
-    .shop-tag { background: #F5F5F5; color: var(--text); font-size: 12px; padding: 4px 10px; border-radius: 6px; cursor: pointer; border: 1px solid var(--border); transition: all 0.15s; }
+    .shop-tag { background: #F5F5F5; color: var(--text); font-size: 14px; padding: 4px 10px; border-radius: 6px; cursor: pointer; border: 1px solid var(--border); transition: all 0.15s; }
     .shop-tag:active { transform: scale(0.96); }
     .shop-tag.selected { background: var(--red); color: #FFF; border-color: var(--red); }
     .street-card { background: #FFF; border-radius: 10px; padding: 14px; margin-bottom: 10px; transition: transform 0.15s; }
     .street-card:active { transform: scale(0.98); }
     .street-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
-    .street-name { font-size: 17px; font-weight: 700; color: var(--text); }
-    .street-shop-count { font-size: 11px; color: var(--red); background: var(--red-bg); padding: 2px 8px; border-radius: 4px; }
-    .street-desc { font-size: 13px; color: var(--text2); display: block; line-height: 1.5; }
-    .street-addr { font-size: 12px; color: var(--text3); margin-top: 6px; }
-    .street-shops-preview { font-size: 12px; color: var(--text2); margin-top: 6px; padding: 8px; background: #F5F5F5; border-radius: 6px; line-height: 1.4; }
-    .street-card-arrow { font-size: 12px; color: var(--red); font-weight: 600; text-align: right; margin-top: 8px; }
+    .street-name { font-size: 19px; font-weight: 700; color: var(--text); }
+    .street-shop-count { font-size: 13px; color: var(--red); background: var(--red-bg); padding: 2px 8px; border-radius: 4px; }
+    .street-desc { font-size: 15px; color: var(--text2); display: block; line-height: 1.5; }
+    .street-addr { font-size: 14px; color: var(--text3); margin-top: 6px; }
+    .street-shops-preview { font-size: 14px; color: var(--text2); margin-top: 6px; padding: 8px; background: #F5F5F5; border-radius: 6px; line-height: 1.4; }
+    .street-card-arrow { font-size: 14px; color: var(--red); font-weight: 600; text-align: right; margin-top: 8px; }
 
     .flight-compare { display: flex; gap: 8px; margin-bottom: 10px; }
     .flight-card { flex: 1; background: #FFF; border-radius: 10px; padding: 12px; }
     .flight-header { display: flex; justify-content: space-between; margin-bottom: 6px; }
-    .flight-type { font-size: 14px; font-weight: 700; color: var(--red); }
-    .flight-airline { font-size: 11px; color: #FFF; background: #333; padding: 2px 6px; border-radius: 4px; }
-    .flight-time { font-size: 20px; font-weight: 800; display: block; margin-bottom: 4px; color: var(--text); }
-    .flight-airport { font-size: 12px; color: var(--text2); display: block; margin-bottom: 3px; }
-    .flight-desc { font-size: 12px; color: var(--red); display: block; }
+    .flight-type { font-size: 16px; font-weight: 700; color: var(--red); }
+    .flight-airline { font-size: 13px; color: #FFF; background: #333; padding: 2px 6px; border-radius: 4px; }
+    .flight-time { font-size: 22px; font-weight: 800; display: block; margin-bottom: 4px; color: var(--text); }
+    .flight-airport { font-size: 14px; color: var(--text2); display: block; margin-bottom: 3px; }
+    .flight-desc { font-size: 14px; color: var(--red); display: block; }
     .airport-card { background: #FFF; border-radius: 10px; padding: 14px; margin-bottom: 8px; }
     .airport-header { display: flex; justify-content: space-between; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
-    .airport-name { font-size: 16px; font-weight: 700; color: var(--text); }
-    .airport-distance { font-size: 12px; color: var(--text3); }
+    .airport-name { font-size: 18px; font-weight: 700; color: var(--text); }
+    .airport-distance { font-size: 14px; color: var(--text3); }
     .airport-row { display: flex; padding: 4px 0; gap: 6px; }
-    .airport-text { font-size: 13px; flex: 1; line-height: 1.5; color: var(--text); }
+    .airport-text { font-size: 15px; flex: 1; line-height: 1.5; color: var(--text); }
     .airport-tip { display: flex; gap: 4px; padding: 8px 10px; background: var(--red-bg); border-radius: 6px; margin-top: 10px; }
-    .airport-tip .tip-text { font-size: 12px; color: var(--red); flex: 1; }
+    .airport-tip .tip-text { font-size: 14px; color: var(--red); flex: 1; }
     .city-card { background: #FFF; border-radius: 10px; padding: 14px; margin-bottom: 8px; }
     .city-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
-    .city-icon { font-size: 24px; color: var(--text2); }
-    .city-mode { font-size: 16px; font-weight: 700; color: var(--text); }
-    .city-desc { font-size: 13px; color: var(--text2); display: block; line-height: 1.5; }
+    .city-icon { font-size: 26px; color: var(--text2); }
+    .city-mode { font-size: 18px; font-weight: 700; color: var(--text); }
+    .city-desc { font-size: 15px; color: var(--text2); display: block; line-height: 1.5; }
     .warn-item { display: flex; gap: 6px; padding: 10px 14px; background: #FFF8E1; border: 1px solid #FFE082; border-radius: 6px; margin-bottom: 6px; }
-    .warn-icon { font-size: 14px; color: #E65100; flex-shrink: 0; }
-    .warn-text { font-size: 13px; color: #BF360C; line-height: 1.5; flex: 1; }
+    .warn-icon { font-size: 16px; color: #E65100; flex-shrink: 0; }
+    .warn-text { font-size: 15px; color: #BF360C; line-height: 1.5; flex: 1; }
 
     .tips-hero { text-align: center; padding: 24px 0; }
-    .tips-hero-icon { font-size: 40px; display: block; margin-bottom: 6px; color: var(--text2); }
-    .tips-hero-title { font-size: 20px; font-weight: 700; display: block; color: var(--text); }
-    .tips-hero-desc { font-size: 13px; color: var(--text3); display: block; margin-top: 4px; }
+    .tips-hero-icon { font-size: 42px; display: block; margin-bottom: 6px; color: var(--text2); }
+    .tips-hero-title { font-size: 22px; font-weight: 700; display: block; color: var(--text); }
+    .tips-hero-desc { font-size: 15px; color: var(--text3); display: block; margin-top: 4px; }
     .tip-card { background: #FFF; border-radius: 10px; padding: 14px; margin-bottom: 10px; border-left: 3px solid; }
     .tip-card-header { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; }
-    .tip-card-icon { font-size: 20px; color: var(--text2); }
-    .tip-card-title { font-size: 16px; font-weight: 700; color: var(--text); }
+    .tip-card-icon { font-size: 22px; color: var(--text2); }
+    .tip-card-title { font-size: 18px; font-weight: 700; color: var(--text); }
     .tip-bullet { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; margin-top: 7px; }
     .tip-list-item { display: flex; padding: 6px 0; gap: 8px; }
-    .tip-list-item .tip-text { color: var(--text); font-size: 14px; }
+    .tip-list-item .tip-text { color: var(--text); font-size: 16px; }
 
     .total-card { background: var(--red); border-radius: 14px; padding: 24px; margin-bottom: 18px; text-align: center; }
-    .total-label { font-size: 14px; color: rgba(255,255,255,0.85); display: block; margin-bottom: 2px; }
-    .total-amount { font-size: 38px; font-weight: 800; color: #FFF; display: block; }
-    .total-range { font-size: 12px; color: rgba(255,255,255,0.7); display: block; margin-top: 6px; }
+    .total-label { font-size: 16px; color: rgba(255,255,255,0.85); display: block; margin-bottom: 2px; }
+    .total-amount { font-size: 40px; font-weight: 800; color: #FFF; display: block; }
+    .total-range { font-size: 14px; color: rgba(255,255,255,0.7); display: block; margin-top: 6px; }
     .budget-item { display: flex; align-items: center; justify-content: space-between; background: #FFF; border-radius: 10px; padding: 12px 14px; margin-bottom: 8px; }
     .item-left { display: flex; align-items: center; gap: 10px; flex: 1; }
-    .item-icon { font-size: 24px; width: 40px; height: 40px; border-radius: 8px; background: #F5F5F5; display: flex; align-items: center; justify-content: center; }
+    .item-icon { font-size: 26px; width: 40px; height: 40px; border-radius: 8px; background: #F5F5F5; display: flex; align-items: center; justify-content: center; }
     .item-info { flex: 1; }
-    .item-name { font-size: 15px; font-weight: 600; display: block; color: var(--text); }
-    .item-amount { font-size: 14px; color: var(--red); font-weight: 700; display: block; margin-top: 1px; }
+    .item-name { font-size: 17px; font-weight: 600; display: block; color: var(--text); }
+    .item-amount { font-size: 16px; color: var(--red); font-weight: 700; display: block; margin-top: 1px; }
     .item-actions { display: flex; gap: 4px; }
-    .action-btn { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: none; font-size: 14px; }
+    .action-btn { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: none; font-size: 16px; }
     .edit-btn { background: #F5F5F5; }
     .delete-btn { background: #FFEBEE; }
     .budget-actions { padding-bottom: 24px; }
-    .btn-add { display: flex; align-items: center; justify-content: center; gap: 6px; background: var(--red); color: #FFF; font-size: 16px; font-weight: 600; padding: 14px; border-radius: 10px; margin-bottom: 8px; cursor: pointer; border: none; width: 100%; }
-    .btn-reset { text-align: center; font-size: 14px; color: var(--text3); padding: 10px; border: 1px solid var(--border); border-radius: 10px; cursor: pointer; background: #FFF; width: 100%; }
+    .btn-add { display: flex; align-items: center; justify-content: center; gap: 6px; background: var(--red); color: #FFF; font-size: 18px; font-weight: 600; padding: 14px; border-radius: 10px; margin-bottom: 8px; cursor: pointer; border: none; width: 100%; }
+    .btn-reset { text-align: center; font-size: 16px; color: var(--text3); padding: 10px; border: 1px solid var(--border); border-radius: 10px; cursor: pointer; background: #FFF; width: 100%; }
 
     .modal-mask { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); z-index: 1000; display: none; }
     .modal-mask.show { display: block; }
     .modal { position: fixed; bottom: 0; left: 0; right: 0; background: #FFF; border-radius: 16px 16px 0 0; z-index: 1001; padding: 20px; transform: translateY(100%); transition: transform 0.3s cubic-bezier(.4,0,.2,1); max-height: 85vh; overflow-y: auto; }
     .modal.show { transform: translateY(0); }
-    .modal-header { font-size: 18px; font-weight: 700; text-align: center; margin-bottom: 16px; color: var(--text); }
+    .modal-header { font-size: 20px; font-weight: 700; text-align: center; margin-bottom: 16px; color: var(--text); }
     .input-group { margin-bottom: 14px; }
-    .input-label { font-size: 13px; color: var(--text2); display: block; margin-bottom: 4px; }
-    .input-field { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 15px; outline: none; color: var(--text); }
+    .input-label { font-size: 15px; color: var(--text2); display: block; margin-bottom: 4px; }
+    .input-field { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 17px; outline: none; color: var(--text); }
     .input-field:focus { border-color: var(--red); }
     .modal-actions { display: flex; gap: 8px; }
-    .modal-btn { flex: 1; padding: 12px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; border: none; }
+    .modal-btn { flex: 1; padding: 12px; border-radius: 8px; font-size: 17px; font-weight: 600; cursor: pointer; border: none; }
     .modal-btn-cancel { background: #F5F5F5; color: var(--text); }
     .modal-btn-confirm { background: var(--red); color: #FFF; }
 
-    .toast { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); background: rgba(0,0,0,0.75); color: #FFF; padding: 10px 22px; border-radius: 8px; font-size: 14px; z-index: 2000; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+    .toast { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); background: rgba(0,0,0,0.75); color: #FFF; padding: 10px 22px; border-radius: 8px; font-size: 16px; z-index: 2000; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
     .toast.show { opacity: 1; }
 
     .plan-toolbar { display: flex; gap: 5px; padding: 10px 12px; background: #FFF; position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--border); overflow-x: auto; -webkit-overflow-scrolling: touch; }
-    .plan-btn { padding: 8px 8px; border-radius: 6px; text-align: center; font-size: 12px; font-weight: 600; cursor: pointer; border: 1px solid var(--border); background: #FFF; color: var(--text); transition: all 0.15s; white-space: nowrap; }
+    .plan-btn { padding: 8px 8px; border-radius: 6px; text-align: center; font-size: 14px; font-weight: 600; cursor: pointer; border: 1px solid var(--border); background: #FFF; color: var(--text); transition: all 0.15s; white-space: nowrap; }
     .plan-btn:active { transform: scale(0.97); }
     .plan-btn-spots { background: var(--red); color: #FFF; border-color: var(--red); }
     .plan-btn-clear { background: #F5F5F5; color: var(--text3); }
 
     .plan-days { padding: 10px 14px; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; background: #FFF; border-bottom: 1px solid var(--border); }
-    .day-chip { display: inline-block; padding: 6px 14px; margin-right: 6px; border-radius: 20px; font-size: 13px; cursor: pointer; background: #F5F5F5; color: var(--text2); border: 1px solid transparent; transition: all 0.2s; }
+    .day-chip { display: inline-block; padding: 6px 14px; margin-right: 6px; border-radius: 20px; font-size: 15px; cursor: pointer; background: #F5F5F5; color: var(--text2); border: 1px solid transparent; transition: all 0.2s; }
     .day-chip.active { background: var(--red-bg); color: var(--red); border-color: var(--red); font-weight: 600; }
     .day-chip:last-child { margin-right: 0; }
 
     .plan-day-section { margin-bottom: 14px; }
     .plan-day-header { display: flex; align-items: center; justify-content: space-between; padding: 11px 14px; background: #333; color: #FFF; border-radius: 10px 10px 0 0; }
-    .plan-day-title { font-size: 16px; font-weight: 700; }
-    .plan-day-actions { display: flex; gap: 6px; font-size: 13px; }
+    .plan-day-title { font-size: 18px; font-weight: 700; }
+    .plan-day-actions { display: flex; gap: 6px; font-size: 15px; }
     .plan-day-action { cursor: pointer; opacity: 0.85; }
     .plan-day-body { background: #FFF; border-radius: 0 0 10px 10px; padding: 10px 12px; }
 
@@ -299,46 +299,46 @@
     .plan-slot.evening { border-left-color: #8E44AD; }
     .plan-slot.hotel { border-left-color: #2980B9; }
     .plan-slot.transport { border-left-color: #7F8C8D; }
-    .plan-slot-icon { font-size: 20px; width: 34px; height: 34px; border-radius: 8px; background: #F0F0F0; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .plan-slot-icon { font-size: 22px; width: 34px; height: 34px; border-radius: 8px; background: #F0F0F0; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     .plan-slot-info { flex: 1; min-width: 0; }
-    .plan-slot-name { font-size: 14px; font-weight: 600; display: block; color: var(--text); }
-    .plan-slot-detail { font-size: 12px; color: var(--text2); }
-    .plan-slot-remove { font-size: 16px; color: #E74C3C; cursor: pointer; padding: 2px; flex-shrink: 0; opacity: 0.7; }
+    .plan-slot-name { font-size: 16px; font-weight: 600; display: block; color: var(--text); }
+    .plan-slot-detail { font-size: 14px; color: var(--text2); }
+    .plan-slot-remove { font-size: 18px; color: #E74C3C; cursor: pointer; padding: 2px; flex-shrink: 0; opacity: 0.7; }
     .plan-slot-remove:active { opacity: 1; }
-    .plan-slot-edit { font-size: 14px; color: var(--text3); cursor: pointer; padding: 2px; flex-shrink: 0; opacity: 0.5; }
+    .plan-slot-edit { font-size: 16px; color: var(--text3); cursor: pointer; padding: 2px; flex-shrink: 0; opacity: 0.5; }
     .plan-slot-edit:active { opacity: 1; }
     .plan-slot-custom { border-left-color: #1ABC9C !important; }
-    .plan-slot-memo { font-size: 11px; color: var(--text3); margin-top: 1px; }
+    .plan-slot-memo { font-size: 13px; color: var(--text3); margin-top: 1px; }
 
     .custom-picker-form { padding: 14px; }
     .custom-picker-form .input-group { margin-bottom: 10px; }
-    .custom-picker-form .input-label { font-size: 12px; color: var(--text2); display: block; margin-bottom: 4px; }
-    .custom-picker-form .input-field { width: 100%; padding: 9px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; outline: none; color: var(--text); }
+    .custom-picker-form .input-label { font-size: 14px; color: var(--text2); display: block; margin-bottom: 4px; }
+    .custom-picker-form .input-field { width: 100%; padding: 9px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 16px; outline: none; color: var(--text); }
     .custom-picker-form .input-field:focus { border-color: var(--red); }
     .custom-picker-form .type-select { display: flex; gap: 6px; flex-wrap: wrap; }
-    .custom-picker-form .type-option { padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; border: 1px solid var(--border); background: #FFF; color: var(--text2); transition: all 0.15s; }
+    .custom-picker-form .type-option { padding: 6px 12px; border-radius: 6px; font-size: 14px; cursor: pointer; border: 1px solid var(--border); background: #FFF; color: var(--text2); transition: all 0.15s; }
     .custom-picker-form .type-option.active { border-color: var(--red); background: var(--red-bg); color: var(--red); font-weight: 600; }
     .custom-picker-form .type-option:active { transform: scale(0.96); }
-    .custom-picker-form .geo-status { font-size: 11px; margin-top: 3px; }
+    .custom-picker-form .geo-status { font-size: 13px; margin-top: 3px; }
 
     .plan-empty { text-align: center; padding: 30px 16px; color: var(--text3); }
     .plan-empty-icon { font-size: 36px; display: block; margin-bottom: 8px; opacity: 0.4; color: var(--text3); }
-    .plan-empty-text { font-size: 14px; line-height: 1.5; }
+    .plan-empty-text { font-size: 16px; line-height: 1.5; }
 
     .add-to-plan-bar { position: fixed; bottom: 60px; left: 0; right: 0; background: #333; padding: 12px 14px; display: flex; align-items: center; gap: 8px; z-index: 150; }
-    .add-to-plan-text { flex: 1; color: #FFF; font-size: 14px; font-weight: 600; }
-    .add-to-plan-btn { background: #FFF; color: var(--red); border: none; border-radius: 20px; padding: 8px 20px; font-size: 13px; font-weight: 700; cursor: pointer; }
+    .add-to-plan-text { flex: 1; color: #FFF; font-size: 16px; font-weight: 600; }
+    .add-to-plan-btn { background: #FFF; color: var(--red); border: none; border-radius: 20px; padding: 8px 20px; font-size: 15px; font-weight: 700; cursor: pointer; }
 
     .picker-list { max-height: 52vh; overflow-y: auto; }
-    .picker-category { font-size: 12px; color: var(--red); padding: 8px 14px 3px; font-weight: 700; background: #FAFAFA; }
+    .picker-category { font-size: 14px; color: var(--red); padding: 8px 14px 3px; font-weight: 700; background: #FAFAFA; }
     .picker-item { display: flex; align-items: center; padding: 11px 14px; gap: 8px; cursor: pointer; border-bottom: 1px solid #F5F5F5; }
     .picker-item:active { background: var(--red-bg); }
     .picker-item.checked { background: var(--red-bg); }
-    .picker-check { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 12px; color: #FFF; background: #FFF; flex-shrink: 0; }
+    .picker-check { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 14px; color: #FFF; background: #FFF; flex-shrink: 0; }
     .picker-item.checked .picker-check { background: var(--red); border-color: var(--red); }
     .picker-info { flex: 1; }
-    .picker-name { font-size: 14px; font-weight: 600; color: var(--text); }
-    .picker-detail { font-size: 12px; color: var(--text3); }
+    .picker-name { font-size: 16px; font-weight: 600; color: var(--text); }
+    .picker-detail { font-size: 14px; color: var(--text3); }
   </style>
 </head>
 <body>
@@ -487,9 +487,9 @@
   <div class="modal" id="daySlotModal" style="max-height:85vh;padding:0;">
     <div class="modal-header" style="padding:16px;" id="daySlotHeader"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px;"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> 规划到哪一天</div>
     <div style="padding:12px 16px 4px;">
-      <div style="font-size:13px;color:#888;margin-bottom:8px;">选择日期：</div>
+      <div style="font-size: 15px;color:#888;margin-bottom:8px;">选择日期：</div>
       <div id="daySlotTabs" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;"></div>
-      <div style="font-size:13px;color:#888;margin-bottom:8px;">选择时段：</div>
+      <div style="font-size: 15px;color:#888;margin-bottom:8px;">选择时段：</div>
       <div id="daySlotTimes" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;"></div>
     </div>
     <div class="modal-actions" style="padding:16px;">
@@ -1210,19 +1210,19 @@ function showSpotInfoWindow(spot) {
   if (infoWindow) { infoWindow.close(); infoWindow = null; }
 
   var content = document.createElement('div');
-  content.style.cssText = 'padding:14px;max-width:240px;font-size:15px;font-family:-apple-system,sans-serif;';
+  content.style.cssText = 'padding:14px;max-width:240px;font-size: 17px;font-family:-apple-system,sans-serif;';
   content.innerHTML =
-    '<div style="font-size:17px;font-weight:700;color:#1A1A1A;margin-bottom:6px;">' + spot.icon + ' ' + spot.name + '</div>' +
-    '<div style="color:#666;margin-bottom:4px;font-size:14px;">' + spot.subtitle + '</div>' +
+    '<div style="font-size: 19px;font-weight:700;color:#1A1A1A;margin-bottom:6px;">' + spot.icon + ' ' + spot.name + '</div>' +
+    '<div style="color:#666;margin-bottom:4px;font-size: 16px;">' + spot.subtitle + '</div>' +
     '<div style="display:flex;gap:8px;margin-bottom:8px;">' +
-      '<span style="background:#F3E5F5;color:#7E57C2;padding:3px 10px;border-radius:12px;font-size:13px;font-weight:600;">' + spot.price + '</span>' +
-      '<span style="color:var(--text2);font-size:13px;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> ' + spot.duration + '</span>' +
+      '<span style="background:#F3E5F5;color:#7E57C2;padding:3px 10px;border-radius:12px;font-size: 15px;font-weight:600;">' + spot.price + '</span>' +
+      '<span style="color:var(--text2);font-size: 15px;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> ' + spot.duration + '</span>' +
     '</div>' +
-    '<div style="margin-bottom:10px;">' + (spot.tags||[]).map(function(t) { return '<span style="display:inline-block;background:#F3E5F5;color:#7E57C2;font-size:12px;padding:2px 8px;border-radius:14px;margin-right:4px;font-weight:500;">' + t + '</span>'; }).join('') + '</div>' +
-    '<div style="font-size:13px;color:var(--text2);margin-bottom:10px;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;"><circle cx="12" cy="10" r="3"/><path d="M12 2a8 8 0 0 0-8 8c0 5.4 8 12 8 12s8-6.6 8-12a8 8 0 0 0-8-8z"/></svg> ' + spot.address + '</div>' +
+    '<div style="margin-bottom:10px;">' + (spot.tags||[]).map(function(t) { return '<span style="display:inline-block;background:#F3E5F5;color:#7E57C2;font-size: 14px;padding:2px 8px;border-radius:14px;margin-right:4px;font-weight:500;">' + t + '</span>'; }).join('') + '</div>' +
+    '<div style="font-size: 15px;color:var(--text2);margin-bottom:10px;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;"><circle cx="12" cy="10" r="3"/><path d="M12 2a8 8 0 0 0-8 8c0 5.4 8 12 8 12s8-6.6 8-12a8 8 0 0 0-8-8z"/></svg> ' + spot.address + '</div>' +
     '<div style="display:flex;gap:8px;">' +
-      '<div onclick="showSpotDetail(\'' + spot.id + '\')" style="flex:1;background:linear-gradient(135deg,#B39DDB,#CE93D8);color:#FFF;text-align:center;padding:9px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(126,87,194,0.25);">查看详情 ›</div>' +
-      '<div onclick="addToPlan(\'' + spot.id + '\')" style="background:linear-gradient(135deg,#FFB300,#FFC107);color:#FFF;text-align:center;padding:9px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;box-shadow:0 2px 8px rgba(255,179,0,0.3);">+ 规划</div>' +
+      '<div onclick="showSpotDetail(\'' + spot.id + '\')" style="flex:1;background:linear-gradient(135deg,#B39DDB,#CE93D8);color:#FFF;text-align:center;padding:9px;border-radius:8px;font-size: 16px;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(126,87,194,0.25);">查看详情 ›</div>' +
+      '<div onclick="addToPlan(\'' + spot.id + '\')" style="background:linear-gradient(135deg,#FFB300,#FFC107);color:#FFF;text-align:center;padding:9px;border-radius:8px;font-size: 16px;font-weight:600;cursor:pointer;white-space:nowrap;box-shadow:0 2px 8px rgba(255,179,0,0.3);">+ 规划</div>' +
     '</div>';
 
   infoWindow = new AMap.InfoWindow({
@@ -1253,7 +1253,7 @@ function renderPanelList(spots) {
     return;
   }
   el.innerHTML = spots.map(function(s) {
-    var inPlan = isItemInPlan(s.id) ? '<span style="font-size:12px;color:#27AE60;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#27AE60" stroke-width="2" style="vertical-align:middle;"><polyline points="20 6 9 17 4 12"/></svg>已加入规划</span>' : '';
+    var inPlan = isItemInPlan(s.id) ? '<span style="font-size: 14px;color:#27AE60;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#27AE60" stroke-width="2" style="vertical-align:middle;"><polyline points="20 6 9 17 4 12"/></svg>已加入规划</span>' : '';
     return '<div class="panel-spot-item" onclick="showSpotDetail(\'' + s.id + '\')">' +
       '<div class="panel-spot-icon">' + s.icon + '</div>' +
       '<div class="panel-spot-info">' +
@@ -1366,8 +1366,8 @@ function showSpotDetail(spotId) {
   // 餐饮休息
   if (spot.dining || spot.rest) {
     var restHtml = '';
-    if (spot.dining) restHtml += '<div style="margin-bottom:10px;"><span style="font-size:14px;font-weight:600;color:#333;">餐饮</span><div style="font-size:13px;color:#666;margin-top:4px;line-height:1.6;">' + spot.dining + '</div></div>';
-    if (spot.rest) restHtml += '<div><span style="font-size:14px;font-weight:600;color:#333;">休息设施</span><div style="font-size:13px;color:#666;margin-top:4px;line-height:1.6;">' + spot.rest + '</div></div>';
+    if (spot.dining) restHtml += '<div style="margin-bottom:10px;"><span style="font-size: 16px;font-weight:600;color:#333;">餐饮</span><div style="font-size: 15px;color:#666;margin-top:4px;line-height:1.6;">' + spot.dining + '</div></div>';
+    if (spot.rest) restHtml += '<div><span style="font-size: 16px;font-weight:600;color:#333;">休息设施</span><div style="font-size: 15px;color:#666;margin-top:4px;line-height:1.6;">' + spot.rest + '</div></div>';
     html += '<div class="mf-card">' +
       '<div class="mf-card-header" onclick="toggleMfCard(this)">' +
         '<span class="mf-card-header-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#E74C3C" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/></svg></span>' +
@@ -1799,9 +1799,9 @@ function addFoodShopToPlan(shopId) {
   var timesHtml = '';
   for (var t = 0; t < times.length; t++) {
     timesHtml += '<div class="slot-time-chip" data-time="' + times[t].id + '" onclick="selectDaySlotTime(\'' + times[t].id + '\',this)" style="flex:1;min-width:70px;padding:12px 8px;text-align:center;border-radius:12px;border:2px solid #E8E8E8;cursor:pointer;background:#FAFAFA;transition:all 0.2s;">' +
-      '<div style="font-size:18px;margin-bottom:2px;">' + times[t].icon + '</div>' +
-      '<div style="font-size:12px;font-weight:600;color:#555;">' + times[t].name + '</div>' +
-      '<div style="font-size:11px;color:#999;">' + times[t].desc + '</div>' +
+      '<div style="font-size: 20px;margin-bottom:2px;">' + times[t].icon + '</div>' +
+      '<div style="font-size: 14px;font-weight:600;color:#555;">' + times[t].name + '</div>' +
+      '<div style="font-size: 13px;color:#999;">' + times[t].desc + '</div>' +
       '</div>';
   }
   document.getElementById('daySlotTimes').innerHTML = timesHtml;
@@ -2559,7 +2559,7 @@ function renderFood() {
 function renderTransport() {
   var t = DATA.transport;
   document.getElementById('transportContent').innerHTML =
-    '<div class="section-title"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;"><path d="M22 12l-4-4H6l-4 4M2 12h20"/></svg> 宁波→北京</div><div style="padding:0 0 12px;color:#666;font-size:15px;">直飞约 ' + t.fromNingbo.duration + ' · ' + t.fromNingbo.price + '</div>' +
+    '<div class="section-title"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;"><path d="M22 12l-4-4H6l-4 4M2 12h20"/></svg> 宁波→北京</div><div style="padding:0 0 12px;color:#666;font-size: 17px;">直飞约 ' + t.fromNingbo.duration + ' · ' + t.fromNingbo.price + '</div>' +
     '<div class="flight-compare">' +
       '<div class="flight-card"><div class="flight-header"><span class="flight-type">去程推荐</span></div><span class="flight-time">07:20→09:35</span><span class="flight-airport"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;"><path d="M22 12l-4-4H6l-4 4M2 12h20"/></svg> 宁波栎社 → 北京大兴</span><span class="flight-desc"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#FFF" stroke-width="2" style="vertical-align:middle;"><polyline points="20 6 9 17 4 12"/></svg> 早班机中午前到不耽误行程</span></div>' +
       '<div class="flight-card"><div class="flight-header"><span class="flight-type">返程推荐</span></div><span class="flight-time">20:35→22:55</span><span class="flight-airport"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;"><path d="M2 12l4-4h12l4 4M2 12h20"/></svg> 北京大兴 → 宁波栎社</span><span class="flight-desc"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#FFF" stroke-width="2" style="vertical-align:middle;"><polyline points="20 6 9 17 4 12"/></svg> 晚班机白天可多玩半天</span></div>' +
@@ -2575,7 +2575,7 @@ function renderTransport() {
     '<div class="section-title"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;"><circle cx="12" cy="10" r="3"/><path d="M12 2a8 8 0 0 0-8 8c0 5.4 8 12 8 12s8-6.6 8-12a8 8 0 0 0-8-8z"/></svg> 市内交通</div>' +
     t.city.map(function(c) {
       return '<div class="city-card"><div class="city-header"><span class="city-icon">' + c.icon + '</span><span class="city-mode">' + c.mode + '</span></div>' +
-        '<span class="city-desc">' + c.desc + '</span>' + (c.tool ? '<div style="margin-top:8px;font-size:14px;color:#7E57C2;font-weight:500;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg> ' + c.tool + '</div>' : '') + '</div>';
+        '<span class="city-desc">' + c.desc + '</span>' + (c.tool ? '<div style="margin-top:8px;font-size: 16px;color:#7E57C2;font-weight:500;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg> ' + c.tool + '</div>' : '') + '</div>';
     }).join('') +
     '<div class="section-title"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#E65100" stroke-width="2" style="vertical-align:middle;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> 避坑提示</div>' +
     t.warnings.map(function(w) {
