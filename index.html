@@ -179,26 +179,34 @@
     .warning-title { flex: 1; font-size: 16px; font-weight: 600; color: #E65100; }
     .warning-toggle { font-size: 14px; color: var(--red); font-weight: 500; }
     .warning-text { font-size: 15px; color: var(--text2); line-height: 1.6; margin-top: 8px; padding: 10px; background: #FFF; border-radius: 6px; display: none; }
-    .dish-card { background: #FFF; border-radius: 10px; padding: 14px; margin-bottom: 10px; }
-    .dish-header { display: flex; gap: 12px; }
-    .dish-icon { font-size: 34px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 8px; background: #F5F5F5; }
-    .dish-info { flex: 1; }
+    .dish-card { background: #FFF; border-radius: 14px; overflow: hidden; margin-bottom: 12px; box-shadow: 0 1px 6px rgba(0,0,0,0.04); }
+    .dish-card:active { transform: scale(0.98); }
+    .dish-thumb { width: 100%; height: 140px; overflow: hidden; background: #F0F0F0; position: relative; }
+    .dish-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .dish-thumb-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+    .dish-thumb-placeholder svg { width: 48px; height: 48px; stroke: #CCC; }
+    .dish-card-body { padding: 14px; }
     .dish-name { font-size: 19px; font-weight: 700; display: block; color: var(--text); }
-    .dish-desc { font-size: 15px; color: var(--text2); display: block; margin-top: 3px; line-height: 1.5; }
-    .dish-shops { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
+    .dish-desc { font-size: 15px; color: var(--text2); display: block; margin-top: 4px; line-height: 1.5; }
+    .dish-shops { margin-top: 12px; padding-top: 10px; border-top: 1px solid #F0F0F0; }
     .shops-label { font-size: 14px; color: var(--text3); display: block; margin-bottom: 6px; }
     .shop-tags { display: flex; flex-wrap: wrap; gap: 6px; }
-    .shop-tag { background: #F5F5F5; color: var(--text); font-size: 14px; padding: 4px 10px; border-radius: 6px; cursor: pointer; border: 1px solid var(--border); transition: all 0.15s; }
-    .shop-tag:active { transform: scale(0.96); }
+    .shop-tag { background: #F8F8F8; color: var(--text); font-size: 14px; padding: 5px 12px; border-radius: 6px; cursor: pointer; border: none; transition: all 0.15s; }
+    .shop-tag:active { transform: scale(0.96); background: #E74C3C; color: #FFF; }
     .shop-tag.selected { background: var(--red); color: #FFF; border-color: var(--red); }
-    .street-card { background: #FFF; border-radius: 10px; padding: 14px; margin-bottom: 10px; transition: transform 0.15s; }
+    .street-card { background: #FFF; border-radius: 14px; overflow: hidden; margin-bottom: 12px; box-shadow: 0 1px 6px rgba(0,0,0,0.04); }
     .street-card:active { transform: scale(0.98); }
+    .street-thumb { width: 100%; height: 120px; overflow: hidden; background: #F0F0F0; position: relative; }
+    .street-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .street-thumb-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #F5F5F5, #EEE); }
+    .street-thumb-placeholder svg { width: 40px; height: 40px; stroke: #CCC; }
+    .street-card-body { padding: 14px; }
     .street-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
     .street-name { font-size: 19px; font-weight: 700; color: var(--text); }
     .street-shop-count { font-size: 13px; color: var(--red); background: var(--red-bg); padding: 2px 8px; border-radius: 4px; }
-    .street-desc { font-size: 15px; color: var(--text2); display: block; line-height: 1.5; }
+    .street-desc { font-size: 15px; color: var(--text2); display: block; line-height: 1.5; margin-top: 4px; }
     .street-addr { font-size: 14px; color: var(--text3); margin-top: 6px; }
-    .street-shops-preview { font-size: 14px; color: var(--text2); margin-top: 6px; padding: 8px; background: #F5F5F5; border-radius: 6px; line-height: 1.4; }
+    .street-shops-preview { font-size: 14px; color: var(--text2); margin-top: 8px; padding: 10px; background: #F8F8F8; border-radius: 8px; line-height: 1.5; }
     .street-card-arrow { font-size: 14px; color: var(--red); font-weight: 600; text-align: right; margin-top: 8px; }
 
     .flight-compare { display: flex; gap: 8px; margin-bottom: 10px; }
@@ -2530,8 +2538,10 @@ function renderFood() {
   if (foodTab === 'dishes') {
     document.getElementById('foodContent').innerHTML = DATA.food.dishes.map(function(d) {
       var hasPhotos = d.photos && d.photos.length > 0;
-      return '<div class="dish-card" onclick="'+(hasPhotos ? 'showFoodDetail(\''+d.id+'\')' : '')+'"><div class="dish-header"><span class="dish-icon">' + d.icon + '</span><div class="dish-info"><span class="dish-name">' + d.name + '</span><span class="dish-desc">' + d.desc + '</span></div></div>' +
-        '<div class="dish-shops"><span class="shops-label">推荐店铺：</span><div class="shop-tags">' + d.shops.map(function(s) { return '<span class="shop-tag" onclick="event.stopPropagation();addToPlan(\''+d.id+'_'+s.name.replace(/[^a-zA-Z0-9]/g,'_')+'\')">' + s.name + '</span>'; }).join('') + '</div></div></div>';
+      var thumb = d.photos && d.photos[0] ? '<div class="dish-thumb"><img src="'+d.photos[0]+'" alt="'+d.name+'" loading="lazy" /></div>' : '<div class="dish-thumb"><div class="dish-thumb-placeholder">'+d.icon+'</div></div>';
+      return '<div class="dish-card" onclick="'+(hasPhotos ? 'showFoodDetail(\''+d.id+'\')' : '')+'">' + thumb +
+        '<div class="dish-card-body"><span class="dish-name">' + d.name + '</span><span class="dish-desc">' + d.desc + '</span>' +
+        '<div class="dish-shops"><span class="shops-label">推荐店铺</span><div class="shop-tags">' + d.shops.map(function(s) { return '<span class="shop-tag" onclick="event.stopPropagation();addFoodShopToPlan(\''+d.id+'_'+s.name.replace(/[^a-zA-Z0-9]/g,'_')+'\')">' + s.name + '</span>'; }).join('') + '</div></div></div></div>';
     }).join('');
   } else {
     document.getElementById('foodContent').innerHTML = DATA.food.streets.map(function(s) {
@@ -2539,16 +2549,18 @@ function renderFood() {
       var shopCount = s.shops ? s.shops.length : 0;
       var shopPreview = s.shops ? s.shops.slice(0, 3).map(function(sh){ return sh.name; }).join('、') : '';
       var onclick = hasPhotos ? 'onclick="showStreetDetail(\''+s.id+'\')"' : '';
-      return '<div class="street-card" ' + onclick + ' style="' + (hasPhotos ? 'cursor:pointer;' : '') + '">' +
+      var thumb = s.photos && s.photos[0] ? '<div class="street-thumb"><img src="'+s.photos[0]+'" alt="'+s.name+'" loading="lazy" /></div>' : '<div class="street-thumb"><div class="street-thumb-placeholder"><svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="#CCC" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div></div>';
+      return '<div class="street-card" ' + onclick + ' style="' + (hasPhotos ? 'cursor:pointer;' : '') + '">' + thumb +
+        '<div class="street-card-body">' +
         '<div class="street-header">' +
           '<span class="street-name">' + s.name + '</span>' +
           '<span class="street-shop-count">' + shopCount + '家店铺</span>' +
         '</div>' +
         '<span class="street-desc">' + s.desc + '</span>' +
-        (s.addr ? '<div class="street-addr"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;"><circle cx="12" cy="10" r="3"/><path d="M12 2a8 8 0 0 0-8 8c0 5.4 8 12 8 12s8-6.6 8-12a8 8 0 0 0-8-8z"/></svg> ' + s.addr + '</div>' : '') +
-        (shopPreview ? '<div class="street-shops-preview"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> ' + shopPreview + (shopCount > 3 ? ' 等' : '') + '</div>' : '') +
+        (s.addr ? '<div class="street-addr"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;"><circle cx="12" cy="10" r="3"/><path d="M12 2a8 8 0 0 0-8 8c0 5.4 8 12 8 12s8-6.6 8-12a8 8 0 0 0-8-8z"/></svg> ' + s.addr + '</div>' : '') +
+        (shopPreview ? '<div class="street-shops-preview">' + shopPreview + (shopCount > 3 ? ' 等' : '') + '</div>' : '') +
         (hasPhotos ? '<div class="street-card-arrow">查看详情 →</div>' : '') +
-      '</div>';
+      '</div></div>';
     }).join('');
   }
 }
