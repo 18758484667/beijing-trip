@@ -99,39 +99,76 @@
     .custom-marker.food-marker { width: 26px; height: 26px; font-size: 12px; background: var(--red); box-shadow: 0 2px 6px rgba(231,76,60,0.3); }
     .custom-marker.food-marker svg { width: 14px; height: 14px; stroke: #FFF !important; }
 
-    .detail-page { position: fixed; top: 0; left: 0; right: 0; bottom: 56px; background: #FAFAFA; z-index: 600; overflow-y: auto; display: none; }
+    /* ========== 马蜂窝风格详情页 ========== */
+    .detail-page { position: fixed; top: 0; left: 0; right: 0; bottom: 56px; background: #F8F8F8; z-index: 600; overflow-y: auto; display: none; -webkit-overflow-scrolling: touch; }
     .detail-page.show { display: block; }
-    .detail-back { position: sticky; top: 0; z-index: 10; padding: 12px 16px; background: rgba(255,255,255,0.95); backdrop-filter: blur(12px); cursor: pointer; font-size: 15px; color: var(--red); font-weight: 500; display: flex; align-items: center; gap: 4px; border-bottom: 1px solid var(--border); }
-    .detail-hero { position: relative; height: 200px; overflow: hidden; background: #E0E0E0; }
-    .hero-bg { height: 100%; position: relative; }
-    .hero-bg img { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; }
-    .hero-info { position: absolute; bottom: 0; left: 0; right: 0; padding: 40px 20px 14px; background: linear-gradient(transparent, rgba(0,0,0,0.6)); z-index: 2; }
-    .hero-name { font-size: 24px; font-weight: 800; color: #FFF; display: block; }
-    .hero-subtitle { font-size: 13px; color: rgba(255,255,255,0.9); margin-top: 4px; display: block; }
-    .detail-body { padding: 16px; }
-    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
-    .info-item { background: #FFF; border-radius: 8px; padding: 12px; text-align: center; }
-    .info-label { font-size: 12px; color: var(--text3); display: block; margin-bottom: 2px; }
-    .info-value { font-size: 15px; font-weight: 600; display: block; color: var(--text); }
-    .info-price { color: var(--red); font-weight: 700; }
-    .info-row { display: flex; padding: 8px 0; gap: 8px; border-bottom: 1px solid var(--border); font-size: 13px; }
-    .info-row .info-label { flex-shrink: 0; font-size: 13px; margin-bottom: 0; color: var(--text3); }
-    .info-row .info-value { font-size: 13px; flex: 1; color: var(--text); font-weight: 400; }
-    .section-card { background: #FFF; border-radius: 10px; margin-bottom: 10px; overflow: hidden; }
-    .section-header { display: flex; align-items: center; padding: 13px 14px; cursor: pointer; }
-    .section-header-icon { font-size: 18px; margin-right: 6px; color: var(--text2); }
-    .section-header-text { flex: 1; font-size: 16px; font-weight: 600; color: var(--text); }
-    .section-toggle { font-size: 18px; color: var(--text3); }
-    .section-content { padding: 0 14px 12px; border-top: 1px solid var(--border); }
-    .route-item { display: flex; padding: 8px 0; gap: 8px; }
-    .route-num { width: 22px; height: 22px; border-radius: 50%; background: var(--red); color: #FFF; font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .route-text { font-size: 14px; line-height: 1.6; flex: 1; color: var(--text); }
-    .tip-item { display: flex; padding: 7px 0; gap: 8px; }
-    .tip-icon { font-size: 16px; flex-shrink: 0; color: var(--text2); }
-    .tip-text { font-size: 14px; line-height: 1.5; flex: 1; color: var(--text); }
-    .dining-card { padding: 8px 0; }
-    .dining-label { font-size: 14px; font-weight: 600; display: block; margin-bottom: 3px; color: var(--text); }
-    .dining-text { font-size: 13px; color: var(--text2); line-height: 1.5; }
+    .detail-back { position: fixed; top: 0; left: 0; right: 0; z-index: 10; padding: 8px 16px; display: flex; align-items: center; gap: 4px; cursor: pointer; height: 44px; background: transparent; transition: background 0.3s; }
+    .detail-back.scrolled { background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+    .detail-back-icon { width: 32px; height: 32px; border-radius: 50%; background: rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
+    .detail-back.scrolled .detail-back-icon { background: rgba(0,0,0,0.05); }
+    .detail-back-icon svg { stroke: #FFF; }
+    .detail-back.scrolled .detail-back-icon svg { stroke: #333; }
+    .detail-hero { position: relative; width: 100%; height: 280px; overflow: hidden; background: #E8E8E8; }
+    .detail-hero img { width: 100%; height: 100%; object-fit: cover; }
+    .detail-hero::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 100px; background: linear-gradient(transparent, rgba(0,0,0,0.45)); z-index: 1; }
+    .hero-info { position: absolute; bottom: 20px; left: 20px; right: 20px; z-index: 2; }
+    .hero-name { font-size: 26px; font-weight: 700; color: #FFF; display: block; line-height: 1.2; text-shadow: 0 1px 4px rgba(0,0,0,0.2); }
+    .hero-subtitle { font-size: 13px; color: rgba(255,255,255,0.85); margin-top: 6px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .hero-tag { font-size: 11px; color: #FFF; background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 10px; backdrop-filter: blur(10px); }
+    .detail-body { padding: 0 16px 24px; position: relative; z-index: 2; margin-top: -16px; }
+    /* 信息卡片 - 浮在头图下方 */
+    .detail-info-card { background: #FFF; border-radius: 16px; padding: 16px; margin-bottom: 12px; box-shadow: 0 1px 8px rgba(0,0,0,0.04); }
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+    .info-cell { padding: 10px 12px; text-align: center; border-right: 1px solid #F0F0F0; border-bottom: 1px solid #F0F0F0; }
+    .info-cell:nth-child(2n) { border-right: none; }
+    .info-cell:nth-child(n+3) { border-bottom: none; }
+    .info-cell-label { font-size: 11px; color: #999; display: block; margin-bottom: 4px; }
+    .info-cell-val { font-size: 14px; font-weight: 600; display: block; color: #333; }
+    .info-cell-val.price { color: #FF6B35; }
+    /* 段落卡片 */
+    .mf-card { background: #FFF; border-radius: 16px; padding: 0; margin-bottom: 12px; overflow: hidden; box-shadow: 0 1px 8px rgba(0,0,0,0.04); }
+    .mf-card-header { display: flex; align-items: center; padding: 14px 16px; font-size: 16px; font-weight: 600; color: #1A1A1A; cursor: pointer; }
+    .mf-card-header-icon { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; margin-right: 8px; flex-shrink: 0; }
+    .mf-card-header-text { flex: 1; }
+    .mf-card-arrow { font-size: 14px; color: #CCC; transition: transform 0.2s; }
+    .mf-card-arrow.open { transform: rotate(180deg); }
+    .mf-card-body { padding: 0 16px 14px; display: none; }
+    .mf-card-body.open { display: block; }
+    .mf-card-body.no-collapse { display: block; padding: 0 16px 14px; }
+    /* 介绍文本 */
+    .mf-intro { font-size: 14px; color: #555; line-height: 1.8; }
+    /* 路线 */
+    .mf-route-item { display: flex; align-items: flex-start; padding: 8px 0; gap: 10px; }
+    .mf-route-dot { width: 20px; height: 20px; border-radius: 50%; background: #E74C3C; color: #FFF; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+    .mf-route-text { font-size: 14px; color: #444; line-height: 1.6; flex: 1; }
+    .mf-route-divider { width: 20px; text-align: center; padding: 2px 0; }
+    .mf-route-divider::before { content: ''; display: inline-block; width: 1px; height: 12px; background: #DDD; }
+    /* 贴士 */
+    .mf-tip-item { display: flex; align-items: flex-start; padding: 8px 0; gap: 10px; }
+    .mf-tip-dot { width: 6px; height: 6px; border-radius: 50%; background: #E74C3C; flex-shrink: 0; margin-top: 6px; }
+    .mf-tip-text { font-size: 14px; color: #444; line-height: 1.5; flex: 1; }
+    /* 店铺卡片 */
+    .mf-shop-card { background: #F8F8F8; border-radius: 12px; padding: 14px; margin-bottom: 8px; }
+    .mf-shop-name { font-size: 15px; font-weight: 600; color: #1A1A1A; display: flex; align-items: center; gap: 6px; }
+    .mf-shop-addr { font-size: 12px; color: #999; margin-top: 6px; display: flex; align-items: center; gap: 4px; }
+    .mf-shop-rec { font-size: 13px; color: #FF6B35; margin-top: 8px; padding: 8px 10px; background: #FFF5F0; border-radius: 8px; line-height: 1.5; }
+    .mf-shop-price { font-size: 12px; color: #FF6B35; font-weight: 600; background: #FFF5F0; padding: 2px 8px; border-radius: 8px; margin-left: auto; }
+    .mf-shop-btn { display: block; width: 100%; margin-top: 10px; padding: 10px; background: #E74C3C; color: #FFF; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; text-align: center; }
+    .mf-shop-btn:active { opacity: 0.85; }
+    /* 加入规划按钮 */
+    .mf-add-bar { margin-top: 16px; }
+    .mf-add-btn { display: block; width: 100%; padding: 14px; background: #E74C3C; color: #FFF; border: none; border-radius: 14px; font-size: 16px; font-weight: 600; cursor: pointer; text-align: center; }
+    .mf-add-btn:active { opacity: 0.85; }
+    /* 图集 */
+    .mf-gallery { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; -webkit-overflow-scrolling: touch; }
+    .mf-gallery::-webkit-scrollbar { display: none; }
+    .mf-gallery-item { flex-shrink: 0; width: 160px; border-radius: 10px; overflow: hidden; cursor: pointer; }
+    .mf-gallery-item img { width: 100%; height: 110px; object-fit: cover; display: block; }
+    .mf-gallery-cap { font-size: 11px; color: #999; display: block; padding: 4px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    /* 地址行 */
+    .mf-addr-row { display: flex; align-items: flex-start; padding: 12px 16px; font-size: 13px; color: #666; gap: 6px; border-top: 1px solid #F0F0F0; }
+    .mf-addr-row svg { flex-shrink: 0; margin-top: 1px; }
+    .mf-addr-row-text { flex: 1; line-height: 1.5; }
 
     .food-tabs { display: flex; background: #F5F5F5; border-radius: 8px; padding: 3px; margin-bottom: 14px; gap: 3px; }
     .food-tab { flex: 1; text-align: center; padding: 10px; border-radius: 6px; font-size: 14px; color: var(--text2); cursor: pointer; font-weight: 500; transition: all 0.2s; }
@@ -1245,124 +1282,213 @@ function showSpotDetail(spotId) {
   var spot = DATA.spots.find(function(s) { return s.id === spotId; });
   if (!spot) return;
 
-  var html = '';
   var photos = spot.photos || [];
   var heroImg = photos.length > 0 ? photos[0] : '';
-  html += '<div class="detail-hero"><div class="hero-bg">' + (heroImg ? '<img src="'+heroImg+'" alt="'+spot.name+'" onerror="this.style.display=\'none\'" />':'') + '</div>' +
-    '<div class="hero-info"><span class="hero-name">' + spot.name + '</span><span class="hero-subtitle">' + spot.subtitle + '</span></div></div>';
+
+  var html = '';
+  // 头图 + 返回按钮
+  html += '<div class="detail-back" id="detailBackBar" onclick="goBackFromDetail()">' +
+    '<div class="detail-back-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#FFF" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg></div></div>';
+  html += '<div class="detail-hero">' +
+    (heroImg ? '<img src="'+heroImg+'" alt="'+spot.name+'" />' : '<div style="height:100%;background:#D5D5D5;"></div>') +
+    '<div class="hero-info">' +
+      '<span class="hero-name">' + spot.name + '</span>' +
+      '<span class="hero-subtitle">' + spot.subtitle +
+        (spot.tags || []).map(function(t) { return '<span class="hero-tag">'+t+'</span>'; }).join('') +
+      '</span>' +
+    '</div></div>';
+
+  // 内容区
   html += '<div class="detail-body">';
 
-
-  html += '<div class="info-grid">' +
-    '<div class="info-item"><span class="info-label">门票价格</span><span class="info-value info-price">' + spot.price + '</span></div>' +
-    '<div class="info-item"><span class="info-label">建议时长</span><span class="info-value">' + spot.duration + '</span></div>' +
-    '<div class="info-item"><span class="info-label">开放时间</span><span class="info-value">' + spot.time + '</span></div>' +
-    '<div class="info-item"><span class="info-label">闭馆日</span><span class="info-value">' + spot.closedDay + '</span></div>' +
+  // 信息卡片（浮在头图下方）
+  html += '<div class="detail-info-card">' +
+    '<div class="info-grid">' +
+      '<div class="info-cell"><span class="info-cell-label">门票</span><span class="info-cell-val price">' + spot.price + '</span></div>' +
+      '<div class="info-cell"><span class="info-cell-label">时长</span><span class="info-cell-val">' + spot.duration + '</span></div>' +
+      '<div class="info-cell"><span class="info-cell-label">开放</span><span class="info-cell-val">' + spot.time + '</span></div>' +
+      '<div class="info-cell"><span class="info-cell-label">闭馆</span><span class="info-cell-val">' + spot.closedDay + '</span></div>' +
+    '</div>' +
+    '<div class="mf-addr-row">' +
+      '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#999" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 2a8 8 0 0 0-8 8c0 5.4 8 12 8 12s8-6.6 8-12a8 8 0 0 0-8-8z"/></svg>' +
+      '<span class="mf-addr-row-text">' + spot.address + '</span>' +
+    '</div>' +
+    '<div class="mf-addr-row">' +
+      '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#999" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>' +
+      '<span class="mf-addr-row-text">' + spot.reservation + '</span>' +
+    '</div>' +
     '</div>';
-  html += '<div class="info-row"><span class="info-label"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;"><circle cx="12" cy="10" r="3"/><path d="M12 2a8 8 0 0 0-8 8c0 5.4 8 12 8 12s8-6.6 8-12a8 8 0 0 0-8-8z"/></svg> 地址：</span><span class="info-value">' + spot.address + '</span></div>';
-  html += '<div class="info-row"><span class="info-label"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg> 预约：</span><span class="info-value">' + spot.reservation + '</span></div>';
 
+  // 景点介绍
   if (spot.intro) {
-    html += '<div style="margin:14px 0;padding:14px 16px;background:linear-gradient(135deg,#F3E5F5,#EDE7F6);border-radius:12px;border-left:4px solid #7E57C2;">' +
-      '<div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:6px;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg> 景点介绍</div>' +
-      '<div style="font-size:14px;color:#555;line-height:1.8;">' + spot.intro + '</div></div>';
+    html += '<div class="mf-card">' +
+      '<div class="mf-card-header" onclick="toggleMfCard(this)">' +
+        '<span class="mf-card-header-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#E74C3C" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span>' +
+        '<span class="mf-card-header-text">景点介绍</span>' +
+        '<span class="mf-card-arrow">▼</span>' +
+      '</div>' +
+      '<div class="mf-card-body open"><div class="mf-intro">' + spot.intro + '</div></div>' +
+      '</div>';
   }
 
+  // 推荐路线
   if (spot.route && spot.route.length > 0) {
-    html += makeSection('<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>', '推荐路线', spot.route.map(function(r, i) {
-      return '<div class="route-item"><span class="route-num">' + (i+1) + '</span><span class="route-text">' + r + '</span></div>';
-    }).join(''));
+    var routeHtml = '';
+    spot.route.forEach(function(r, i) {
+      if (i > 0) routeHtml += '<div class="mf-route-divider"></div>';
+      routeHtml += '<div class="mf-route-item"><span class="mf-route-dot">' + (i+1) + '</span><span class="mf-route-text">' + r + '</span></div>';
+    });
+    html += '<div class="mf-card">' +
+      '<div class="mf-card-header" onclick="toggleMfCard(this)">' +
+        '<span class="mf-card-header-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#E74C3C" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg></span>' +
+        '<span class="mf-card-header-text">推荐路线</span>' +
+        '<span class="mf-card-arrow open">▼</span>' +
+      '</div>' +
+      '<div class="mf-card-body open">' + routeHtml + '</div>' +
+      '</div>';
   }
 
+  // 省力技巧
   if (spot.tips && spot.tips.length > 0) {
-    html += makeSection('<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;"><path d="M9 18h6M10 22h4M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/></svg>', '省力技巧', spot.tips.map(function(t) {
-      return '<div class="tip-item"><span class="tip-icon">' + t.icon + '</span><span class="tip-text">' + t.text + '</span></div>';
-    }).join(''));
+    var tipsHtml = spot.tips.map(function(t) {
+      return '<div class="mf-tip-item"><span class="mf-tip-dot"></span><span class="mf-tip-text">' + t.text + '</span></div>';
+    }).join('');
+    html += '<div class="mf-card">' +
+      '<div class="mf-card-header" onclick="toggleMfCard(this)">' +
+        '<span class="mf-card-header-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#E74C3C" stroke-width="2"><path d="M9 18h6M10 22h4M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/></svg></span>' +
+        '<span class="mf-card-header-text">省力技巧</span>' +
+        '<span class="mf-card-arrow open">▼</span>' +
+      '</div>' +
+      '<div class="mf-card-body open">' + tipsHtml + '</div>' +
+      '</div>';
   }
 
+  // 餐饮休息
   if (spot.dining || spot.rest) {
-    html += makeSection('<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;"><path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/></svg>', '餐饮与休息',
-      (spot.dining?'<div class="dining-card"><span class="dining-label">餐饮</span><span class="dining-text">'+spot.dining+'</span></div>':'')+
-      (spot.rest?'<div class="dining-card"><span class="dining-label">休息</span><span class="dining-text">'+spot.rest+'</span></div>':''));
-  }
-
-  if (spot.guide && spot.guide.length > 0) {
-    html += makeSection('<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>', '讲解服务', spot.guide.map(function(g) {
-      return '<div class="guide-item"><div class="guide-header"><span class="guide-type">'+g.type+'</span><span class="guide-price">'+g.price+'</span></div><span class="guide-desc">'+g.desc+'</span></div>';
-    }).join(''));
+    var restHtml = '';
+    if (spot.dining) restHtml += '<div style="margin-bottom:10px;"><span style="font-size:14px;font-weight:600;color:#333;">餐饮</span><div style="font-size:13px;color:#666;margin-top:4px;line-height:1.6;">' + spot.dining + '</div></div>';
+    if (spot.rest) restHtml += '<div><span style="font-size:14px;font-weight:600;color:#333;">休息设施</span><div style="font-size:13px;color:#666;margin-top:4px;line-height:1.6;">' + spot.rest + '</div></div>';
+    html += '<div class="mf-card">' +
+      '<div class="mf-card-header" onclick="toggleMfCard(this)">' +
+        '<span class="mf-card-header-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#E74C3C" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/></svg></span>' +
+        '<span class="mf-card-header-text">餐饮与休息</span>' +
+        '<span class="mf-card-arrow open">▼</span>' +
+      '</div>' +
+      '<div class="mf-card-body open">' + restHtml + '</div>' +
+      '</div>';
   }
 
   // 加入规划按钮
-  html += '<div style="margin-top:16px;display:flex;gap:10px;">';
-  html += '<div onclick="addToPlan(\''+spot.id+'\')" style="flex:1;background:linear-gradient(135deg,#B39DDB,#CE93D8);color:#FFF;text-align:center;padding:12px;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;box-shadow:0 3px 10px rgba(126,87,194,0.25);"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 加入行程规划</div>';
-  html += '</div>';
-  html += '</div>';
+  html += '<div class="mf-add-bar">' +
+    '<div class="mf-add-btn" onclick="addToPlan(\''+spot.id+'\')"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle;margin-right:6px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>加入行程规划</div>' +
+    '</div>';
+
+  html += '</div>'; // detail-body
 
   document.getElementById('detailContent').innerHTML = html;
   document.getElementById('detailPage').classList.add('show');
+  document.getElementById('detailPage').scrollTop = 0;
+
+  // 滚动监听：返回栏背景变化
+  var detailPage = document.getElementById('detailPage');
+  var backBar = document.getElementById('detailBackBar');
+  detailPage.onscroll = function() {
+    backBar.classList.toggle('scrolled', detailPage.scrollTop > 200);
+  };
 }
 
-function makeSection(icon, title, content) {
-  return '<div class="section-card"><div class="section-header" onclick="var c=this.nextElementSibling,t=this.querySelector(\'.section-toggle\');if(c.style.display===\'none\'){c.style.display=\'\';t.textContent=\'−\'}else{c.style.display=\'none\';t.textContent=\'+\'}">' +
-    '<span class="section-header-icon">' + icon + '</span><span class="section-header-text">' + title + '</span><span class="section-toggle">−</span></div>' +
-    '<div class="section-content">' + content + '</div></div>';
+function toggleMfCard(header) {
+  var card = header.parentElement;
+  var body = card.querySelector('.mf-card-body');
+  var arrow = card.querySelector('.mf-card-arrow');
+  var isOpen = body.classList.contains('open');
+  if (isOpen) {
+    body.classList.remove('open');
+    arrow.classList.remove('open');
+  } else {
+    body.classList.add('open');
+    arrow.classList.add('open');
+  }
+}
+
+function openLightbox(src) {
+  var overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.92);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;cursor:pointer;';
+  overlay.onclick = function() { this.remove(); };
+  var img = new Image();
+  img.src = src;
+  img.style.cssText = 'max-width:100%;max-height:90vh;border-radius:8px;';
+  overlay.appendChild(img);
+  document.body.appendChild(overlay);
 }
 
 function goBackFromDetail() {
   document.getElementById('detailPage').classList.remove('show');
 }
 
-function previewPhoto(src) {
-  var overlay = document.createElement('div');
-  overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(8px);cursor:pointer;';
-  overlay.onclick = function() { this.remove(); };
-  var img = new Image();
-  img.src = src;
-  img.style.cssText = 'max-width:100%;max-height:90vh;border-radius:12px;box-shadow:0 8px 40px rgba(0,0,0,0.5);';
-  overlay.appendChild(img);
-  var cap = document.createElement('div');
-  cap.style.cssText = 'position:absolute;bottom:30px;color:#FFF;font-size:14px;text-shadow:0 1px 3px rgba(0,0,0,0.8);text-align:center;width:100%;';
-  overlay.appendChild(cap);
-  document.body.appendChild(overlay);
-}
+
 
 function showFoodDetail(dishId) {
   var dish = DATA.food.dishes.find(function(d) { return d.id === dishId; });
-  if (!dish || !dish.photos || dish.photos.length === 0) return;
+  if (!dish) return;
 
-  var photos = dish.photos;
-  var captions = dish.photoCaptions || {};
+  var photos = dish.photos || [];
+  var heroImg = photos.length > 0 ? photos[0] : '';
+
   var html = '';
-  var heroImg = photos[0] || '';
-  html += '<div class="detail-hero"><div class="hero-bg">' + (heroImg ? '<img src="'+heroImg+'" alt="'+dish.name+'" onerror="this.style.display=\'none\'" />':'') + '</div>' +
-    '<div class="hero-info"><span class="hero-name">' + dish.icon + ' ' + dish.name + '</span><span class="hero-subtitle">' + dish.desc + '</span></div></div>';
+  html += '<div class="detail-back" id="detailBackBar" onclick="goBackFromDetail()">' +
+    '<div class="detail-back-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#FFF" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg></div></div>';
+  html += '<div class="detail-hero">' +
+    (heroImg ? '<img src="'+heroImg+'" alt="'+dish.name+'" />' : '<div style="height:100%;background:#D5D5D5;"></div>') +
+    '<div class="hero-info">' +
+      '<span class="hero-name">' + dish.icon + ' ' + dish.name + '</span>' +
+      '<span class="hero-subtitle">' + (dish.desc ? dish.desc.substring(0,40) + '...' : '') + '</span>' +
+    '</div></div>';
+
   html += '<div class="detail-body">';
 
   // 美食简介
-  html += '<div style="margin:0 0 14px;padding:14px 16px;background:linear-gradient(135deg,#FFF8E1,#FFF3E0);border-radius:12px;border-left:4px solid #FF9800;">' +
-    '<div style="font-size:14px;font-weight:600;color:#E65100;margin-bottom:4px;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;"><circle cx="12" cy="10" r="7"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> 美食简介</div>' +
-    '<div style="font-size:14px;color:#555;line-height:1.7;">' + dish.desc + '</div></div>';
+  html += '<div class="mf-card">' +
+    '<div class="mf-card-header">' +
+      '<span class="mf-card-header-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#E74C3C" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span>' +
+      '<span class="mf-card-header-text">美食简介</span>' +
+    '</div>' +
+    '<div class="mf-card-body no-collapse"><div class="mf-intro">' + dish.desc + '</div></div>' +
+    '</div>';
 
-  // 推荐店铺 - 卡片形式
-  html += '<div class="section-card"><div class="section-header"><span class="section-header-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span><span class="section-header-text">推荐店铺（' + dish.shops.length + '家）</span><span class="section-toggle">−</span></div>' +
-    '<div class="section-content">';
+  // 推荐店铺
+  html += '<div class="mf-card">' +
+    '<div class="mf-card-header" onclick="toggleMfCard(this)">' +
+      '<span class="mf-card-header-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#E74C3C" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>' +
+      '<span class="mf-card-header-text">推荐店铺（' + dish.shops.length + '家）</span>' +
+      '<span class="mf-card-arrow open">▼</span>' +
+    '</div>' +
+    '<div class="mf-card-body open">';
   dish.shops.forEach(function(s) {
     var shopId = dish.id + '_' + s.name.replace(/[^a-zA-Z0-9]/g,'_');
-    html += '<div style="background:#FAFAFA;border-radius:12px;padding:14px;margin-bottom:10px;border:1px solid #E8E8E8;">' +
-      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">' +
-        '<span style="font-size:16px;font-weight:700;color:#333;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> ' + s.name + '</span>' +
-        '<span style="font-size:13px;color:#E65100;font-weight:600;background:#FFF3E0;padding:3px 10px;border-radius:12px;">' + (s.price || '') + '</span>' +
+    html += '<div class="mf-shop-card">' +
+      '<div style="display:flex;align-items:center;">' +
+        '<span class="mf-shop-name">' + s.name + '</span>' +
+        (s.price ? '<span class="mf-shop-price">' + s.price + '</span>' : '') +
       '</div>' +
-      (s.addr ? '<div style="font-size:13px;color:#888;margin-bottom:6px;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;"><circle cx="12" cy="10" r="3"/><path d="M12 2a8 8 0 0 0-8 8c0 5.4 8 12 8 12s8-6.6 8-12a8 8 0 0 0-8-8z"/></svg> ' + s.addr + '</div>' : '') +
-      (s.recommend ? '<div style="font-size:13px;color:#555;margin-bottom:10px;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg> 推荐：' + s.recommend + '</div>' : '') +
-      '<button onclick="addFoodShopToPlan(\'' + shopId + '\')" style="width:100%;padding:10px;background:linear-gradient(135deg,#7E57C2,#9575CD);color:#FFF;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> 添加到规划</button>' +
+      (s.addr ? '<div class="mf-shop-addr"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#999" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 2a8 8 0 0 0-8 8c0 5.4 8 12 8 12s8-6.6 8-12a8 8 0 0 0-8-8z"/></svg>' + s.addr + '</div>' : '') +
+      (s.recommend ? '<div class="mf-shop-rec">' + s.recommend + '</div>' : '') +
+      '<button class="mf-shop-btn" onclick="event.stopPropagation();addFoodShopToPlan(\'' + shopId + '\')">添加到规划</button>' +
       '</div>';
   });
   html += '</div></div>';
 
   html += '</div>';
+
   document.getElementById('detailContent').innerHTML = html;
   document.getElementById('detailPage').classList.add('show');
+  document.getElementById('detailPage').scrollTop = 0;
+
+  var detailPage = document.getElementById('detailPage');
+  var backBar = document.getElementById('detailBackBar');
+  detailPage.onscroll = function() {
+    backBar.classList.toggle('scrolled', detailPage.scrollTop > 200);
+  };
 }
 
 function showStreetDetail(streetId) {
@@ -1371,58 +1497,82 @@ function showStreetDetail(streetId) {
 
   var photos = street.photos || [];
   var captions = street.photoCaptions || {};
-  var html = '';
   var heroImg = photos[0] || '';
-  html += '<div class="detail-hero"><div class="hero-bg">' + (heroImg ? '<img src="'+heroImg+'" alt="'+street.name+'" onerror="this.style.display=\'none\'" />':'') + '</div>' +
-    '<div class="hero-info"><span class="hero-name">' + street.name + '</span><span class="hero-subtitle">' + (street.addr || '') + '</span></div></div>';
+
+  var html = '';
+  html += '<div class="detail-back" id="detailBackBar" onclick="goBackFromDetail()">' +
+    '<div class="detail-back-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#FFF" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg></div></div>';
+  html += '<div class="detail-hero">' +
+    (heroImg ? '<img src="'+heroImg+'" alt="'+street.name+'" />' : '<div style="height:100%;background:#D5D5D5;"></div>') +
+    '<div class="hero-info">' +
+      '<span class="hero-name">' + street.name.split(' ')[0] + '</span>' +
+      '<span class="hero-subtitle"><span class="hero-tag">美食街</span></span>' +
+    '</div></div>';
+
   html += '<div class="detail-body">';
 
-  // 街区简介
-  html += '<div style="margin:0 0 14px;padding:14px 16px;background:linear-gradient(135deg,#F3E5F5,#EDE7F6);border-radius:12px;border-left:4px solid #7E57C2;">' +
-    '<div style="font-size:14px;font-weight:600;color:#5E35B1;margin-bottom:4px;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;"><circle cx="12" cy="10" r="3"/><path d="M12 2a8 8 0 0 0-8 8c0 5.4 8 12 8 12s8-6.6 8-12a8 8 0 0 0-8-8z"/></svg> 街区简介</div>' +
-    '<div style="font-size:14px;color:#555;line-height:1.7;">' + street.desc + '</div></div>';
-
-  // 地址
+  // 简介 + 地址卡片
+  html += '<div class="detail-info-card">' +
+    '<div class="mf-intro" style="padding:4px 0;">' + street.desc + '</div>';
   if (street.addr) {
-    html += '<div style="margin:0 0 14px;padding:14px 16px;background:#FFF;border-radius:12px;border:1px solid #E8E8E8;">' +
-      '<div style="font-size:14px;font-weight:600;color:#333;margin-bottom:4px;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;"><circle cx="12" cy="10" r="3"/><path d="M12 2a8 8 0 0 0-8 8c0 5.4 8 12 8 12s8-6.6 8-12a8 8 0 0 0-8-8z"/></svg> 地址</div>' +
-      '<div style="font-size:14px;color:#666;">' + street.addr + '</div></div>';
+    html += '<div class="mf-addr-row" style="margin-top:8px;padding-top:12px;">' +
+      '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#999" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 2a8 8 0 0 0-8 8c0 5.4 8 12 8 12s8-6.6 8-12a8 8 0 0 0-8-8z"/></svg>' +
+      '<span class="mf-addr-row-text">' + street.addr + '</span></div>';
   }
+  html += '</div>';
 
   // 推荐店铺
-  html += '<div class="section-card"><div class="section-header"><span class="section-header-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span><span class="section-header-text">推荐店铺（' + street.shops.length + '家）</span><span class="section-toggle">−</span></div>' +
-    '<div class="section-content">';
+  html += '<div class="mf-card">' +
+    '<div class="mf-card-header" onclick="toggleMfCard(this)">' +
+      '<span class="mf-card-header-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#E74C3C" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>' +
+      '<span class="mf-card-header-text">推荐店铺（' + street.shops.length + '家）</span>' +
+      '<span class="mf-card-arrow open">▼</span>' +
+    '</div>' +
+    '<div class="mf-card-body open">';
   street.shops.forEach(function(s) {
     var shopId = 'street_' + street.id + '_' + s.name.replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g,'_');
-    html += '<div style="background:#FAFAFA;border-radius:12px;padding:14px;margin-bottom:10px;border:1px solid #E8E8E8;">' +
-      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">' +
-        '<span style="font-size:16px;font-weight:700;color:#333;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> ' + s.name + '</span>' +
-        '<span style="font-size:13px;color:#E65100;font-weight:600;background:#FFF3E0;padding:3px 10px;border-radius:12px;">' + (s.price || '') + '</span>' +
+    html += '<div class="mf-shop-card">' +
+      '<div style="display:flex;align-items:center;">' +
+        '<span class="mf-shop-name">' + s.name + '</span>' +
+        (s.price ? '<span class="mf-shop-price">' + s.price + '</span>' : '') +
       '</div>' +
-      (s.addr ? '<div style="font-size:13px;color:#888;margin-bottom:6px;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;"><circle cx="12" cy="10" r="3"/><path d="M12 2a8 8 0 0 0-8 8c0 5.4 8 12 8 12s8-6.6 8-12a8 8 0 0 0-8-8z"/></svg> ' + s.addr + '</div>' : '') +
-      (s.recommend ? '<div style="font-size:13px;color:#555;margin-bottom:10px;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg> 推荐：' + s.recommend + '</div>' : '') +
-      '<button onclick="addStreetShopToPlan(\'' + street.id + '\',\'' + s.name.replace(/'/g,'\\\'') + '\')" style="width:100%;padding:10px;background:linear-gradient(135deg,#7E57C2,#9575CD);color:#FFF;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> 添加到规划</button>' +
+      (s.addr ? '<div class="mf-shop-addr"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#999" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 2a8 8 0 0 0-8 8c0 5.4 8 12 8 12s8-6.6 8-12a8 8 0 0 0-8-8z"/></svg>' + s.addr + '</div>' : '') +
+      (s.recommend ? '<div class="mf-shop-rec">' + s.recommend + '</div>' : '') +
+      '<button class="mf-shop-btn" onclick="event.stopPropagation();addStreetShopToPlan(\'' + street.id + '\',\'' + s.name.replace(/'/g,'\\\'') + '\')">添加到规划</button>' +
       '</div>';
   });
   html += '</div></div>';
 
-  // 照片画廊
+  // 图集
   if (photos.length > 1) {
-    html += '<div class="section-card"><div class="section-header"><span class="section-header-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></span><span class="section-header-text">街区图集</span><span class="section-toggle">−</span></div>' +
-      '<div class="section-content">' +
-        '<div class="gallery-scroll">';
+    var galleryHtml = '';
     photos.forEach(function(src, i) {
-      html += '<div class="gallery-item" onclick="openLightbox(\'' + src + '\')">' +
-        '<img src="' + src + '" alt="' + (captions[i] || '') + '" loading="lazy" onerror="this.style.display=\'none\'" />' +
-        (captions[i] ? '<span class="gallery-cap">' + captions[i] + '</span>' : '') +
+      galleryHtml += '<div class="mf-gallery-item" onclick="openLightbox(\'' + src + '\')">' +
+        '<img src="' + src + '" alt="" loading="lazy" />' +
+        (captions[i] ? '<span class="mf-gallery-cap">' + captions[i] + '</span>' : '') +
         '</div>';
     });
-    html += '</div></div></div>';
+    html += '<div class="mf-card">' +
+      '<div class="mf-card-header" onclick="toggleMfCard(this)">' +
+        '<span class="mf-card-header-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#E74C3C" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></span>' +
+        '<span class="mf-card-header-text">街区图集（' + (photos.length-1) + '张）</span>' +
+        '<span class="mf-card-arrow open">▼</span>' +
+      '</div>' +
+      '<div class="mf-card-body open"><div class="mf-gallery">' + galleryHtml + '</div></div>' +
+      '</div>';
   }
 
   html += '</div>';
+
   document.getElementById('detailContent').innerHTML = html;
   document.getElementById('detailPage').classList.add('show');
+  document.getElementById('detailPage').scrollTop = 0;
+
+  var detailPage = document.getElementById('detailPage');
+  var backBar = document.getElementById('detailBackBar');
+  detailPage.onscroll = function() {
+    backBar.classList.toggle('scrolled', detailPage.scrollTop > 200);
+  };
 }
 
 function addStreetShopToPlan(streetId, shopName) {
