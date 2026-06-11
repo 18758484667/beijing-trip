@@ -1,4 +1,0 @@
-[     490ms] [LOG] 京城游记 H5 页面加载完成 - 共22个景点 @ http://localhost:8080/index.html:2295
-[     683ms] [ERROR] Failed to load resource: the server responded with a status of 404 (File not found) @ http://localhost:8080/favicon.ico:0
-[     925ms] [LOG] 高德地图初始化成功 @ http://localhost:8080/index.html:992
-[    2254ms] [WARNING] Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently @ https://webapi.amap.com/maps?v=2.0&key=dffd44fa0a2f45b73bfa2cbe9ccd1ad5:0
