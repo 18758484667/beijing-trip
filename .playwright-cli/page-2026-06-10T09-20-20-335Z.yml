@@ -1,0 +1,250 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e4]:
+    - generic [ref=e5] [cursor=pointer]:
+      - generic [ref=e6]: 📍 北京景点
+      - generic [ref=e7]: 收起
+    - generic [ref=e8]:
+      - generic [ref=e9]:
+        - generic [ref=e10]: 🔍
+        - textbox "搜索景点..." [ref=e11]
+      - generic [ref=e12]:
+        - generic [ref=e13] [cursor=pointer]:
+          - generic [ref=e14]: 🏯
+          - generic [ref=e15]:
+            - generic [ref=e16]: 故宫博物院 60元
+            - generic [ref=e17]: 世界文化遗产·紫禁城 · 3-4小时
+          - generic [ref=e18]: ›
+        - generic [ref=e19] [cursor=pointer]:
+          - generic [ref=e20]: 🏛️
+          - generic [ref=e21]:
+            - generic [ref=e22]: 天安门广场 免费（需预约）
+            - generic [ref=e23]: 北京中轴线核心地标 · 3-4小时
+          - generic [ref=e24]: ›
+        - generic [ref=e25] [cursor=pointer]:
+          - generic [ref=e26]: 🏛️
+          - generic [ref=e27]:
+            - generic [ref=e28]: 人民大会堂 30元（成人）
+            - generic [ref=e29]: 天安门广场西侧标志性建筑 · 1.5-2小时
+          - generic [ref=e30]: ›
+        - generic [ref=e31] [cursor=pointer]:
+          - generic [ref=e32]: 🏛️
+          - generic [ref=e33]:
+            - generic [ref=e34]: 国家博物馆 免费（需预约）
+            - generic [ref=e35]: 中国最大博物馆·国宝云集 · 3-4小时
+          - generic [ref=e36]: ›
+        - generic [ref=e37] [cursor=pointer]:
+          - generic [ref=e38]: 🌄
+          - generic [ref=e39]:
+            - generic [ref=e40]: 景山公园 2元
+            - generic [ref=e41]: 俯瞰故宫全景最佳地点 · 1-2小时
+          - generic [ref=e42]: ›
+        - generic [ref=e43] [cursor=pointer]:
+          - generic [ref=e44]: 🌳
+          - generic [ref=e45]:
+            - generic [ref=e46]: 颐和园 30元（旺季）/20元（淡季）
+            - generic [ref=e47]: 中国古典园林之首 · 3-4小时
+          - generic [ref=e48]: ›
+        - generic [ref=e49] [cursor=pointer]:
+          - generic [ref=e50]: 🏯
+          - generic [ref=e51]:
+            - generic [ref=e52]: 圆明园 25元通票（18岁以下免票）
+            - generic [ref=e53]: 万园之园·大水法遗址 · 2-3小时
+          - generic [ref=e54]: ›
+        - generic [ref=e55] [cursor=pointer]:
+          - generic [ref=e56]: 🎓
+          - generic [ref=e57]:
+            - generic [ref=e58]: 清华大学 免费
+            - generic [ref=e59]: 最高学府·荷塘月色 · 2-3小时
+          - generic [ref=e60]: ›
+        - generic [ref=e61] [cursor=pointer]:
+          - generic [ref=e62]: 🌊
+          - generic [ref=e63]:
+            - generic [ref=e64]: 什刹海 免费
+            - generic [ref=e65]: 老北京胡同文化体验 · 3-4小时
+          - generic [ref=e66]: ›
+        - generic [ref=e67] [cursor=pointer]:
+          - generic [ref=e68]: 🏯
+          - generic [ref=e69]:
+            - generic [ref=e70]: 恭王府 40元
+            - generic [ref=e71]: 一座恭王府半部清代史 · 2-3小时
+          - generic [ref=e72]: ›
+        - generic [ref=e73] [cursor=pointer]:
+          - generic [ref=e74]: 🔔
+          - generic [ref=e75]:
+            - generic [ref=e76]: 鼓楼大街 免费
+            - generic [ref=e77]: 中轴线北端·老北京风情 · 2-3小时
+          - generic [ref=e78]: ›
+        - generic [ref=e79] [cursor=pointer]:
+          - generic [ref=e80]: 🏮
+          - generic [ref=e81]:
+            - generic [ref=e82]: 五道营胡同 免费
+            - generic [ref=e83]: 最文艺的胡同 · 2-3小时
+          - generic [ref=e84]: ›
+        - generic [ref=e85] [cursor=pointer]:
+          - generic [ref=e86]: 🏮
+          - generic [ref=e87]:
+            - generic [ref=e88]: 杨梅竹斜街 免费
+            - generic [ref=e89]: 前门最文艺胡同 · 2-3小时
+          - generic [ref=e90]: ›
+        - generic [ref=e91] [cursor=pointer]:
+          - generic [ref=e92]: 🏛️
+          - generic [ref=e93]:
+            - generic [ref=e94]: 东交民巷 免费
+            - generic [ref=e95]: 最长胡同·欧式建筑群 · 2-3小时
+          - generic [ref=e96]: ›
+        - generic [ref=e97] [cursor=pointer]:
+          - generic [ref=e98]: 🏘️
+          - generic [ref=e99]:
+            - generic [ref=e100]: 史家胡同 免费
+            - generic [ref=e101]: 一条胡同半部中国史 · 1-2小时
+          - generic [ref=e102]: ›
+        - generic [ref=e103] [cursor=pointer]:
+          - generic [ref=e104]: ⛩️
+          - generic [ref=e105]:
+            - generic [ref=e106]: 天坛公园 28元（联票）
+            - generic [ref=e107]: 明清帝王祭天场所 · 2-3小时
+          - generic [ref=e108]: ›
+        - generic [ref=e109] [cursor=pointer]:
+          - generic [ref=e110]: 🏯
+          - generic [ref=e111]:
+            - generic [ref=e112]: 慕田峪长城 40元（18岁以下免票）
+            - generic [ref=e113]: 人少景美缆车直达 · 半天
+          - generic [ref=e114]: ›
+        - generic [ref=e115] [cursor=pointer]:
+          - generic [ref=e116]: 🏟️
+          - generic [ref=e117]:
+            - generic [ref=e118]: 奥林匹克公园 园区免费 / 鸟巢100元 / 水立方30元
+            - generic [ref=e119]: 鸟巢水立方夜景最美 · 3-4小时
+          - generic [ref=e120]: ›
+        - generic [ref=e121] [cursor=pointer]:
+          - generic [ref=e122]: 🏮
+          - generic [ref=e123]:
+            - generic [ref=e124]: 北顶娘娘庙 免费
+            - generic [ref=e125]: 600年古庙·求子灵验 · 0.5-1小时
+          - generic [ref=e126]: ›
+        - generic [ref=e127] [cursor=pointer]:
+          - generic [ref=e128]: 🔬
+          - generic [ref=e129]:
+            - generic [ref=e130]: 中国科技馆 免费（需预约）
+            - generic [ref=e131]: 8岁孩子的放电天堂 · 3-5小时
+          - generic [ref=e132]: ›
+        - generic [ref=e133] [cursor=pointer]:
+          - generic [ref=e134]: 🏯
+          - generic [ref=e135]:
+            - generic [ref=e136]: 北海公园 10元
+            - generic [ref=e137]: 让我们荡起双桨 · 2-3小时
+          - generic [ref=e138]: ›
+        - generic [ref=e139] [cursor=pointer]:
+          - generic [ref=e140]: 🏮
+          - generic [ref=e141]:
+            - generic [ref=e142]: 前门大街/大栅栏 免费
+            - generic [ref=e143]: 老字号一条街 · 3-4小时
+          - generic [ref=e144]: ›
+  - generic [ref=e145]:
+    - generic [ref=e146]: 编辑金额
+    - generic [ref=e147]:
+      - generic [ref=e148]: 金额（元）
+      - spinbutton [ref=e149]
+    - generic [ref=e150]:
+      - button "取消" [ref=e151] [cursor=pointer]
+      - button "保存" [ref=e152] [cursor=pointer]
+  - generic [ref=e153]:
+    - generic [ref=e154]: 添加预算项目
+    - generic [ref=e155]:
+      - generic [ref=e156]: 项目名称
+      - textbox "如：购物" [ref=e157]
+    - generic [ref=e158]:
+      - generic [ref=e159]: 金额（元）
+      - spinbutton [ref=e160]
+    - generic [ref=e161]:
+      - button "取消" [ref=e162] [cursor=pointer]
+      - button "添加" [ref=e163] [cursor=pointer]
+  - generic [ref=e164]:
+    - generic [ref=e165]: 选择
+    - generic [ref=e166]:
+      - button "取消" [ref=e167] [cursor=pointer]
+      - button "确认添加" [ref=e168] [cursor=pointer]
+  - generic [ref=e169]:
+    - generic [ref=e170]: 📅 规划到哪一天
+    - generic [ref=e171]:
+      - generic [ref=e172]: 选择日期：
+      - generic [ref=e173]: 选择时段：
+    - generic [ref=e174]:
+      - button "取消" [ref=e175] [cursor=pointer]
+      - button "确认添加" [ref=e176] [cursor=pointer]
+  - generic [ref=e177]:
+    - generic [ref=e178]: 添加自定义项目
+    - generic [ref=e179]:
+      - generic [ref=e180]:
+        - generic [ref=e181]: 类型
+        - generic [ref=e182]:
+          - generic [ref=e183] [cursor=pointer]: 📍 景点
+          - generic [ref=e184] [cursor=pointer]: 🍜 美食
+          - generic [ref=e185] [cursor=pointer]: 🏨 住宿
+          - generic [ref=e186] [cursor=pointer]: ✈️ 交通
+          - generic [ref=e187] [cursor=pointer]: 📌 其他
+      - generic [ref=e188]:
+        - generic [ref=e189]: 名称 *
+        - textbox "请输入项目名称" [ref=e190]
+      - generic [ref=e191]:
+        - generic [ref=e192]:
+          - generic [ref=e193]: 地址（用于自动定位，可选）
+          - textbox "请输入地址，如：东城区前门大街XX号" [ref=e194]
+        - generic [ref=e195]:
+          - generic [ref=e196]:
+            - generic [ref=e197]: 经度（自动获取）
+            - textbox "自动" [ref=e198]
+          - generic [ref=e199]:
+            - generic [ref=e200]: 纬度（自动获取）
+            - textbox "自动" [ref=e201]
+      - generic [ref=e202]:
+        - generic [ref=e203]: 备注（可选）
+        - textbox "如：已预订、电话XXX" [ref=e204]
+      - generic [ref=e205]:
+        - generic [ref=e206]: 时间段
+        - generic [ref=e207]:
+          - generic [ref=e208] [cursor=pointer]: 🌅 上午
+          - generic [ref=e209] [cursor=pointer]: ☀️ 中午
+          - generic [ref=e210] [cursor=pointer]: 🌤️ 下午
+          - generic [ref=e211] [cursor=pointer]: 🌙 晚上
+          - generic [ref=e212] [cursor=pointer]: 🏨 住宿
+    - generic [ref=e213]:
+      - button "取消" [ref=e214] [cursor=pointer]
+      - button "确认添加" [ref=e215] [cursor=pointer]
+  - generic [ref=e216]:
+    - generic [ref=e217]: ✏️ 编辑项目
+    - generic [ref=e218]:
+      - generic [ref=e219]:
+        - generic [ref=e220]: 名称
+        - textbox "项目名称" [ref=e221]
+      - generic [ref=e222]:
+        - generic [ref=e223]: 备注
+        - textbox "备注信息..." [ref=e224]
+      - generic [ref=e225]:
+        - generic [ref=e226]: 时间段
+        - generic [ref=e227]:
+          - generic [ref=e228] [cursor=pointer]: 🌅 上午
+          - generic [ref=e229] [cursor=pointer]: ☀️ 中午
+          - generic [ref=e230] [cursor=pointer]: 🌤️ 下午
+          - generic [ref=e231] [cursor=pointer]: 🌙 晚上
+          - generic [ref=e232] [cursor=pointer]: 🏨 住宿
+          - generic [ref=e233] [cursor=pointer]: ✈️ 交通
+    - generic [ref=e234]:
+      - button "取消" [ref=e235] [cursor=pointer]
+      - button "保存" [ref=e236] [cursor=pointer]
+  - generic [ref=e237]:
+    - generic [ref=e238] [cursor=pointer]:
+      - generic [ref=e239]: 🗺️
+      - generic [ref=e240]: 地图
+    - generic [ref=e241] [cursor=pointer]:
+      - generic [ref=e242]: 📅
+      - generic [ref=e243]: 规划
+    - generic [ref=e244] [cursor=pointer]:
+      - generic [ref=e245]: 🍜
+      - generic [ref=e246]: 美食
+    - generic [ref=e247] [cursor=pointer]:
+      - generic [ref=e248]: 🚗
+      - generic [ref=e249]: 交通
+    - generic [ref=e250] [cursor=pointer]:
+      - generic [ref=e251]: 💰
+      - generic [ref=e252]: 预算
