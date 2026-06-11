@@ -26,7 +26,7 @@
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica Neue', sans-serif;
       background: var(--purple-bg); color: var(--text); font-size: 16px; line-height: 1.6;
-      padding-bottom: 90px; -webkit-tap-highlight-color: transparent;
+      padding-bottom: 0; -webkit-tap-highlight-color: transparent;
     }
     .page-container { padding: 0 16px 32px; }
     .section-title { font-size: 20px; font-weight: 700; color: var(--text); margin: 16px 0 12px; padding-left: 14px; border-left: 4px solid var(--primary); line-height: 1.4; }
@@ -36,7 +36,6 @@
 
     /* TabBar */
     .tabbar { position: fixed; bottom: 0; left: 0; right: 0; background: #FFF; display: flex; border-top: 1px solid var(--border); z-index: 999; padding: 6px 0 env(safe-area-inset-bottom, 6px); }
-    .tabbar::before { content: ''; position: absolute; bottom: 100%; left: 0; right: 0; height: 20px; background: linear-gradient(to top, #FFF 0%, transparent 100%); pointer-events: none; }
     /* 隐藏高德地图水印 */
     .amap-logo, .amap-copyright { display: none !important; }
     .tab-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4px 0; cursor: pointer; font-size: 11px; color: var(--text-muted); transition: all 0.2s; }
@@ -48,7 +47,7 @@
     .tab-item-mode.viewing { color: #E57373; }
     .tab-item-mode.viewing .mode-icon { animation: lockPulse 2s infinite; }
     @keyframes lockPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.08); } }
-    .page { display: none; }
+    .page { display: none; padding-bottom: 72px; }
     .page.active { display: block; }
 
     /* ===== 查看模式：隐藏编辑元素 ===== */
