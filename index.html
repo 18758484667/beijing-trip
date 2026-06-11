@@ -293,30 +293,32 @@
     .day-chip:last-child { margin-right: 0; }
 
     .plan-day-section { margin-bottom: 14px; }
-    .plan-day-header { display: flex; align-items: center; justify-content: space-between; padding: 11px 14px; background: #333; color: #FFF; border-radius: 10px 10px 0 0; }
-    .plan-day-title { font-size: 18px; font-weight: 700; }
-    .plan-day-actions { display: flex; gap: 6px; font-size: 15px; }
-    .plan-day-action { cursor: pointer; opacity: 0.85; }
-    .plan-day-body { background: #FFF; border-radius: 0 0 10px 10px; padding: 10px 12px; }
+    .plan-day-title { font-size: 18px; font-weight: 700; padding: 6px 4px 10px; color: var(--text); }
+    .plan-day-actions { display: inline-block; font-size: 13px; margin-left: 8px; }
+    .plan-day-action { cursor: pointer; color: var(--text3); font-weight: 400; }
+    .plan-day-action:active { color: var(--red); }
+    .plan-day-body { background: #FFF; border-radius: 14px; padding: 8px 12px; box-shadow: 0 1px 6px rgba(0,0,0,0.04); }
 
-    .plan-slot { display: flex; align-items: center; padding: 10px; margin-bottom: 6px; background: #FAFAFA; border-radius: 8px; gap: 8px; border-left: 3px solid var(--red); cursor: pointer; }
-    .plan-slot:active { background: var(--red-bg); }
-    .plan-slot.morning { border-left-color: #F39C12; }
-    .plan-slot.noon { border-left-color: #E74C3C; }
-    .plan-slot.afternoon { border-left-color: #27AE60; }
-    .plan-slot.evening { border-left-color: #8E44AD; }
-    .plan-slot.hotel { border-left-color: #2980B9; }
-    .plan-slot.transport { border-left-color: #7F8C8D; }
-    .plan-slot-icon { font-size: 22px; width: 34px; height: 34px; border-radius: 8px; background: #F0F0F0; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .plan-slot { display: flex; align-items: center; padding: 12px 0; gap: 10px; cursor: pointer; border-bottom: 1px solid #F0F0F0; }
+    .plan-slot:last-child { border-bottom: none; }
+    .plan-slot:active { opacity: 0.7; }
+    .plan-slot-dot { width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+    .plan-slot-dot svg { width: 18px; height: 18px; stroke: #FFF; }
+    .plan-slot.morning .plan-slot-dot { background: #E67E22; }
+    .plan-slot.noon .plan-slot-dot { background: #E74C3C; }
+    .plan-slot.afternoon .plan-slot-dot { background: #27AE60; }
+    .plan-slot.evening .plan-slot-dot { background: #8E44AD; }
+    .plan-slot.hotel .plan-slot-dot { background: #2980B9; }
+    .plan-slot.transport .plan-slot-dot { background: #78909C; }
+    .plan-slot-custom .plan-slot-dot { background: #1ABC9C; }
     .plan-slot-info { flex: 1; min-width: 0; }
     .plan-slot-name { font-size: 16px; font-weight: 600; display: block; color: var(--text); }
     .plan-slot-detail { font-size: 14px; color: var(--text2); }
-    .plan-slot-remove { font-size: 18px; color: #E74C3C; cursor: pointer; padding: 2px; flex-shrink: 0; opacity: 0.7; }
-    .plan-slot-remove:active { opacity: 1; }
-    .plan-slot-edit { font-size: 16px; color: var(--text3); cursor: pointer; padding: 2px; flex-shrink: 0; opacity: 0.5; }
-    .plan-slot-edit:active { opacity: 1; }
-    .plan-slot-custom { border-left-color: #1ABC9C !important; }
-    .plan-slot-memo { font-size: 13px; color: var(--text3); margin-top: 1px; }
+    .plan-slot-remove { font-size: 20px; color: #CCC; cursor: pointer; padding: 4px; flex-shrink: 0; }
+    .plan-slot-remove:active { color: #E74C3C; }
+    .plan-slot-edit { font-size: 16px; color: #CCC; cursor: pointer; padding: 4px; flex-shrink: 0; }
+    .plan-slot-edit:active { color: var(--red); }
+    .plan-slot-memo { font-size: 13px; color: var(--text3); margin-top: 2px; }
 
     .custom-picker-form { padding: 14px; }
     .custom-picker-form .input-group { margin-bottom: 10px; }
@@ -1694,11 +1696,7 @@ function renderDaySection(plan, dayIdx) {
 
   var html = '';
   html += '<div class="plan-day-section">';
-  html += '<div class="plan-day-header">';
-  html += '<span class="plan-day-title">' + day.label + '</span>';
-  html += '<span class="plan-day-actions"><span class="plan-day-action" onclick="clearDay(' + dayIdx + ')">清空当天</span></span>';
-  html += '</div>';
-  html += '<div class="plan-day-body">';
+  html += '<span class="plan-day-title">' + day.label + '<span class="plan-day-actions"><span class="plan-day-action" onclick="clearDay(' + dayIdx + ')">清空</span></span></span>';
 
   // 按时间段分组排序
   var slotOrder = {'hotel':0,'morning':1,'noon':2,'afternoon':3,'evening':4,'transport':5};
@@ -1706,25 +1704,22 @@ function renderDaySection(plan, dayIdx) {
     return (slotOrder[a.slotType]||99) - (slotOrder[b.slotType]||99);
   });
 
-  var slotLabels = {
-    morning:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/></svg> 上午', noon:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/></svg> 中午', afternoon:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9z"/></svg> 下午', evening:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg> 晚上', hotel:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;"><path d="M3 21h18M3 7v14M21 7v14M6 11h4v4H6zM14 11h4v4h-4zM9 3h6v4H9z"/></svg> 住宿', transport:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;"><path d="M22 12l-4-4H6l-4 4M2 12h20"/></svg> 交通'
-  };
-  var slotColors = {
-    morning:'#E67E22', noon:'#E74C3C', afternoon:'#27AE60', evening:'#8E44AD', hotel:'#2980B9', transport:'#78909C'
-  };
+  var slotLabels = { morning:'上午', noon:'中午', afternoon:'下午', evening:'晚上', hotel:'住宿', transport:'交通' };
+
+  html += '<div class="plan-day-body">';
 
   sortedSlots.forEach(function(slot, idx) {
     var cls = slot.slotType || 'afternoon';
     if (slot.custom) cls += ' plan-slot-custom';
     var originalIdx = day.slots.indexOf(slot);
     html += '<div class="plan-slot ' + cls + '" onclick="showSlotOnMap(\'' + slot.id + '\',\'' + slot.type + '\',\'' + (slot.lat||'') + '\',\'' + (slot.lng||'') + '\')">';
-    html += '<div class="plan-slot-icon">' + getSlotIcon(slot.type) + '</div>';
+    html += '<div class="plan-slot-dot">' + getSlotIcon(slot.type) + '</div>';
     html += '<div class="plan-slot-info">';
-    html += '<span class="plan-slot-name">' + (slotLabels[slot.slotType]||'') + ' · ' + slot.name + '</span>';
+    html += '<span class="plan-slot-name"><span style="font-size:12px;color:#999;font-weight:400;margin-right:4px;">' + (slotLabels[slot.slotType]||'') + '</span>' + slot.name + '</span>';
     html += '<span class="plan-slot-detail">' + (slot.detail || '') + '</span>';
     if (slot.memo) html += '<span class="plan-slot-memo"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> ' + slot.memo + '</span>';
     html += '</div>';
-    html += '<span class="plan-slot-edit" onclick="event.stopPropagation();openSlotEdit(' + dayIdx + ',' + originalIdx + ')"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></span>';
+    html += '<span class="plan-slot-edit" onclick="event.stopPropagation();openSlotEdit(' + dayIdx + ',' + originalIdx + ')"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></span>';
     html += '<span class="plan-slot-remove" onclick="event.stopPropagation();removeSlot(' + dayIdx + ',' + originalIdx + ')">×</span>';
     html += '</div>';
   });
