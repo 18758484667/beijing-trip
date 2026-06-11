@@ -35,7 +35,7 @@
     .btn-primary:active { opacity: 0.88; transform: scale(0.98); }
 
     /* TabBar */
-    .tabbar { position: fixed; bottom: 0; left: 0; right: 0; background: #FFF; display: flex; border-top: 1px solid var(--border); z-index: 999; padding: 6px 0 env(safe-area-inset-bottom, 6px); }
+    .tabbar { position: fixed; bottom: 0; left: 0; right: 0; background: #FFF; display: flex; border-top: 1px solid var(--border); z-index: 999; padding: 6px 0 env(safe-area-inset-bottom, 6px); box-shadow: 0 -8px 16px #FFF; }
     .tab-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4px 0; cursor: pointer; font-size: 11px; color: var(--text-muted); transition: all 0.2s; }
     .tab-item .tab-icon { font-size: 24px; margin-bottom: 2px; }
     .tab-item.active { color: var(--primary); font-weight: 600; }
@@ -91,7 +91,7 @@
     .custom-marker.food-marker { width: 30px; height: 30px; font-size: 14px; background: linear-gradient(135deg, #FF9800, #FFB74D); box-shadow: 0 2px 8px rgba(255,152,0,0.3); }
 
     /* 景点/街区详情页 */
-    .detail-page { position: fixed; top: 0; left: 0; right: 0; bottom: 64px; background: #FBF8FD; z-index: 600; overflow-y: auto; display: none; padding-bottom: 20px; }
+    .detail-page { position: fixed; top: 0; left: 0; right: 0; bottom: 56px; background: #FBF8FD; z-index: 600; overflow-y: auto; display: none; padding-bottom: 0; }
     .detail-page.show { display: block; }
     .detail-back { position: sticky; top: 0; z-index: 10; padding: 14px 18px; background: rgba(255,255,255,0.92); backdrop-filter: blur(12px); cursor: pointer; font-size: 16px; color: var(--primary); font-weight: 500; display: flex; align-items: center; gap: 6px; }
     .detail-hero { position: relative; height: 220px; overflow: hidden; }
