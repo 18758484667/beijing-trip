@@ -90,9 +90,14 @@
     .panel-spot-highlight { font-size: 11px; color: #FFF; font-weight: 600; background: var(--red); padding: 1px 6px; border-radius: 4px; margin-left: 6px; }
 
     .custom-marker { width: 36px; height: 36px; border-radius: 50%; background: var(--red); display: flex; align-items: center; justify-content: center; cursor: pointer; border: 2px solid #FFF; font-size: 16px; box-shadow: 0 2px 6px rgba(231,76,60,0.3); }
+    .custom-marker svg { width: 18px; height: 18px; stroke: #FFF !important; }
+    .custom-marker svg [fill]:not([fill="none"]) { fill: #FFF !important; }
     .custom-marker.active { background: #333; width: 42px; height: 42px; }
+    .custom-marker.active svg { width: 20px; height: 20px; stroke: #FFF !important; }
     .custom-marker.route-marker { width: 26px; height: 26px; font-size: 12px; background: #333; box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
+    .custom-marker.route-marker svg { width: 14px; height: 14px; stroke: #FFF !important; }
     .custom-marker.food-marker { width: 26px; height: 26px; font-size: 12px; background: var(--red); box-shadow: 0 2px 6px rgba(231,76,60,0.3); }
+    .custom-marker.food-marker svg { width: 14px; height: 14px; stroke: #FFF !important; }
 
     .detail-page { position: fixed; top: 0; left: 0; right: 0; bottom: 56px; background: #FAFAFA; z-index: 600; overflow-y: auto; display: none; }
     .detail-page.show { display: block; }
@@ -1143,6 +1148,7 @@ function addMarkers() {
 
     var markerDom = document.createElement('div');
     markerDom.className = 'custom-marker';
+    markerDom.setAttribute('data-spot-id', spot.id);
     markerDom.innerHTML = spot.icon;
     markerDom.onclick = function() { showSpotInfoWindow(spot); };
 
@@ -1161,7 +1167,7 @@ function addMarkers() {
 function showSpotInfoWindow(spot) {
   activeSpotId = spot.id;
   document.querySelectorAll('.custom-marker').forEach(function(el) {
-    el.classList.toggle('active', el.textContent === spot.icon);
+    el.classList.toggle('active', el.getAttribute('data-spot-id') === spot.id);
   });
 
   if (infoWindow) { infoWindow.close(); infoWindow = null; }
