@@ -1,0 +1,2624 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>京城游记 - 全家北京之旅攻略助手</title>
+  <!-- 高德地图 JS API 2.0 + 安全密钥 -->
+  <script type="text/javascript">
+    window._AMapSecurityConfig = {
+      securityJsCode: "a3c5e8f2b7d14c6a9e0f8d2b5c4a7e1f"
+    };
+  </script>
+  <script src="https://webapi.amap.com/maps?v=2.0&key=dffd44fa0a2f45b73bfa2cbe9ccd1ad5"></script>
+  <!-- Supabase SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --primary: #B39DDB; --primary-light: #CE93D8; --primary-dark: #7E57C2;
+      --accent: #E1BEE7; --gold: #FFCA28;
+      --bg: #F8F5FC; --text: #1A1A1A; --text-light: #555; --text-muted: #999;
+      --border: #E8E0F0; --shadow: 0 2px 12px rgba(126,87,194,0.06);
+      --purple-bg: linear-gradient(180deg, #F3E5F5 0%, #F8F5FC 30%, #FFF 100%);
+      --card-shadow: 0 2px 12px rgba(126,87,194,0.08);
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica Neue', sans-serif;
+      background: var(--purple-bg); color: var(--text); font-size: 16px; line-height: 1.6;
+      padding-bottom: 90px; -webkit-tap-highlight-color: transparent;
+    }
+    .page-container { padding: 0 16px 32px; }
+    .section-title { font-size: 20px; font-weight: 700; color: var(--text); margin: 16px 0 12px; padding-left: 14px; border-left: 4px solid var(--primary); line-height: 1.4; }
+    .tag { display: inline-block; background: #F3E5F5; color: var(--primary-dark); font-size: 13px; padding: 3px 10px; border-radius: 16px; margin-right: 6px; font-weight: 500; }
+    .btn-primary { background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: #FFF; border: none; border-radius: 24px; padding: 12px 32px; font-size: 17px; font-weight: 600; text-align: center; cursor: pointer; display: inline-block; box-shadow: 0 4px 12px rgba(126,87,194,0.3); }
+    .btn-primary:active { opacity: 0.88; transform: scale(0.98); }
+
+    /* TabBar */
+    .tabbar { position: fixed; bottom: 0; left: 0; right: 0; background: #FFF; display: flex; border-top: 1px solid var(--border); z-index: 999; padding: 6px 0 env(safe-area-inset-bottom, 6px); }
+    .tab-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4px 0; cursor: pointer; font-size: 11px; color: var(--text-muted); transition: all 0.2s; }
+    .tab-item .tab-icon { font-size: 24px; margin-bottom: 2px; }
+    .tab-item.active { color: var(--primary); font-weight: 600; }
+    .tab-item-mode { flex: 0 0 52px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; font-size: 11px; color: var(--text-muted); transition: all 0.2s; border-left: 1px solid var(--border); padding: 4px 0; }
+    .tab-item-mode .mode-icon { font-size: 22px; margin-bottom: 2px; transition: transform 0.3s; }
+    .tab-item-mode:active .mode-icon { transform: scale(1.2); }
+    .tab-item-mode.viewing { color: #E57373; }
+    .tab-item-mode.viewing .mode-icon { animation: lockPulse 2s infinite; }
+    @keyframes lockPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* ===== 查看模式：隐藏编辑元素 ===== */
+    body.view-mode .plan-toolbar { display: none !important; }
+    body.view-mode .plan-day-actions { display: none !important; }
+    body.view-mode .plan-slot-remove { display: none !important; }
+    body.view-mode .plan-slot-edit { display: none !important; }
+    body.view-mode .add-to-plan-bar { display: none !important; }
+    body.view-mode .budget-actions { display: none !important; }
+    body.view-mode .item-actions { display: none !important; }
+    body.view-mode .plan-btn-clear { display: none !important; }
+    body.view-mode .shop-tag { pointer-events: none; opacity: 0.7; }
+
+    /* 地图容器 */
+    #mapContainer { width: 100%; height: 55vh; min-height: 320px; background: #EDE7F6; border-radius: 0 0 16px 16px; overflow: hidden; }
+
+    /* 景点面板 */
+    .spot-panel { position: fixed; bottom: 56px; left: 0; right: 0; background: #FFF; border-radius: 20px 20px 0 0; box-shadow: 0 -4px 24px rgba(0,0,0,0.08); z-index: 100; max-height: 45vh; display: flex; flex-direction: column; transition: transform 0.3s ease; }
+    .spot-panel.collapsed { transform: translateY(calc(100% - 52px)); }
+    .spot-panel.collapsed .panel-body { display: none; }
+    .panel-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; cursor: pointer; flex-shrink: 0; }
+    .panel-title { font-size: 17px; font-weight: 700; color: var(--text); }
+    .panel-toggle { font-size: 14px; color: var(--primary); font-weight: 500; cursor: pointer; }
+    .panel-body { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+    .panel-search { display: flex; align-items: center; padding: 10px 14px; margin: 8px 14px; background: #F5F5F5; border-radius: 22px; }
+    .panel-search input { flex: 1; border: none; outline: none; background: transparent; font-size: 15px; color: var(--text); }
+    .panel-search input::placeholder { color: var(--text-muted); }
+    .panel-list { flex: 1; overflow-y: auto; padding: 0 12px 12px; }
+    .panel-spot-item { display: flex; align-items: center; padding: 12px 10px; border-bottom: 1px solid #F0F0F0; cursor: pointer; gap: 12px; transition: background 0.15s; border-radius: 12px; margin-bottom: 4px; }
+    .panel-spot-item:active { background: #F3E5F5; }
+    .panel-spot-item.selected { background: #F3E5F5; }
+    .panel-spot-icon { width: 44px; height: 44px; border-radius: 14px; background: linear-gradient(135deg, var(--primary), var(--accent)); display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; box-shadow: 0 2px 8px rgba(126,87,194,0.2); }
+    .panel-spot-info { flex: 1; min-width: 0; }
+    .panel-spot-name { font-size: 16px; font-weight: 600; display: block; color: var(--text); }
+    .panel-spot-detail { font-size: 13px; color: var(--text-light); display: block; margin-top: 2px; }
+    .panel-spot-arrow { font-size: 18px; color: var(--primary); }
+    .panel-spot-highlight { font-size: 12px; color: #FFF; font-weight: 600; background: var(--primary); padding: 2px 8px; border-radius: 10px; margin-left: 6px; }
+
+    /* 自定义地图标记 */
+    .custom-marker { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #B39DDB, #CE93D8); display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 10px rgba(126,87,194,0.35); cursor: pointer; border: 3px solid #FFF; font-size: 19px; }
+    .custom-marker.active { background: linear-gradient(135deg, #FFB300, #FFC107); width: 46px; height: 46px; box-shadow: 0 4px 14px rgba(255,179,0,0.4); }
+    .custom-marker.route-marker { width: 30px; height: 30px; font-size: 14px; background: linear-gradient(135deg, #26A69A, #4DB6AC); box-shadow: 0 2px 8px rgba(38,166,154,0.3); }
+    .custom-marker.food-marker { width: 30px; height: 30px; font-size: 14px; background: linear-gradient(135deg, #FF9800, #FFB74D); box-shadow: 0 2px 8px rgba(255,152,0,0.3); }
+
+    /* 景点/街区详情页 */
+    .detail-page { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #FBF8FD; z-index: 600; overflow-y: auto; display: none; padding-bottom: 90px; }
+    .detail-page.show { display: block; }
+    .detail-back { position: sticky; top: 0; z-index: 10; padding: 14px 18px; background: rgba(255,255,255,0.92); backdrop-filter: blur(12px); cursor: pointer; font-size: 16px; color: var(--primary); font-weight: 500; display: flex; align-items: center; gap: 6px; }
+    .detail-hero { position: relative; height: 220px; overflow: hidden; }
+    .hero-bg { height: 100%; position: relative; background: linear-gradient(135deg, var(--primary), var(--accent)); }
+    .hero-bg img { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; }
+    .hero-icon { font-size: 68px; filter: drop-shadow(0 2px 8px rgba(0,0,0,0.15)); z-index: 1; position: relative; padding-top: 40px; text-align: center; }
+    .hero-info { position: absolute; bottom: 0; left: 0; right: 0; padding: 42px 22px 16px; background: linear-gradient(transparent, rgba(0,0,0,0.55)); z-index: 2; }
+    .hero-icon { font-size: 68px; filter: drop-shadow(0 2px 8px rgba(0,0,0,0.15)); }
+    .hero-info { position: absolute; bottom: 0; left: 0; right: 0; padding: 42px 22px 16px; background: linear-gradient(transparent, rgba(0,0,0,0.55)); }
+    .hero-name { font-size: 25px; font-weight: 800; color: #FFF; display: block; text-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+    .hero-subtitle { font-size: 14px; color: rgba(255,255,255,0.92); margin-top: 4px; display: block; }
+    .detail-body { padding: 16px; }
+    /* 照片画廊 */
+    .photo-gallery { margin-bottom: 14px; border-radius: 14px; overflow: hidden; background: #FFF; box-shadow: var(--card-shadow); }
+    .photo-gallery-title { font-size: 15px; font-weight: 700; color: var(--text); padding: 12px 14px 0; display: flex; align-items: center; gap: 6px; }
+    .photo-scroll { display: flex; overflow-x: auto; gap: 8px; padding: 12px 14px 14px; -webkit-overflow-scrolling: touch; scroll-snap-type: x mandatory; scrollbar-width: none; }
+    .photo-scroll::-webkit-scrollbar { display: none; }
+    .photo-item { flex-shrink: 0; width: 160px; height: 120px; border-radius: 10px; overflow: hidden; scroll-snap-align: start; cursor: pointer; position: relative; }
+    .photo-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
+    .photo-item:hover img, .photo-item:active img { transform: scale(1.05); }
+    .photo-item .photo-caption { position: absolute; bottom: 0; left: 0; right: 0; padding: 4px 8px; background: linear-gradient(transparent, rgba(0,0,0,0.6)); color: #FFF; font-size: 11px; text-align: center; }
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+    .info-item { background: #FFF; border-radius: 12px; padding: 12px; text-align: center; box-shadow: var(--card-shadow); }
+    .info-label { font-size: 13px; color: var(--text-light); display: block; margin-bottom: 3px; }
+    .info-value { font-size: 15px; font-weight: 600; display: block; color: var(--text); }
+    .info-price { color: var(--primary-dark); font-weight: 700; }
+    .info-row { display: flex; padding: 10px 0; gap: 8px; border-bottom: 1px solid var(--border); }
+    .info-row .info-label { flex-shrink: 0; font-size: 14px; margin-bottom: 0; color: var(--text-light); }
+    .info-row .info-value { font-size: 14px; flex: 1; color: var(--text); }
+    .section-card { background: #FFF; border-radius: 14px; margin-bottom: 12px; box-shadow: var(--card-shadow); overflow: hidden; }
+    .section-header { display: flex; align-items: center; padding: 15px 16px; cursor: pointer; }
+    .section-header-icon { font-size: 20px; margin-right: 8px; }
+    .section-header-text { flex: 1; font-size: 17px; font-weight: 600; color: var(--text); }
+    .section-toggle { font-size: 20px; color: var(--primary); }
+    .section-content { padding: 0 16px 14px; border-top: 1px solid var(--border); }
+    .route-item { display: flex; padding: 9px 0; gap: 10px; }
+    .route-num { width: 24px; height: 24px; border-radius: 50%; background: var(--primary); color: #FFF; font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .route-text { font-size: 15px; line-height: 1.65; flex: 1; color: var(--text); }
+    .tip-item { display: flex; padding: 9px 0; gap: 10px; }
+    .tip-icon { font-size: 18px; flex-shrink: 0; }
+    .tip-text { font-size: 15px; line-height: 1.55; flex: 1; color: var(--text); }
+    .dining-card { padding: 10px 0; }
+    .dining-label { font-size: 15px; font-weight: 600; display: block; margin-bottom: 4px; color: var(--text); }
+    .dining-text { font-size: 14px; color: var(--text-light); line-height: 1.55; }
+    .guide-item { padding: 10px 0; border-bottom: 1px solid var(--border); }
+    .guide-header { display: flex; justify-content: space-between; margin-bottom: 4px; }
+    .guide-type { font-size: 15px; font-weight: 600; color: var(--text); }
+    .guide-price { font-size: 14px; color: var(--primary-dark); font-weight: 600; }
+    .guide-desc { font-size: 13px; color: var(--text-light); }
+
+    /* 美食 */
+    .food-tabs { display: flex; background: #FFF; border-radius: 14px; padding: 4px; margin-bottom: 14px; box-shadow: var(--card-shadow); gap: 4px; }
+    .food-tab { flex: 1; text-align: center; padding: 10px; border-radius: 10px; font-size: 15px; color: var(--text-light); cursor: pointer; font-weight: 500; transition: all 0.2s; }
+    .food-tab.active { background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: #FFF; font-weight: 600; box-shadow: 0 2px 8px rgba(126,87,194,0.25); }
+    .warning-card { background: #FFFDE7; border: 1px solid #FFE082; border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; }
+    .warning-header { display: flex; align-items: center; }
+    .warning-icon { font-size: 18px; margin-right: 6px; }
+    .warning-title { flex: 1; font-size: 15px; font-weight: 600; color: #F57C00; }
+    .warning-toggle { font-size: 13px; color: var(--gold); font-weight: 500; }
+    .warning-text { font-size: 14px; color: var(--text-light); line-height: 1.65; margin-top: 8px; padding: 10px; background: #FFF; border-radius: 8px; display: none; }
+    .dish-card { background: #FFF; border-radius: 14px; padding: 16px; margin-bottom: 12px; box-shadow: var(--card-shadow); }
+    .dish-header { display: flex; gap: 14px; }
+    .dish-icon { font-size: 36px; flex-shrink: 0; }
+    .dish-info { flex: 1; }
+    .dish-name { font-size: 18px; font-weight: 700; display: block; color: var(--text); }
+    .dish-desc { font-size: 14px; color: var(--text-light); display: block; margin-top: 4px; line-height: 1.5; }
+    .dish-shops { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
+    .shops-label { font-size: 13px; color: var(--text-light); display: block; margin-bottom: 8px; font-weight: 500; }
+    .shop-tags { display: flex; flex-wrap: wrap; gap: 7px; }
+    .shop-tag { background: #F3E5F5; color: var(--primary-dark); font-size: 13px; padding: 5px 12px; border-radius: 16px; cursor: pointer; font-weight: 500; border: 1px solid transparent; transition: all 0.15s; }
+    .shop-tag:active { transform: scale(0.96); }
+    .shop-tag.selected { background: var(--primary); color: #FFF; }
+    .street-card { background: #FFF; border-radius: 14px; padding: 16px; margin-bottom: 12px; box-shadow: var(--card-shadow); transition: transform 0.15s; }
+    .street-card:active { transform: scale(0.98); }
+    .street-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+    .street-name { font-size: 18px; font-weight: 700; color: var(--text); }
+    .street-shop-count { font-size: 12px; color: var(--primary); background: #F3E5F5; padding: 3px 10px; border-radius: 12px; font-weight: 500; }
+    .street-desc { font-size: 14px; color: var(--text-light); display: block; line-height: 1.6; }
+    .street-addr { font-size: 13px; color: #999; margin-top: 8px; }
+    .street-shops-preview { font-size: 13px; color: #666; margin-top: 8px; padding: 8px 10px; background: #F8F8F8; border-radius: 8px; line-height: 1.5; }
+    .street-card-arrow { font-size: 13px; color: var(--primary); font-weight: 600; text-align: right; margin-top: 10px; }
+
+    /* 交通 */
+    .flight-compare { display: flex; gap: 10px; margin-bottom: 10px; }
+    .flight-card { flex: 1; background: #FFF; border-radius: 14px; padding: 14px; box-shadow: var(--card-shadow); }
+    .flight-header { display: flex; justify-content: space-between; margin-bottom: 8px; }
+    .flight-type { font-size: 15px; font-weight: 700; color: var(--primary-dark); }
+    .flight-airline { font-size: 12px; color: #FFF; background: var(--primary); padding: 2px 8px; border-radius: 6px; font-weight: 500; }
+    .flight-time { font-size: 22px; font-weight: 800; display: block; margin-bottom: 6px; color: var(--text); }
+    .flight-airport { font-size: 13px; color: var(--text-light); display: block; margin-bottom: 4px; }
+    .flight-desc { font-size: 13px; color: var(--primary-dark); display: block; font-weight: 500; }
+    .airport-card { background: #FFF; border-radius: 14px; padding: 16px; margin-bottom: 10px; box-shadow: var(--card-shadow); }
+    .airport-header { display: flex; justify-content: space-between; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+    .airport-name { font-size: 17px; font-weight: 700; color: var(--text); }
+    .airport-distance { font-size: 13px; color: var(--text-light); }
+    .airport-row { display: flex; padding: 5px 0; gap: 8px; }
+    .airport-text { font-size: 14px; flex: 1; line-height: 1.55; color: var(--text); }
+    .airport-tip { display: flex; gap: 6px; padding: 10px 12px; background: #F3E5F5; border-radius: 10px; margin-top: 12px; border: 1px solid #E1BEE7; }
+    .airport-tip .tip-text { font-size: 13px; color: var(--primary-dark); flex: 1; font-weight: 500; }
+    .city-card { background: #FFF; border-radius: 14px; padding: 16px; margin-bottom: 10px; box-shadow: var(--card-shadow); }
+    .city-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+    .city-icon { font-size: 26px; }
+    .city-mode { font-size: 17px; font-weight: 700; color: var(--text); }
+    .city-desc { font-size: 14px; color: var(--text-light); display: block; line-height: 1.5; }
+    .warn-item { display: flex; gap: 8px; padding: 12px 16px; background: #FFF3E0; border: 1px solid #FFE0B2; border-radius: 10px; margin-bottom: 8px; }
+    .warn-icon { font-size: 16px; color: #E65100; flex-shrink: 0; }
+    .warn-text { font-size: 14px; color: #BF360C; line-height: 1.5; flex: 1; font-weight: 500; }
+
+    /* 攻略 */
+    .tips-hero { text-align: center; padding: 28px 0; }
+    .tips-hero-icon { font-size: 46px; display: block; margin-bottom: 8px; }
+    .tips-hero-title { font-size: 22px; font-weight: 700; display: block; color: var(--text); }
+    .tips-hero-desc { font-size: 14px; color: var(--text-light); display: block; margin-top: 4px; }
+    .tip-card { background: #FFF; border-radius: 14px; padding: 16px; margin-bottom: 12px; box-shadow: var(--card-shadow); border-left: 4px solid; }
+    .tip-card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+    .tip-card-icon { font-size: 24px; }
+    .tip-card-title { font-size: 17px; font-weight: 700; color: var(--text); }
+    .tip-bullet { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; margin-top: 8px; }
+    .tip-list-item { display: flex; padding: 7px 0; gap: 10px; }
+    .tip-list-item .tip-text { color: var(--text); font-size: 14.5px; }
+
+    /* 预算 */
+    .total-card { background: linear-gradient(135deg, var(--primary), var(--accent)); border-radius: 18px; padding: 26px; margin-bottom: 20px; text-align: center; box-shadow: 0 6px 24px rgba(126,87,194,0.3); }
+    .total-label { font-size: 15px; color: rgba(255,255,255,0.9); display: block; margin-bottom: 4px; font-weight: 500; }
+    .total-amount { font-size: 42px; font-weight: 800; color: #FFF; display: block; letter-spacing: -1px; }
+    .total-range { font-size: 13px; color: rgba(255,255,255,0.78); display: block; margin-top: 8px; }
+    .budget-item { display: flex; align-items: center; justify-content: space-between; background: #FFF; border-radius: 14px; padding: 14px 16px; margin-bottom: 9px; box-shadow: var(--card-shadow); }
+    .item-left { display: flex; align-items: center; gap: 12px; flex: 1; }
+    .item-icon { font-size: 26px; }
+    .item-info { flex: 1; }
+    .item-name { font-size: 16px; font-weight: 600; display: block; color: var(--text); }
+    .item-amount { font-size: 15px; color: var(--primary-dark); font-weight: 700; display: block; margin-top: 2px; }
+    .item-actions { display: flex; gap: 6px; }
+    .action-btn { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; border: none; font-size: 16px; }
+    .edit-btn { background: #F3E5F5; }
+    .delete-btn { background: #FFEBEE; }
+    .budget-actions { padding-bottom: 24px; }
+    .btn-add { display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: #FFF; font-size: 17px; font-weight: 600; padding: 14px; border-radius: 14px; margin-bottom: 10px; cursor: pointer; border: none; width: 100%; box-shadow: 0 3px 12px rgba(126,87,194,0.25); }
+    .btn-reset { text-align: center; font-size: 15px; color: var(--text-light); padding: 12px; border: 1.5px solid var(--border); border-radius: 14px; cursor: pointer; background: #FFF; width: 100%; font-weight: 500; }
+
+    /* 弹窗 */
+    .modal-mask { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.45); z-index: 1000; display: none; backdrop-filter: blur(3px); }
+    .modal-mask.show { display: block; }
+    .modal { position: fixed; bottom: 0; left: 0; right: 0; background: #FFF; border-radius: 20px 20px 0 0; z-index: 1001; padding: 22px; transform: translateY(100%); transition: transform 0.3s cubic-bezier(.4,0,.2,1); max-height: 85vh; overflow-y: auto; box-shadow: 0 -8px 32px rgba(0,0,0,0.12); }
+    .modal.show { transform: translateY(0); }
+    .modal-header { font-size: 20px; font-weight: 700; text-align: center; margin-bottom: 20px; color: var(--text); }
+    .input-group { margin-bottom: 16px; }
+    .input-label { font-size: 14px; color: var(--text-light); display: block; margin-bottom: 6px; font-weight: 500; }
+    .input-field { width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: 10px; font-size: 16px; outline: none; transition: border-color 0.2s; color: var(--text); }
+    .input-field:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(126,87,194,0.1); }
+    .modal-actions { display: flex; gap: 10px; }
+    .modal-btn { flex: 1; padding: 14px; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; border: none; }
+    .modal-btn-cancel { background: #F5F5F5; color: var(--text); }
+    .modal-btn-confirm { background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: #FFF; box-shadow: 0 3px 10px rgba(126,87,194,0.25); }
+
+    .toast { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); background: rgba(0,0,0,0.72); color: #FFF; padding: 12px 26px; border-radius: 12px; font-size: 15px; z-index: 2000; opacity: 0; transition: opacity 0.3s; pointer-events: none; font-weight: 500; backdrop-filter: blur(4px); }
+    .toast.show { opacity: 1; }
+
+    /* ===== 行程规划样式 ===== */
+    .plan-toolbar { display: flex; gap: 7px; padding: 12px 14px; background: #FFF; position: sticky; top: 0; z-index: 10; box-shadow: 0 1px 8px rgba(0,0,0,0.04); }
+    .plan-btn { flex: 1; padding: 10px 6px; border-radius: 10px; text-align: center; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; }
+    .plan-btn:active { transform: scale(0.97); }
+    .plan-btn-spots { background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: #FFF; box-shadow: 0 2px 8px rgba(126,87,194,0.25); }
+    .plan-btn-food { background: linear-gradient(135deg, #FF9800, #FFB74D); color: #FFF; box-shadow: 0 2px 8px rgba(255,152,0,0.25); }
+    .plan-btn-hotel { background: linear-gradient(135deg, #29B6F6, #4FC3F7); color: #FFF; box-shadow: 0 2px 8px rgba(41,182,246,0.25); }
+    .plan-btn-transport { background: linear-gradient(135deg, #78909C, #90A4AE); color: #FFF; box-shadow: 0 2px 8px rgba(120,144,156,0.25); }
+    .plan-btn-custom { background: linear-gradient(135deg, #26A69A, #4DB6AC); color: #FFF; box-shadow: 0 2px 8px rgba(38,166,154,0.25); }
+    .plan-btn-clear { background: #F5F5F5; color: var(--text-muted); }
+
+    .plan-days { padding: 12px 16px; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; background: #FFF; border-bottom: 1px solid var(--border); }
+    .day-chip { display: inline-block; padding: 8px 18px; margin-right: 8px; border-radius: 22px; font-size: 14px; cursor: pointer; background: #F5F5F5; color: var(--text-light); border: 2px solid transparent; transition: all 0.2s; font-weight: 500; }
+    .day-chip.active { background: #F3E5F5; color: var(--primary-dark); border-color: var(--primary); font-weight: 700; box-shadow: 0 2px 8px rgba(126,87,194,0.15); }
+    .day-chip:last-child { margin-right: 0; }
+
+    .plan-day-section { margin-bottom: 16px; }
+    .plan-day-header { display: flex; align-items: center; justify-content: space-between; padding: 13px 16px; background: linear-gradient(135deg, var(--primary), var(--accent)); color: #FFF; border-radius: 14px 14px 0 0; }
+    .plan-day-title { font-size: 17px; font-weight: 700; }
+    .plan-day-actions { display: flex; gap: 8px; font-size: 14px; }
+    .plan-day-action { cursor: pointer; opacity: 0.88; font-weight: 500; }
+    .plan-day-body { background: #FFF; border-radius: 0 0 14px 14px; padding: 12px 14px; box-shadow: var(--card-shadow); }
+
+    .plan-slot { display: flex; align-items: center; padding: 11px; margin-bottom: 8px; background: #FBF8FD; border-radius: 12px; gap: 10px; border-left: 4px solid var(--primary); cursor: pointer; transition: background 0.15s; }
+    .plan-slot:active { background: #F3E5F5; }
+    .plan-slot.morning { border-left-color: #FF9800; }
+    .plan-slot.noon { border-left-color: #EF5350; }
+    .plan-slot.afternoon { border-left-color: #B39DDB; }
+    .plan-slot.evening { border-left-color: #AB47BC; }
+    .plan-slot.hotel { border-left-color: #29B6F6; }
+    .plan-slot.transport { border-left-color: #78909C; }
+    .plan-slot-icon { font-size: 24px; width: 38px; height: 38px; border-radius: 10px; background: #F3E8F9; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .plan-slot-info { flex: 1; min-width: 0; }
+    .plan-slot-name { font-size: 15px; font-weight: 600; display: block; color: var(--text); }
+    .plan-slot-detail { font-size: 13px; color: var(--text-light); }
+    .plan-slot-remove { font-size: 18px; color: #EF5350; cursor: pointer; padding: 4px; flex-shrink: 0; opacity: 0.7; }
+    .plan-slot-remove:active { opacity: 1; }
+    .plan-slot-edit { font-size: 16px; color: var(--primary); cursor: pointer; padding: 4px; flex-shrink: 0; opacity: 0.6; }
+    .plan-slot-edit:active { opacity: 1; }
+    .plan-slot-custom { border-left-color: #26A69A !important; }
+    .plan-slot-memo { font-size: 11px; color: var(--text-muted); margin-top: 2px; font-style: italic; }
+
+    /* 自定义选择器 */
+    .custom-picker-form { padding: 16px; }
+    .custom-picker-form .input-group { margin-bottom: 12px; }
+    .custom-picker-form .input-label { font-size: 13px; color: var(--text-light); display: block; margin-bottom: 5px; font-weight: 500; }
+    .custom-picker-form .input-field { width: 100%; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 10px; font-size: 15px; outline: none; color: var(--text); transition: border-color 0.2s; }
+    .custom-picker-form .input-field:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(126,87,194,0.08); }
+    .custom-picker-form .type-select { display: flex; gap: 8px; flex-wrap: wrap; }
+    .custom-picker-form .type-option { padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 500; cursor: pointer; border: 2px solid var(--border); background: #FFF; color: var(--text-light); transition: all 0.15s; }
+    .custom-picker-form .type-option.active { border-color: var(--primary); background: #F3E5F5; color: var(--primary-dark); font-weight: 600; }
+    .custom-picker-form .type-option:active { transform: scale(0.96); }
+    .custom-picker-form .geo-status { font-size: 12px; margin-top: 4px; display: flex; align-items: center; gap: 4px; }
+    .custom-picker-form .geo-loading { color: var(--primary); }
+    .custom-picker-form .geo-success { color: #27AE60; }
+    .custom-picker-form .geo-error { color: #E74C3C; }
+
+    .plan-empty { text-align: center; padding: 34px 16px; color: var(--text-muted); }
+    .plan-empty-icon { font-size: 44px; display: block; margin-bottom: 10px; opacity: 0.6; }
+    .plan-empty-text { font-size: 15px; line-height: 1.5; }
+
+
+
+    .add-to-plan-bar { position: fixed; bottom: 60px; left: 0; right: 0; background: linear-gradient(135deg, var(--primary), var(--accent)); padding: 14px 16px; display: flex; align-items: center; gap: 10px; z-index: 150; box-shadow: 0 -3px 16px rgba(126,87,194,0.25); }
+    .add-to-plan-text { flex: 1; color: #FFF; font-size: 15px; font-weight: 600; }
+    .add-to-plan-btn { background: #FFF; color: var(--primary-dark); border: none; border-radius: 22px; padding: 9px 22px; font-size: 14px; font-weight: 700; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+
+    /* 选择弹窗增强 */
+    .picker-list { max-height: 52vh; overflow-y: auto; }
+    .picker-category { font-size: 13px; color: var(--primary-dark); padding: 10px 16px 4px; font-weight: 700; background: #F9FBF9; }
+    .picker-item { display: flex; align-items: center; padding: 13px 16px; gap: 10px; cursor: pointer; transition: background 0.15s; border-bottom: 1px solid #F5F5F5; }
+    .picker-item:active { background: #F3E5F5; }
+    .picker-item.checked { background: #F3E5F5; }
+    .picker-check { width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 13px; color: #FFF; background: var(--border); flex-shrink: 0; transition: all 0.2s; }
+    .picker-item.checked .picker-check { background: var(--primary); border-color: var(--primary); box-shadow: 0 2px 6px rgba(126,87,194,0.3); }
+    .picker-info { flex: 1; }
+    .picker-name { font-size: 15px; font-weight: 600; color: var(--text); }
+    .picker-detail { font-size: 13px; color: var(--text-light); }
+    .picker-icon { font-size: 22px; }
+  </style>
+</head>
+<body>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <!-- ===== 地图首页 ===== -->
+  <div class="page active" id="page-spots">
+    <div id="mapContainer"></div>
+    <div class="spot-panel" id="spotPanel">
+      <div class="panel-header" onclick="togglePanel()">
+        <span class="panel-title">📍 北京景点</span>
+        <span class="panel-toggle" id="panelToggle">收起</span>
+      </div>
+      <div class="panel-body">
+        <div class="panel-search">
+          <span style="font-size:15px;margin-right:6px;">🔍</span>
+          <input type="text" placeholder="搜索景点..." id="searchInput" oninput="filterMarkers()" />
+        </div>
+        <div class="panel-list" id="panelList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 行程规划页 ===== -->
+  <div class="page" id="page-plan">
+    <div class="plan-toolbar">
+      <button class="plan-btn plan-btn-spots" onclick="showSpotPicker()">📍 加景点</button>
+      <button class="plan-btn plan-btn-food" onclick="showFoodPicker()">🍜 加美食</button>
+      <button class="plan-btn plan-btn-hotel" onclick="showCustomPicker('hotel')">🏨 加住宿</button>
+      <button class="plan-btn plan-btn-transport" onclick="showTransportPicker()">✈️ 交通</button>
+      <button class="plan-btn plan-btn-custom" onclick="showCustomPicker('custom')">✏️ 自定义</button>
+      <button class="plan-btn plan-btn-clear" onclick="clearPlan()">🗑️ 清空</button>
+    </div>
+    <div id="planSummaryBar"></div>
+    <div class="plan-days" id="planDaysTabs"></div>
+    <div id="planContent" class="page-container"></div>
+  </div>
+
+  <!-- ===== 美食页 ===== -->
+  <div class="page" id="page-food">
+    <div class="page-container">
+      <div style="height:12px;"></div>
+      <div class="food-tabs">
+        <div class="food-tab active" onclick="switchFoodTab('dishes',this)">🍜 特色美食</div>
+        <div class="food-tab" onclick="switchFoodTab('streets',this)">🏪 美食街区</div>
+      </div>
+      <div class="warning-card" onclick="toggleWarning()">
+        <div class="warning-header">
+          <span class="warning-icon">⚠️</span>
+          <span class="warning-title">美食避坑提示</span>
+          <span class="warning-toggle" id="warningToggle">展开</span>
+        </div>
+        <div class="warning-text" id="warningText"></div>
+      </div>
+      <div id="foodContent"></div>
+    </div>
+  </div>
+
+  <!-- ===== 交通页 ===== -->
+  <div class="page" id="page-transport">
+    <div class="page-container" id="transportContent"></div>
+  </div>
+
+  <!-- ===== 攻略页 ===== -->
+  <div class="page" id="page-tips">
+    <div class="page-container">
+      <div class="tips-hero">
+        <span class="tips-hero-icon">📋</span>
+        <span class="tips-hero-title">出行攻略</span>
+        <span class="tips-hero-desc">全家北京游 · 实用注意事项</span>
+      </div>
+      <div id="tipsContent"></div>
+    </div>
+  </div>
+
+  <!-- ===== 预算页 ===== -->
+  <div class="page" id="page-budget">
+    <div class="page-container">
+      <div style="height:12px;"></div>
+      <div class="total-card">
+        <span class="total-label">预算总计</span>
+        <span class="total-amount" id="totalAmount">¥0</span>
+        <span class="total-range">（5大2小，含机票住宿门票餐饮交通）</span>
+      </div>
+      <div id="budgetList"></div>
+      <div class="budget-actions">
+        <button class="btn-add" onclick="showAddModal()">➕ 添加自定义项目</button>
+        <button class="btn-reset" onclick="resetBudget()">🔄 重置预算</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 景点详情页 ===== -->
+  <div class="detail-page" id="detailPage">
+    <div class="detail-back" onclick="goBackFromDetail()">← 返回</div>
+    <div id="detailContent"></div>
+  </div>
+
+  <!-- ===== 编辑弹窗 ===== -->
+  <div class="modal-mask" id="editMask" onclick="closeEdit()"></div>
+  <div class="modal" id="editModal">
+    <div class="modal-header">编辑金额</div>
+    <div class="input-group">
+      <span class="input-label">金额（元）</span>
+      <input type="number" class="input-field" id="editAmountInput" placeholder="请输入金额" />
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn modal-btn-cancel" onclick="closeEdit()">取消</button>
+      <button class="modal-btn modal-btn-confirm" onclick="saveEdit()">保存</button>
+    </div>
+  </div>
+
+  <!-- ===== 添加弹窗 ===== -->
+  <div class="modal-mask" id="addMask" onclick="closeAdd()"></div>
+  <div class="modal" id="addModal">
+    <div class="modal-header">添加预算项目</div>
+    <div class="input-group">
+      <span class="input-label">项目名称</span>
+      <input type="text" class="input-field" id="newNameInput" placeholder="如：购物" />
+    </div>
+    <div class="input-group">
+      <span class="input-label">金额（元）</span>
+      <input type="number" class="input-field" id="newAmountInput" placeholder="请输入金额" />
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn modal-btn-cancel" onclick="closeAdd()">取消</button>
+      <button class="modal-btn modal-btn-confirm" onclick="addCustomItem()">添加</button>
+    </div>
+  </div>
+
+  <!-- ===== 选择器弹窗（行程规划用） ===== -->
+  <div class="modal-mask" id="pickerMask" onclick="closePicker()"></div>
+  <div class="modal" id="pickerModal" style="max-height:80vh;padding:0;">
+    <div class="modal-header" style="padding:16px;" id="pickerHeader">选择</div>
+    <div class="picker-list" id="pickerList"></div>
+    <div class="modal-actions" style="padding:16px;">
+      <button class="modal-btn modal-btn-cancel" onclick="closePicker()">取消</button>
+      <button class="modal-btn modal-btn-confirm" id="pickerConfirmBtn" onclick="confirmPicker()">确认添加</button>
+    </div>
+  </div>
+
+  <!-- ===== 天/时段选择弹窗（直接添加已选项目） ===== -->
+  <div class="modal-mask" id="daySlotMask" onclick="closeDaySlotPicker()"></div>
+  <div class="modal" id="daySlotModal" style="max-height:85vh;padding:0;">
+    <div class="modal-header" style="padding:16px;" id="daySlotHeader">📅 规划到哪一天</div>
+    <div style="padding:12px 16px 4px;">
+      <div style="font-size:13px;color:#888;margin-bottom:8px;">选择日期：</div>
+      <div id="daySlotTabs" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;"></div>
+      <div style="font-size:13px;color:#888;margin-bottom:8px;">选择时段：</div>
+      <div id="daySlotTimes" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;"></div>
+    </div>
+    <div class="modal-actions" style="padding:16px;">
+      <button class="modal-btn modal-btn-cancel" onclick="closeDaySlotPicker()">取消</button>
+      <button class="modal-btn modal-btn-confirm" id="daySlotConfirmBtn" onclick="confirmDaySlotAdd()">确认添加</button>
+    </div>
+  </div>
+
+  <!-- ===== 自定义选择器弹窗（住宿/自定义） ===== -->
+  <div class="modal-mask" id="customPickerMask" onclick="closeCustomPicker()"></div>
+  <div class="modal" id="customPickerModal" style="max-height:85vh;padding:0;">
+    <div class="modal-header" style="padding:16px;" id="customPickerHeader">添加自定义项目</div>
+    <div class="custom-picker-form">
+      <div class="input-group">
+        <span class="input-label">类型</span>
+        <div class="type-select" id="customTypeSelect">
+          <span class="type-option active" data-type="spot">📍 景点</span>
+          <span class="type-option" data-type="food">🍜 美食</span>
+          <span class="type-option" data-type="hotel">🏨 住宿</span>
+          <span class="type-option" data-type="transport">✈️ 交通</span>
+          <span class="type-option" data-type="other">📌 其他</span>
+        </div>
+      </div>
+      <!-- 通用字段 -->
+      <div class="input-group">
+        <span class="input-label">名称 *</span>
+        <input type="text" class="input-field" id="customItemName" placeholder="请输入项目名称" oninput="onCustomNameInput()" />
+      </div>
+      <!-- 非交通字段：地址+定位 -->
+      <div id="customGeoFields">
+        <div class="input-group">
+          <span class="input-label">地址（用于自动定位，可选）</span>
+          <input type="text" class="input-field" id="customItemAddr" placeholder="请输入地址，如：东城区前门大街XX号" oninput="onCustomAddrInput()" />
+          <div class="geo-status" id="geoStatus"></div>
+        </div>
+        <div class="input-group" style="display:flex;gap:8px;">
+          <div style="flex:1;"><span class="input-label">经度（自动获取）</span><input type="text" class="input-field" id="customItemLng" placeholder="自动" readonly /></div>
+          <div style="flex:1;"><span class="input-label">纬度（自动获取）</span><input type="text" class="input-field" id="customItemLat" placeholder="自动" readonly /></div>
+        </div>
+      </div>
+      <!-- 交通专用字段 -->
+      <div id="customTransportFields" style="display:none;">
+        <div class="input-group">
+          <span class="input-label">交通方式</span>
+          <div class="type-select" id="customTransportTypeSelect">
+            <span class="type-option active" data-tt="flight">🛫 航班</span>
+            <span class="type-option" data-tt="train">🚄 高铁/火车</span>
+            <span class="type-option" data-tt="bus">🚌 大巴/专线</span>
+            <span class="type-option" data-tt="metro">🚇 地铁/公交</span>
+            <span class="type-option" data-tt="taxi">🚕 打车/包车</span>
+          </div>
+        </div>
+        <div class="input-group">
+          <span class="input-label">航班号/车次号（可选）</span>
+          <input type="text" class="input-field" id="customTransportNo" placeholder="如：CA1838、G58" />
+        </div>
+        <div class="input-group" style="display:flex;gap:8px;">
+          <div style="flex:1;"><span class="input-label">出发时间</span><input type="text" class="input-field" id="customTransportDepTime" placeholder="如：07:20" /></div>
+          <div style="flex:1;"><span class="input-label">到达时间</span><input type="text" class="input-field" id="customTransportArrTime" placeholder="如：09:35" /></div>
+        </div>
+        <div class="input-group" style="display:flex;gap:8px;">
+          <div style="flex:1;"><span class="input-label">出发地</span><input type="text" class="input-field" id="customTransportFrom" placeholder="如：宁波栎社" /></div>
+          <div style="flex:1;"><span class="input-label">到达地</span><input type="text" class="input-field" id="customTransportTo" placeholder="如：北京大兴" /></div>
+        </div>
+        <div class="input-group">
+          <span class="input-label">参考价格（可选）</span>
+          <input type="text" class="input-field" id="customTransportPrice" placeholder="如：经济舱约600-1200元" />
+        </div>
+      </div>
+      <div class="input-group">
+        <span class="input-label">备注（可选）</span>
+        <input type="text" class="input-field" id="customItemMemo" placeholder="如：已预订、电话XXX" />
+      </div>
+      <div class="input-group">
+        <span class="input-label">时间段</span>
+        <div class="type-select" id="customSlotSelect">
+          <span class="type-option active" data-slot="morning">🌅 上午</span>
+          <span class="type-option" data-slot="noon">☀️ 中午</span>
+          <span class="type-option" data-slot="afternoon">🌤️ 下午</span>
+          <span class="type-option" data-slot="evening">🌙 晚上</span>
+          <span class="type-option" data-slot="hotel">🏨 住宿</span>
+        </div>
+      </div>
+    </div>
+    <div class="modal-actions" style="padding:16px;">
+      <button class="modal-btn modal-btn-cancel" onclick="closeCustomPicker()">取消</button>
+      <button class="modal-btn modal-btn-confirm" onclick="confirmCustomItem()">确认添加</button>
+    </div>
+  </div>
+
+  <!-- ===== Slot编辑弹窗 ===== -->
+  <div class="modal-mask" id="slotEditMask" onclick="closeSlotEdit()"></div>
+  <div class="modal" id="slotEditModal" style="max-height:85vh;padding:0;">
+    <div class="modal-header" style="padding:16px;">✏️ 编辑项目</div>
+    <div class="custom-picker-form">
+      <div class="input-group">
+        <span class="input-label">名称</span>
+        <input type="text" class="input-field" id="slotEditName" placeholder="项目名称" />
+      </div>
+      <div class="input-group">
+        <span class="input-label">备注</span>
+        <input type="text" class="input-field" id="slotEditMemo" placeholder="备注信息..." />
+      </div>
+      <!-- 交通专用编辑字段 -->
+      <div id="slotEditTransportFields" style="display:none;">
+        <div class="input-group" style="display:flex;gap:8px;">
+          <div style="flex:1;"><span class="input-label">航班号/车次号</span><input type="text" class="input-field" id="slotEditTransportNo" placeholder="如：CA1838" /></div>
+          <div style="flex:1;"><span class="input-label">参考价格</span><input type="text" class="input-field" id="slotEditTransportPrice" placeholder="如：600元" /></div>
+        </div>
+        <div class="input-group" style="display:flex;gap:8px;">
+          <div style="flex:1;"><span class="input-label">出发 → 到达时间</span><input type="text" class="input-field" id="slotEditTransportTime" placeholder="如：07:20→09:35" /></div>
+        </div>
+      </div>
+      <div class="input-group">
+        <span class="input-label">时间段</span>
+        <div class="type-select" id="slotEditTypeSelect">
+          <span class="type-option" data-slot="morning">🌅 上午</span>
+          <span class="type-option" data-slot="noon">☀️ 中午</span>
+          <span class="type-option" data-slot="afternoon">🌤️ 下午</span>
+          <span class="type-option" data-slot="evening">🌙 晚上</span>
+          <span class="type-option" data-slot="hotel">🏨 住宿</span>
+          <span class="type-option" data-slot="transport">✈️ 交通</span>
+        </div>
+      </div>
+    </div>
+    <div class="modal-actions" style="padding:16px;">
+      <button class="modal-btn modal-btn-cancel" onclick="closeSlotEdit()">取消</button>
+      <button class="modal-btn modal-btn-confirm" onclick="saveSlotEdit()">保存</button>
+    </div>
+  </div>
+
+  <!-- ===== TabBar ===== -->
+  <div class="tabbar">
+    <div class="tab-item active" data-page="page-spots" onclick="switchTab('page-spots',this)"><span class="tab-icon">🗺️</span><span>地图</span></div>
+    <div class="tab-item" data-page="page-plan" onclick="switchTab('page-plan',this)"><span class="tab-icon">📅</span><span id="tabPlanLabel">规划</span></div>
+    <div class="tab-item" data-page="page-food" onclick="switchTab('page-food',this)"><span class="tab-icon">🍜</span><span>美食</span></div>
+    <div class="tab-item" data-page="page-transport" onclick="switchTab('page-transport',this)"><span class="tab-icon">🚗</span><span>交通</span></div>
+    <div class="tab-item" data-page="page-budget" id="tabBudget" onclick="switchTab('page-budget',this)"><span class="tab-icon">💰</span><span>预算</span></div>
+    <div class="tab-item-mode" id="modeToggle" onclick="toggleMode()">
+      <span class="mode-icon" id="modeIcon">🔓</span>
+      <span id="modeLabel">规划中</span>
+    </div>
+  </div>
+
+<script>
+// ============================================================
+// Supabase 客户端初始化
+// ============================================================
+var SUPABASE_URL = 'https://mjsylaoqkurfdvxtmgan.supabase.co';
+var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1qc3lsYW9xa3VyZmR2eHRtZ2FuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExMjc5MDAsImV4cCI6MjA5NjcwMzkwMH0.bzzf97ETW3Gz4GkcMonJG-zYUvmhJjVa7lFrwruk_VE';
+var supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// 数据存储：优先使用 Supabase，降级到 localStorage
+var useSupabase = true; // 设为 false 可强制使用 localStorage
+var SUPABASE_TABLE = 'trip_data';
+
+// 通用的 Supabase 读数据函数
+async function loadFromCloud(key) {
+  if (!useSupabase) return null;
+  try {
+    var { data, error } = await supabase.from(SUPABASE_TABLE).select('data').eq('id', key).single();
+    if (error || !data) return null;
+    return data.data;
+  } catch(e) {
+    console.warn('Supabase 读取失败，降级到本地存储:', e.message);
+    return null;
+  }
+}
+
+// 通用的 Supabase 写数据函数
+async function saveToCloud(key, value) {
+  if (!useSupabase) return false;
+  try {
+    var { error } = await supabase.from(SUPABASE_TABLE).upsert({ id: key, data: value, updated_at: new Date().toISOString() });
+    if (error) throw error;
+    return true;
+  } catch(e) {
+    console.warn('Supabase 写入失败，降级到本地存储:', e.message);
+    return false;
+  }
+}
+
+// ============================================================
+// 数据层：从文档提取的全部景点、美食、住宿
+// ============================================================
+var DATA = {
+  // ---- 全部景点（按区域/主题分类）----
+  spots: [
+    // === 天安门-故宫片区（地铁1号线）===
+    { id:'gugong', name:'故宫博物院', subtitle:'世界文化遗产·紫禁城', price:'60元', duration:'3-4小时', time:'8:30-17:00', closedDay:'周一闭馆', address:'东城区景山前街4号', reservation:'提前7天20:00在「故宫博物院」小程序抢票', lat:39.9163, lng:116.3972, icon:'🏯',
+      photos:[
+        'images/Beijing_Forbidden_City_Hall_of_2026-06-10T08-24-29.png',
+        'images/Red_walls_and_golden_roof_tile_2026-06-10T08-27-38.png',
+        'images/北京故宫博物院太和殿全景_蓝天白云_紫禁城红墙金瓦_古代宫殿_2026-06-10T07-57-09.png',
+        'images/北京故宫博物院红墙金瓦建筑_紫禁城宫殿_古代中国皇家建筑群__2026-06-10T07-58-52.png'
+      ],photoCaptions:{0:'太和殿全景',1:'紫禁城红墙金瓦',2:'御花园',3:'角楼倒影'},
+      route:['午门（唯一入口）→ 太和门 → 太和殿 → 中和殿 → 保和殿','→ 慈宁宫（雕塑馆）→ 乾清宫 → 交泰殿 → 坤宁宫','→ 御花园 → 东六宫 → 神武门出'],
+      tips:[{icon:'💡',text:'8:30第一批进故宫，人少体验好'},{icon:'🎒',text:'午门广场西侧可免费寄存行李'},{icon:'☂️',text:'6月底紫外线强，宫内遮挡少，带遮阳伞'},{icon:'🚶',text:'无包可走快速通道，有包需排长队'},{icon:'🚕',text:'打车到东华门文体中心，沿城墙走5分钟到午门'}],
+      intro:'故宫又称紫禁城，是明清两代的皇家宫殿，始建于明永乐四年（1406年），距今已有600余年历史。故宫是世界上现存规模最大、保存最完整的木质结构古建筑群，1987年被列入世界文化遗产。宫内收藏有大量珍贵文物，漫步其中仿佛穿越回皇朝盛世，每一块砖瓦都在诉说着历史的沧桑。', dining:'宫内冰窖餐厅、慈宁宫餐厅价格偏高，建议自带零食', rest:'每座宫殿附近都有卫生间和休息椅', tags:['必去','历史','拍照'], area:'天安门-故宫' },
+
+    { id:'tiananmen', name:'天安门广场', subtitle:'北京中轴线核心地标', price:'免费（需预约）', duration:'3-4小时', time:'5:00-22:00', closedDay:'周一部分闭馆', address:'东城区长安街', reservation:'提前1-7天在「天安门广场预约参观」小程序预约', lat:39.9054, lng:116.3976, icon:'🏛️',
+      photos:[
+        'images/Tiananmen_Square_Beijing__larg_2026-06-10T08-25-00.png',
+        'images/Tiananmen_Square_Beijing__larg_2026-06-10T08-25-00.png'
+      ],photoCaptions:{0:'天安门城楼',1:'广场全景'},
+      route:['天安门东站B口出 → 天安门广场','→ 毛主席纪念堂（需单独预约）→ 人民大会堂（30元）','→ 天安门城楼（15元，俯瞰广场全景）'],
+      tips:[{icon:'🪪',text:'身份证原件，全程刷证安检'},{icon:'🪑',text:'带折叠小马扎，等降旗时老人能坐着'},{icon:'🌇',text:'推荐下午15:25-20:30时段，不太热还能看降旗'}],
+      intro:'天安门广场是世界上最大的城市中心广场，位于北京中轴线上，可容纳100万人集会。广场北依天安门城楼，西为人民大会堂，东为国家博物馆，南为毛主席纪念堂。这里是中国的政治心脏，每天清晨的升国旗仪式庄严震撼，夜晚降旗同样令人动容。', dining:'广场内无餐饮，前门大街、王府井有很多餐厅', rest:'广场周边有休息椅', tags:['免费','地标','仪式感'], area:'天安门-故宫' },
+
+    { id:'renmindahuitang', name:'人民大会堂', subtitle:'天安门广场西侧标志性建筑', price:'30元（成人）', duration:'1.5-2小时', time:'8:30-15:00', closedDay:'可能因会议临时关闭', address:'西城区西长安街', reservation:'提前3天17:00在「人民大会堂参观预约」小程序抢票', lat:39.9082, lng:116.3878, icon:'🏛️',
+      route:['东门外广场入口 → 中央大厅 → 万人大礼堂','→ 迎宾厅 → 地方厅 → 出口（单向通行）'],
+      tips:[{icon:'🎫',text:'18岁以下、60岁以上免票（免票也需预约）'},{icon:'🚇',text:'地铁2/8号线前门站C口出→地下通道直达'}],
+      intro:'人民大会堂是新中国成立十周年"十大建筑"之一，1959年建成，仅用10个月便竣工。内有万人大礼堂、迎宾厅、34个地方厅等，每个地方厅都展现了各省的特色风貌。这里既是国家重大政治活动的举办地，也是展示中华建筑艺术的殿堂。', dining:'内部无餐饮，参观结束后可去前门大街用餐', rest:'全程室内有空调，夏季避暑好去处', tags:['室内','政治地标','避暑'], area:'天安门-故宫' },
+
+    { id:'guobowuguan', name:'国家博物馆', subtitle:'中国最大博物馆·国宝云集', price:'免费（需预约）', duration:'3-4小时', time:'9:00-17:00', closedDay:'周一闭馆', address:'东城区天安门广场东侧', reservation:'提前7天17:00在「国家博物馆」小程序抢票，暑期极难约', lat:39.9080, lng:116.3970, icon:'🏛️',
+      photos:[
+        'images/National_Museum_of_China_Beiji_2026-06-10T08-25-33.png',
+        'images/National_Museum_of_China_Beiji_2026-06-10T08-25-33.png'
+      ],photoCaptions:{0:'国家博物馆外观',1:'古代中国展厅'},
+      route:['南门进 → 古代中国（后母戊鼎、四羊方尊）→ 复兴之路 → 北门出'],
+      tips:[{icon:'🚼',text:'南门服务台可租婴儿车/轮椅（免费押金500）'},{icon:'🚇',text:'地铁1号线天安门东站B口出步行200米'},{icon:'📸',text:'B1古代中国展厅是精华，网上爆火的国宝都在这里'}],
+      intro:'中国国家博物馆是世界上单体建筑面积最大的博物馆，馆藏文物140万余件，涵盖了从远古到近现代的中华文明。镇馆之宝包括后母戊鼎（青铜重器）、四羊方尊、人面鱼纹彩陶盆等。B1层的"古代中国"基本陈列是必看精华，每一件文物都是历史的见证。', dining:'1层和3层有餐厅但贵，建议自带零食水', rest:'每层展厅外有休息椅，母婴室齐全', tags:['免费','文化','避暑','必预约'], area:'天安门-故宫' },
+
+    { id:'jingshan', name:'景山公园', subtitle:'俯瞰故宫全景最佳地点', price:'2元', duration:'1-2小时', time:'6:00-21:00', closedDay:'无', address:'西城区景山西街44号', reservation:'无需预约', lat:39.9225, lng:116.3964, icon:'🌄',
+      photos:[
+        'images/Jingshan_Park_Beijing__hilltop_2026-06-10T08-25-31.png',
+        'images/Jingshan_Park_Beijing__hilltop_2026-06-10T08-25-31.png'
+      ],photoCaptions:{0:'万春亭俯瞰故宫中轴线',1:'故宫全景'},
+      route:['南门进 → 万春亭（制高点）→ 俯瞰故宫全景 → 东侧下山'],
+      tips:[{icon:'📸',text:'登顶俯瞰故宫全景，下午拍日落非常美'},{icon:'⏰',text:'最佳时段15:00-18:00光线最好'}],
+      intro:'景山公园位于北京城中轴线上，曾是元明清三代的皇家御苑。园内制高点万春亭是俯瞰故宫全景的绝佳位置，也是拍摄北京中轴线的最佳机位。公园门票仅2元，性价比极高。登上万春亭，故宫的红墙金瓦尽收眼底，南望故宫、北望鼓楼，十分壮观。', dining:'公园附近有小吃摊', rest:'公园内有休息椅', tags:['便宜','全景','拍照','轻松'], area:'天安门-故宫' },
+
+    // === 颐和园-圆明园片区（地铁4号线）===
+    { id:'yiheyuan', name:'颐和园', subtitle:'中国古典园林之首', price:'30元（旺季）/20元（淡季）', duration:'3-4小时', time:'6:00-20:00', closedDay:'园中园周一闭馆', address:'海淀区新建宫门路19号', reservation:'提前1-7天在「颐和园」公众号预约，60岁以上老人免票', lat:39.9996, lng:116.2755, icon:'🌳',
+      photos:[
+        'images/Summer_Palace_Beijing__Kunming_2026-06-10T08-24-33.png',
+        'images/北京颐和园昆明湖与万寿山全景_十七孔桥_古典中国园林_山水园_2026-06-10T07-59-31.png',
+        'images/Beijing_Summer_Palace_long_cor_2026-06-10T08-27-40.png'
+      ],photoCaptions:{0:'昆明湖与万寿山',1:'十七孔桥',2:'长廊'},
+      route:['新建宫门进 → 铜牛 → 十七孔桥 → 南湖岛（坐船）→ 石舫 → 长廊 → 东宫门出'],
+      tips:[{icon:'🚢',text:'坐游船省力！石舫到南湖岛40元/人省2小时腿程'},{icon:'🎫',text:'别买联票，佛香阁苏州街全是台阶老人爬不动'},{icon:'🚇',text:'地铁4号线北宫门站或16号线西苑站'}],
+      intro:'颐和园是中国现存规模最大、保存最完整的皇家园林，被誉为"皇家园林博物馆"。它始建于清朝乾隆年间，以昆明湖和万寿山为主体，集中国传统造园艺术之大成。园内有著名的十七孔桥、长廊（世界最长的画廊）、石舫等景点。1998年被列入世界文化遗产名录。', dining:'园内有快餐茶室，苏州街有小吃的', rest:'长廊沿途有休息座椅，适合推车', tags:['园林','历史','游船','大景区'], area:'颐和园-圆明园' },
+
+    { id:'yuanmingyuan', name:'圆明园', subtitle:'万园之园·大水法遗址', price:'25元通票（18岁以下免票）', duration:'2-3小时', time:'7:00-19:00', closedDay:'全年开放', address:'海淀区清华西路28号', reservation:'提前1-7天在「圆明园遗址公园」公众号预约', lat:39.9999, lng:116.2980, icon:'🏯',
+      photos:[
+        'images/Old_Summer_Palace_Yuanmingyuan_2026-06-10T08-25-35.png',
+        'images/Old_Summer_Palace_Yuanmingyuan_2026-06-10T08-25-35.png'
+      ],photoCaptions:{0:'西洋楼遗址大水法',1:'福海'},
+      route:['东门进 → 黑天鹅观赏区 → 全景沙盘 → 西洋楼遗址（大水法、海晏堂）→ 游船 → 南门出'],
+      tips:[{icon:'📍',text:'东门进最重要！离西洋楼最近进门就是精华'},{icon:'🚢',text:'必坐游船40元/人到南门省1小时'}],
+      intro:'圆明园曾是清代皇家园林，被誉为"万园之园"，汇集了中西园林建筑精华。1860年遭英法联军焚毁，现存的西洋楼遗址区是历史最直观的见证。大水法、海晏堂等残垣断壁无声地诉说着那段历史。如今的圆明园虽已残破，但福海碧波、黑天鹅戏水，依然充满自然之美，也是进行爱国主义教育的重要场所。', dining:'小卖部价格偏高建议自带', rest:'沿途长椅多湖边树荫多', tags:['历史','教育','遗址'], area:'颐和园-圆明园' },
+
+    { id:'qinghua', name:'清华大学', subtitle:'最高学府·荷塘月色', price:'免费', duration:'2-3小时', time:'8:00-11:00/13:00-16:00', closedDay:'周一闭园休整', address:'海淀区清华路', reservation:'「参观清华」小程序预约，8岁以下儿童免预约', lat:39.9990, lng:116.3240, icon:'🎓',
+      photos:[
+        'images/Tsinghua_University_Beijing__S_2026-06-10T08-26-37.png',
+        'images/Tsinghua_University_Beijing__S_2026-06-10T08-26-37.png'
+      ],photoCaptions:{0:'二校门',1:'大礼堂'},
+      route:['西门进 → 二校门 → 清华学堂 → 大礼堂&日晷 → 水木清华 → 近春园荷塘 → 西门出'],
+      tips:[{icon:'📅',text:'工作日提前1天周末提前7天预约'},{icon:'🚲',text:'校内可扫紫色共享单车或坐校园巴士'}],
+      intro:'清华大学始建于1911年，是中国最顶尖的高等学府之一，也是世界知名研究型大学。校园内中西合璧的建筑风格独特，二校门、大礼堂、清华学堂都是经典打卡地。朱自清笔下的"荷塘月色"就在近春园，夏日荷花盛开，书香与花香交融，带孩子来感受名校氛围是绝佳的教育之旅。', dining:'部分食堂对外开放支持微信支付宝支付', rest:'沿途长椅多草坪可坐', tags:['名校','校园','文化'], area:'颐和园-圆明园' },
+
+    // === 什刹海-胡同片区（地铁2/6/8号线）===
+    { id:'shichahai', name:'什刹海', subtitle:'老北京胡同文化体验', price:'免费', duration:'3-4小时', time:'全天开放', closedDay:'无', address:'西城区什刹海', reservation:'无需预约', lat:39.9384, lng:116.3870, icon:'🌊',
+      photos:[
+        'images/Shichahai_Beijing__beautiful_l_2026-06-10T08-26-07.png',
+        'images/Shichahai_Beijing__beautiful_l_2026-06-10T08-26-07.png'
+      ],photoCaptions:{0:'什刹海前海',1:'银锭桥日落'},
+      route:['什刹海地铁站 → 前海 → 后海 → 烟袋斜街 → 银锭桥'],
+      tips:[{icon:'🌃',text:'下午16:00-19:00看日落+夜景光线最好'},{icon:'🛺',text:'可以坐人力车逛胡同（谈好价约150元起）'},{icon:'🍺',text:'前海酒吧街商业化重，拐进胡同里小店更地道'}],
+      intro:'什刹海是北京内城唯一一片开放水域，由前海、后海、西海三部分组成。这里曾是元大都规划的核心水系，周边胡同肌理保存完好，老北京的市井气息浓厚。银锭桥是看"银锭观山"日落的绝佳位置，周边酒吧街、烟袋斜街、鸦儿胡同都值得一逛，是感受老北京慢生活的最佳去处。', dining:'周边胡同里有许多地道小吃和小馆', rest:'沿湖有咖啡馆茶馆多', tags:['免费','胡同','夜景','休闲'], area:'什刹海-胡同' },
+
+    { id:'gongwangfu', name:'恭王府', subtitle:'一座恭王府半部清代史', price:'40元', duration:'2-3小时', time:'8:30-17:00', closedDay:'周一闭馆', address:'西城区柳荫街', reservation:'提前10天20:00在「恭王府博物馆」公众号抢票', lat:39.9350, lng:116.3830, icon:'🏯',
+      photos:[
+        'images/Prince_Gong_Mansion_Beijing__t_2026-06-10T08-26-34.png',
+        'images/Prince_Gong_Mansion_Beijing__t_2026-06-10T08-26-34.png'
+      ],photoCaptions:{0:'恭王府大门',1:'后罩楼'},
+      route:['银安殿 → 嘉乐堂 → 葆光室 → 锡晋斋 → 后罩楼 → 西洋门 → 大戏楼 → 福字碑 → 出口'],
+      tips:[{icon:'🎫',text:'提前10天抢票！40元/人，6周岁以下或1.2米以下免票'},{icon:'🧭',text:'服务中心可租婴儿车轮椅押金500元'}],
+      intro:'恭王府始建于清朝乾隆年间，最初是大学士和珅的府邸，后为恭亲王奕䜣的王府，故有"一座恭王府，半部清代史"之说。王府占地6万平方米，建筑精美，融合了北方四合院与江南园林风格。其中康熙御笔"福"字碑最为著名，传说摸福能沾福气，每逢春节更是人山人海。', dining:'园内无正规餐厅自带水和零食', rest:'各展厅外有休息椅花园树荫多', tags:['历史','王府','文化'], area:'什刹海-胡同' },
+
+    { id:'gulou', name:'鼓楼大街', subtitle:'中轴线北端·老北京风情', price:'免费', duration:'2-3小时', time:'10:00-21:00', closedDay:'无', address:'东城区鼓楼大街', reservation:'无需预约', lat:39.9450, lng:116.3950, icon:'🔔',
+      photos:[
+        'images/Beijing_Drum_Tower_and_Bell_To_2026-06-10T08-26-36.png',
+        'images/Beijing_Drum_Tower_and_Bell_To_2026-06-10T08-26-36.png'
+      ],photoCaptions:{0:'鼓楼与钟楼',1:'烟袋斜街'},
+      route:['鼓楼大街站 → 钟楼 → 鼓楼 → 烟袋斜街 → 银锭桥 → 什刹海'],
+      tips:[{icon:'🌅',text:'银锭桥16:30前到能看"银锭观山"日落'},{icon:'🍢',text:'姚记炒肝配包子是老北京早餐标配'}],
+      intro:'鼓楼和钟楼是北京中轴线北端的地标建筑，始建于元代，是古代城市的报时中心。鼓楼红墙灰瓦，气势宏伟；钟楼内悬挂着中国最重的古钟"永乐大钟"。鼓楼大街周边连接烟袋斜街、南锣鼓巷，是体验老北京风情和品尝地道小吃的好地方，周边胡同里的烟火气息让人流连忘返。', dining:'姚记炒肝、卤煮火烧等老字号聚集', rest:'咖啡馆茶馆多累了随时歇脚', tags:['免费','文化','小吃','拍照'], area:'什刹海-胡同' },
+
+    { id:'wudaoying', name:'五道营胡同', subtitle:'最文艺的胡同', price:'免费', duration:'2-3小时', time:'10:00后开门', closedDay:'无', address:'东城区五道营胡同', reservation:'无需预约', lat:39.9420, lng:116.4180, icon:'🏮',
+      route:['雍和宫站 → 五道营胡同步行 → 文创小店 → 咖啡馆 → 国子监街'],
+      tips:[{icon:'☕',text:'铁手咖啡、兰泰餐、野风筝汉堡都值得试'},{icon:'🚼',text:'路面平坦全程可推婴儿车'}],
+      intro:'五道营胡同是北京最文艺的胡同之一，紧邻雍和宫和国子监，全长约600米。这里没有南锣鼓巷的过度商业化，保留了更多本地生活气息。胡同两侧遍布独立咖啡馆、手作工坊、独立书店和精致餐厅，每一家小店都有自己的故事。悠闲地漫步其中，喝杯咖啡、淘淘好物，是北京文艺青年的日常。', dining:'铁手咖啡、兰泰餐、野风筝、藏红花餐厅', rest:'咖啡馆长椅多', tags:['免费','文艺','胡同','拍照'], area:'什刹海-胡同' },
+
+    { id:'yangmeizhu', name:'杨梅竹斜街', subtitle:'前门最文艺胡同', price:'免费', duration:'2-3小时', time:'10:00后开门', closedDay:'无', address:'西城区杨梅竹斜街', reservation:'无需预约', lat:39.8960, lng:116.3980, icon:'🏮',
+      route:['前门站 → 杨梅竹斜街 → 文创小店 → 咖啡馆 → 大栅栏'],
+      tips:[{icon:'🍰',text:'锦芳小吃奶油炸糕驴打滚艾窝窝一站式体验'},{icon:'🚼',text:'路面平坦全程可推婴儿车'}],
+      intro:'杨梅竹斜街位于前门大栅栏西侧，是北京最美胡同之一。这里曾是民国时期的出版文化中心，书局云集，鲁迅、沈从文等文人曾在此居住。如今胡同里保留了许多老建筑，同时开起了设计书店、独立咖啡馆和文创小店，传统与现代和谐共生。街口的锦芳小吃是品尝老北京小吃的绝佳去处。', dining:'锦芳小吃等老北京小吃', rest:'咖啡馆多', tags:['免费','文艺','胡同','前门'], area:'什刹海-胡同' },
+
+    { id:'dongjiaominxiang', name:'东交民巷', subtitle:'最长胡同·欧式建筑群', price:'免费', duration:'2-3小时', time:'9:00-17:00', closedDay:'博物馆周一闭馆', address:'东城区东交民巷', reservation:'无需预约（部分博物馆需单独预约）', lat:39.9020, lng:116.4080, icon:'🏛️',
+      route:['崇文门站 → 比利时使馆旧址 → 圣弥厄尔天主堂 → 法国邮政局旧址 → 中国法院博物馆'],
+      tips:[{icon:'⛪',text:'圣弥厄尔天主堂哥特式双尖塔超震撼'},{icon:'📸',text:'红砖白墙英式建筑适合拍复古大片'}],
+      intro:'东交民巷是北京最长的胡同，全长约1.6公里。这里曾是近代各国使馆区，保留了大量欧式风格建筑，如哥特式的圣弥厄尔天主堂、法式邮政局旧址、比利时使馆等。走在巷中，仿佛置身欧洲小镇。红砖白墙、铁艺窗花、梧桐树影，是拍摄复古大片的绝佳取景地，也是了解近代历史的一扇窗口。', dining:'周边咖啡馆多', rest:'博物馆内可休息', tags:['免费','建筑','文艺','拍照'], area:'什刹海-胡同' },
+
+    { id:'shijia', name:'史家胡同', subtitle:'一条胡同半部中国史', price:'免费', duration:'1-2小时', time:'周二至周日 9:30-16:30', closedDay:'周一闭馆', address:'东城区史家胡同', reservation:'无需预约直接刷身份证入园', lat:39.9180, lng:116.4200, icon:'🏘️',
+      route:['灯市口站 → 史家胡同博物馆 → 史家小学 → 好园 → 隆福寺文创区'],
+      tips:[{icon:'🏛️',text:'史家胡同博物馆130个院落微缩模型超赞'},{icon:'🖋️',text:'文创社有150+枚印章可以盖'}],
+      intro:'史家胡同被誉为"一条胡同，半部中国史"，这里曾居住过章士钊、傅作义、荣毅仁等名人。胡同里的史家胡同博物馆是北京首家胡同博物馆，展示了130个院落微缩模型和老北京生活场景，让人一窥胡同生活的变迁。博物馆院内的文创社有150多枚印章可盖，是盖章爱好者的天堂。', dining:'福叁咖啡、姚记炒肝', rest:'博物馆院内隆福寺咖啡馆多', tags:['免费','文化','胡同','安静'], area:'什刹海-胡同' },
+
+    // === 天坛片区（地铁5号线）===
+    { id:'tiantan', name:'天坛公园', subtitle:'明清帝王祭天场所', price:'28元（联票）', duration:'2-3小时', time:'6:00-21:00', closedDay:'无', address:'东城区天坛内东里7号', reservation:'提前预约', lat:39.8822, lng:116.4066, icon:'⛩️',
+      photos:[
+        'images/Temple_of_Heaven_Beijing__Hall_2026-06-10T08-24-31.png',
+        'images/Temple_of_Heaven_Beijing__Hall_2026-06-10T08-24-31.png',
+        'images/Temple_of_Heaven_Beijing__Hall_2026-06-10T08-24-31.png'
+      ],photoCaptions:{0:'祈年殿',1:'圜丘坛',2:'丹陛桥'},
+      route:['南门进 → 圜丘坛 → 皇穹宇 → 祈年殿 → 丹陛桥 → 北门出'],
+      tips:[{icon:'📸',text:'祈年殿是最佳拍照点'},{icon:'🌳',text:'平地多树荫多老人散步舒服'},{icon:'🌃',text:'祈年殿周五周六节假日晚上开灯到21:30'}],
+      intro:'天坛始建于明永乐十八年（1420年），是明清两代皇帝祭天、祈谷的场所，也是中国现存最大的古代祭祀性建筑群。祈年殿为三重檐圆殿，是北京的标志性建筑之一；回音壁和三音石则展示了古代声学设计的精妙。天坛公园古树参天，林荫道凉爽宜人，是休闲散步的好去处。', dining:'南门涮肉等美食 nearby', rest:'公园内古树众多林荫道凉爽', tags:['历史','拍照','文化','轻松'], area:'天坛' },
+
+    // === 长城片区 ===
+    { id:'mutianyu', name:'慕田峪长城', subtitle:'人少景美缆车直达', price:'40元（18岁以下免票）', duration:'半天', time:'7:00-18:00', closedDay:'无', address:'怀柔区慕田峪村', reservation:'提前2天在「慕田峪长城」公众号预约', lat:40.4100, lng:116.5600, icon:'🏯',
+      photos:[
+        'images/Great_Wall_of_China_at_Mutiany_2026-06-10T08-25-01.png',
+        'images/Great_Wall_of_China_at_Mutiany_2026-06-10T08-25-01.png',
+        'images/Great_Wall_of_China_at_Mutiany_2026-06-10T08-25-01.png'
+      ],photoCaptions:{0:'慕田峪长城蜿蜒',1:'敌楼风光',2:'好汉坡'},
+      route:['缆车上14号敌楼 → 往西走到20号好汉坡 → 返回14号 → 缆车下山'],
+      tips:[{icon:'🚠',text:'缆车往返140元封闭车厢舒适'},{icon:'🚌',text:'旅游专线前门集散中心往返80元含摆渡车'},{icon:'🎿',text:'滑道下山100元但60岁以上不能坐'}],
+      intro:'慕田峪长城位于怀柔区，距北京市区约70公里，全长5400米，是中国最长的长城段落之一。相比八达岭长城，这里游客更少、自然景观更美，植被覆盖率高达96%以上。长城蜿蜒于崇山峻岭之间，敌楼密集，视野开阔。乘缆车登顶后可轻松游览14-20号敌楼，20号敌楼"好汉坡"是打卡必到之处。', dining:'山上水5元冰棒10元建议自带', rest:'14号敌楼平台可推车', tags:['必去','长城','自然','刺激'], area:'长城' },
+
+    // === 奥林匹克公园片区 ===
+    { id:'aolinpike', name:'奥林匹克公园', subtitle:'鸟巢水立方夜景最美', price:'园区免费 / 鸟巢100元 / 水立方30元', duration:'3-4小时', time:'全天开放', closedDay:'无', address:'朝阳区奥林匹克公园', reservation:'鸟巢水立方需单独预约', lat:39.9920, lng:116.3950, icon:'🏟️',
+      photos:[
+        'images/Beijing_Bird_Nest_Olympic_stad_2026-06-10T08-25-04.png',
+        'images/Beijing_Bird_Nest_Olympic_stad_2026-06-10T08-25-04.png',
+        'images/Beijing_Bird_Nest_Olympic_stad_2026-06-10T08-25-04.png'
+      ],photoCaptions:{0:'鸟巢夜景',1:'水立方外观',2:'中轴景观大道'},
+      route:['景观大道 → 鸟巢外观拍照 → 水立方外观拍照 → 新奥购物中心吃饭 → 晚上看亮灯 → 彩虹骑行道散步'],
+      tips:[{icon:'💡',text:'19:40左右看亮灯比进馆值多了'},{icon:'🍽️',text:'新奥购物中心吃饭选择多'}],
+      intro:'奥林匹克公园是2008年北京奥运会的主会场区域，占地面积约11.59平方公里。鸟巢（国家体育场）和水立方（国家游泳中心）是公园最著名的两座建筑，设计独特、气势恢宏。傍晚时分，鸟巢和水立方的灯光亮起，美不胜收。公园内还有彩虹骑行道、下沉花园等休闲设施，是北京市民休闲健身的热门场所。', dining:'新奥购物中心、南门涮肉奥运村店', rest:'园区全程无障碍推车友好', tags:['免费','夜景','亲子','轻松'], area:'奥林匹克' },
+
+    { id:'beidingniangniangmiao', name:'北顶娘娘庙', subtitle:'600年古庙·求子灵验', price:'免费', duration:'0.5-1小时', time:'8:30-16:30', closedDay:'周一闭馆', address:'朝阳区奥林匹克公园内', reservation:'无需预约直接刷身份证入园', lat:39.9860, lng:116.4000, icon:'🏮',
+      photos:[
+        'images/Beijing_Beiding_Niangniang_Temp_2026-06-10T08-35-01.png'
+      ],photoCaptions:{0:'北顶娘娘庙正门'},
+      route:['奥林匹克公园站 → 北顶娘娘庙 → 鸟巢水立方拍照 → 新奥购物中心'],
+      tips:[{icon:'🙏',text:'主供碧霞元君求子求姻缘求健康都灵'},{icon:'📸',text:'红墙灰瓦与鸟巢水立方同框超震撼'}],
+      intro:'北顶娘娘庙始建于明代宣德年间，距今已有近600年历史，是北京中轴线北延长线上的重要古建筑。庙内主供碧霞元君（泰山奶奶），以求子、求姻缘、求健康灵验著称。有趣的是，这座古老庙宇就坐落于现代感十足的鸟巢和水立方之间，红墙灰瓦与钢结构建筑同框，形成了时空交错的奇妙画面。', dining:'旁边新奥购物中心', rest:'庙内长椅不多建议逛完去购物中心', tags:['免费','祈福','历史'], area:'奥林匹克' },
+
+    { id:'kejiguan', name:'中国科技馆', subtitle:'8岁孩子的放电天堂', price:'免费（需预约）', duration:'3-5小时', time:'9:00-17:00', closedDay:'周一闭馆', address:'朝阳区北辰东路5号', reservation:'提前3-7天在「中国数字科技馆」公众号预约', lat:39.9900, lng:116.3900, icon:'🔬',
+      photos:[
+        'images/Beijing_Science_and_Technology_Museum_2026-06-10T08-35-00.png'
+      ],photoCaptions:{0:'天和核心舱实物展示'},
+      route:['主展厅 → 儿童科学乐园（3层）→ 华夏之光 → 宇宙之问星空剧场'],
+      tips:[{icon:'🎫',text:'儿童科学乐园票要单独抢非常难抢'},{icon:'👶',text:'1岁半也能看互动展项8岁孩子能玩一整天'}],
+      intro:'中国科技馆是中国唯一的国家级综合性科技馆，建筑面积10.2万平方米。馆内设有"科学乐园""华夏之光""探索与发现""科技与生活""挑战与未来"五大主题展厅，互动体验项目丰富。儿童科学乐园专为3-8岁儿童设计，可以动手操作各种科学实验。这里是孩子放电的最佳去处，也是亲子游的必选之地。', dining:'1层3层有餐厅但贵建议自带零食', rest:'每层都有休息区和饮水机母婴室', tags:['亲子','科学','室内','避暑'], area:'奥林匹克' },
+
+    // === 其他备选 ===
+    { id:'beihai', name:'北海公园', subtitle:'让我们荡起双桨', price:'10元', duration:'2-3小时', time:'6:00-21:00', closedDay:'无', address:'西城区文津街1号', reservation:'提前预约', lat:39.9250, lng:116.3800, icon:'🏯',
+      route:['南门进 → 琼华岛白塔 → 九龙壁 → 五龙亭 → 北门出'],
+      tips:[{icon:'⛵',text:'划船建议避开中午高峰期早上9点或下午4点'},{icon:'🏯',text:'九龙壁是中国仅存三座之一'}],
+      intro:'北海公园是中国现存最古老、最完整的皇家园林之一，始建于辽代，距今已有近千年历史。"让我们荡起双桨"这首脍炙人口的歌曲正是以北海为背景创作的。园内白塔矗立于琼华岛之巅，九龙壁是中国仅存的三座九龙壁之一，五龙亭伸入湖中，湖面碧波荡漾，划船泛舟是经典体验。', dining:'园内有小吃', rest:'湖边景色美适合歇脚', tags:['园林','划船','轻松'], area:'其他' },
+
+    { id:'qianmendajie', name:'前门大街/大栅栏', subtitle:'老字号一条街', price:'免费', duration:'3-4小时', time:'全天开放', closedDay:'无', address:'东城区前门大街', reservation:'无需预约', lat:39.8970, lng:116.3980, icon:'🏮',
+      route:['前门箭楼 → 前门大街 → 鲜鱼口美食街 → 大栅栏 → 杨梅竹斜街 → 三里河公园'],
+      tips:[{icon:'🛒',text:'稻香村认准三禾标志别在景区一楼买'},{icon:'⚠️',text:'主街小吃贵又一般拐进胡同更有味道'}],
+      intro:'前门大街是北京最著名的商业街之一，北起正阳门箭楼，南至珠市口，全长约845米。明清时期这里是皇帝出城的必经之路，也是老北京最繁华的商业中心。如今的前门大街保留了大量老字号，如同仁堂、瑞蚨祥、内联升等。大栅栏更是老字号云集之地，鲜鱼口美食街汇聚了各种京味小吃，是逛街购物品尝美食的绝佳去处。', dining:'都一处烧麦、全聚德起源店、锦芳小吃', rest:'三里河公园像江南水乡适合休息', tags:['免费','逛街','美食','夜景'], area:'其他' },
+  ],
+
+  // ---- 美食数据 ----
+  food: {
+    warning:'南锣鼓巷、王府井小吃街主打游客，价格贵味道一般。推荐去牛街吃清真美食，或者前门大街、护国寺小吃。',
+    dishes: [
+      { id:'kaoya', icon:'🦆', name:'北京烤鸭', desc:'来北京必吃！皮脆肉嫩，配薄饼葱丝酱料', photos:[
+        'images/Beijing_roast_duck_Peking_duck_2026-06-10T08-25-02.png',
+        'images/Beijing_roast_duck_Peking_duck_2026-06-10T08-25-02.png',
+        'images/Beijing_roast_duck_Peking_duck_2026-06-10T08-25-02.png'
+      ],photoCaptions:{0:'片皮烤鸭',1:'卷饼蘸酱',2:'整只上桌'}, shops:[
+        {name:'四季民福烤鸭店', addr:'南池子大街11号（故宫东门旁）', price:'约150元/人', recommend:'烤鸭、鸭架汤、芥末鸭掌', lat:39.9090, lng:116.4150},
+        {name:'全聚德（起源店）', addr:'前门大街32号', price:'约200元/人', recommend:'挂炉烤鸭、火燎鸭心、芥末鸭掌', lat:39.8970, lng:116.4000},
+        {name:'大董烤鸭', addr:'南新仓大厦1-2层', price:'约300元/人', recommend:'酥不腻烤鸭、董氏烧海参', lat:39.9200, lng:116.4500},
+        {name:'利群烤鸭', addr:'北翔凤胡同11号', price:'约120元/人', recommend:'果木烤鸭、盐水鸭肝', lat:39.9050, lng:116.4100}
+      ]},
+      { id:'shuanrou', icon:'🍲', name:'铜锅涮肉', desc:'老北京铜锅清汤，手切鲜羊肉蘸麻酱', photos:[
+        'images/Beijing_copper_pot_hotpot_mutt_2026-06-10T08-26-39.png',
+        'images/Beijing_copper_pot_hotpot_mutt_2026-06-10T08-26-39.png'
+      ],photoCaptions:{0:'炭火铜锅涮肉',1:'手切鲜羊肉'}, shops:[
+        {name:'南门涮肉', addr:'安定门东大街56号', price:'约100元/人', recommend:'手切鲜羊肉、麻酱烧饼、百叶', lat:39.8820, lng:116.4080},
+        {name:'聚宝源（牛街）', addr:'牛街西里商业1号楼', price:'约110元/人', recommend:'手切鲜羊肉、烧饼、羊尾油', lat:39.8930, lng:116.3720},
+        {name:'满恒记', addr:'平安里西大街甲14号', price:'约90元/人', recommend:'手切鲜羊肉、糖饼、麻酱', lat:39.9300, lng:116.3600},
+        {name:'东来顺', addr:'东安市场北门', price:'约130元/人', recommend:'手切鲜羊肉、它似蜜、奶油炸糕', lat:39.9100, lng:116.4200}
+      ]},
+      { id:'niujie', icon:'🥟', name:'牛街清真美食', desc:'北京最著名的清真美食聚集地', photos:[
+        'images/Beijing_Niujie_Muslim_food_str_2026-06-10T08-27-04.png',
+        'images/Beijing_Niujie_Muslim_food_str_2026-06-10T08-27-04.png'
+      ],photoCaptions:{0:'牛街小吃街',1:'白记年糕'}, shops:[
+        {name:'白记年糕', addr:'牛街输入胡同口', price:'约30元/人', recommend:'江米条、驴打滚、艾窝窝', lat:39.8930, lng:116.3730},
+        {name:'洪记小吃', addr:'牛街输入胡同内', price:'约40元/人', recommend:'包子、炸糕、牙签肉', lat:39.8930, lng:116.3730},
+        {name:'牛街清真超市', addr:'牛街5号', price:'约50元/人', recommend:'糖火烧、各类糕点、牛肉干', lat:39.8930, lng:116.3720}
+      ]},
+      { id:'daoxxiangcun', icon:'🍰', name:'稻香村糕点', desc:'北京老字号点心，适合做伴手礼', photos:[
+        'images/Daoxiangcun_Beijing_traditiona_2026-06-10T08-27-06.png',
+        'images/Daoxiangcun_Beijing_traditiona_2026-06-10T08-27-06.png'
+      ],photoCaptions:{0:'稻香村礼盒',1:'传统京式糕点'}, shops:[
+        {name:'稻香村（认准三禾标志）', addr:'灯市口大街10号（多家分店）', price:'约60元/人', recommend:'牛舌饼、枣花酥、萨其马、山楂锅盔', lat:39.9000, lng:116.4100},
+        {name:'桂香村', addr:'新街口南大街139号', price:'约50元/人', recommend:'鲜花玫瑰饼、绿豆凸、麻酱威化', lat:39.9050, lng:116.4150}
+      ]},
+      { id:'bingtanghulu', icon:'🍡', name:'冰糖葫芦', desc:'冬天吃糖葫芦是老北京传统', photos:[
+        'images/Bingtanghulu_candied_hawthorn__2026-06-10T08-27-07.png',
+        'images/Bingtanghulu_candied_hawthorn__2026-06-10T08-27-07.png'
+      ],photoCaptions:{0:'冰糖葫芦串',1:'现做糖葫芦'}, shops:[
+        {name:'什刹海现串', addr:'什刹海荷花市场旁', price:'约10元/串', recommend:'山楂糖葫芦、草莓糖葫芦、山药豆', lat:39.9380, lng:116.3880},
+        {name:'护国寺小吃', addr:'护国寺大街93号', price:'约25元/人', recommend:'糖葫芦、豌豆黄、面茶', lat:39.9350, lng:116.3800}
+      ]},
+      { id:'zhajiangmian', icon:'🍜', name:'炸酱面', desc:'北京家常面食代表，浓郁黄豆酱调味', photos:[
+        'images/Beijing_Zhajiangmian_noodles___2026-06-10T08-27-09.png',
+        'images/Beijing_Zhajiangmian_noodles___2026-06-10T08-27-09.png'
+      ],photoCaptions:{0:'老北京炸酱面',1:'菜码丰富'}, shops:[
+        {name:'海碗居', addr:'甘家口大厦B1层', price:'约45元/人', recommend:'炸酱面、炸灌肠、麻豆腐', lat:39.9400, lng:116.3700},
+        {name:'方砖厂69号炸酱面', addr:'方砖厂胡同69号', price:'约30元/人', recommend:'老北京炸酱面、炸酱面套餐', lat:39.9350, lng:116.3950}
+      ]},
+      { id:'luzhu', icon:'🥘', name:'卤煮火烧', desc:'经典北京美食火烧炖猪肠猪肺', photos:[
+        'images/Beijing_Luzhu_huoshao__traditi_2026-06-10T08-27-35.png',
+        'images/Beijing_Luzhu_huoshao__traditi_2026-06-10T08-27-35.png'
+      ],photoCaptions:{0:'卤煮火烧',1:'老店招牌'}, shops:[
+        {name:'门框胡同百年卤煮', addr:'门框胡同19号（前门附近）', price:'约35元/人', recommend:'卤煮火烧、炸灌肠、麻豆腐', lat:39.9350, lng:116.4000},
+        {name:'陈记卤煮小肠', addr:'取灯胡同3号', price:'约30元/人', recommend:'卤煮火烧、炸酱面', lat:39.9300, lng:116.3950}
+      ]},
+      { id:'chaogan', icon:'🍳', name:'炒肝', desc:'猪大肠猪肝制成传统小吃', photos:[
+        'images/Beijing_Chaogan__traditional_C_2026-06-10T08-27-36.png',
+        'images/Beijing_Chaogan__traditional_C_2026-06-10T08-27-36.png'
+      ],photoCaptions:{0:'老北京炒肝',1:'姚记招牌'}, shops:[
+        {name:'天兴居', addr:'鲜鱼口街95号', price:'约25元/人', recommend:'炒肝、包子、炸酱面', lat:39.8950, lng:116.4000},
+        {name:'姚记炒肝', addr:'鼓楼东大街311号', price:'约30元/人', recommend:'炒肝、卤煮、炸酱面', lat:39.9450, lng:116.3950}
+      ]}
+    ],
+    streets: [
+      { id:'qianmen', name:'🏮 前门大街 · 大栅栏', desc:'老北京风情街，明清时期就是商业中心，有600多年历史。老字号云集，全聚德起源店、都一处烧麦、瑞蚨祥绸布店都在这里。', addr:'北京市东城区前门大街', photos:[
+        'images/Beijing_Qianmen_Street_Dashil_2026-06-10T08-28-00.png',
+        'images/Beijing_Qianmen_Street_Dashil_2026-06-10T08-28-01.png'
+      ],photoCaptions:{0:'前门大街夜景',1:'大栅栏老字号'}, shops:[
+        {name:'全聚德起源店', addr:'前门大街32号', price:'约200元/人', recommend:'挂炉烤鸭、火燎鸭心', lat:39.8970, lng:116.4000},
+        {name:'都一处烧麦', addr:'前门大街38号', price:'约60元/人', recommend:'三鲜烧麦、猪肉大葱烧麦', lat:39.8970, lng:116.4000},
+        {name:'一条龙涮肉', addr:'前门大街27号', price:'约100元/人', recommend:'手切鲜羊肉、麻酱烧饼', lat:39.8960, lng:116.3990},
+        {name:'锦芳小吃', addr:'鲜鱼口街81号', price:'约30元/人', recommend:'奶油炸糕、驴打滚、面茶', lat:39.8950, lng:116.4010}
+      ]},
+      { id:'niujie', name:'🕌 牛街', desc:'北京最著名的清真美食街，回族聚居区，有上千年历史。白记年糕、洪记包子、聚宝源涮肉都在这里，排队也要来！', addr:'北京市西城区牛街', photos:[
+        'images/Beijing_Niujie_Muslim_food_str_2026-06-10T08-27-04.png',
+        'images/Beijing_Niujie_Muslim_food_str_2026-06-10T08-27-04.png'
+      ],photoCaptions:{0:'牛街小吃街',1:'白记年糕排队'}, shops:[
+        {name:'白记年糕', addr:'牛街输入胡同口', price:'约30元/人', recommend:'江米条、驴打滚、艾窝窝', lat:39.8930, lng:116.3730},
+        {name:'洪记小吃', addr:'牛街输入胡同内', price:'约40元/人', recommend:'包子、炸糕、牙签肉', lat:39.8930, lng:116.3730},
+        {name:'聚宝源', addr:'牛街西里商业1号楼', price:'约110元/人', recommend:'手切鲜羊肉、烧饼、羊尾油', lat:39.8930, lng:116.3720},
+        {name:'清真超市美食城', addr:'牛街5号', price:'约50元/人', recommend:'糖火烧、牛肉干、各类糕点', lat:39.8930, lng:116.3720}
+      ]},
+      { id:'guijie', name:'🍜 簋街', desc:'北京夜宵圣地，全长1.5公里，上百家餐厅营业到凌晨。麻辣小龙虾的发源地，胡大饭馆排队2小时是常态。', addr:'北京市东城区东直门内大街', photos:[
+        'images/Beijing_Guijie_night_food_stre_2026-06-10T08-28-02.png',
+        'images/Beijing_Guijie_night_food_stre_2026-06-10T08-28-03.png'
+      ],photoCaptions:{0:'簋街夜市',1:'麻辣小龙虾'}, shops:[
+        {name:'胡大饭馆', addr:'簋街233号', price:'约150元/人', recommend:'麻辣小龙虾、馋嘴蛙、烤鱼', lat:39.9400, lng:116.4300},
+        {name:'花家怡园', addr:'簋街235号', price:'约120元/人', recommend:'烤鸭、小龙虾、四合院环境', lat:39.9400, lng:116.4300},
+        {name:'通乐饭馆', addr:'簋街89号', price:'约100元/人', recommend:'麻辣小龙虾、香辣蟹', lat:39.9400, lng:116.4280}
+      ]},
+      { id:'huguosi', name:'🏛️ 护国寺小吃街', desc:'老北京传统小吃集合地，护国寺小吃总店就在这里。豌豆黄、艾窝窝、糖火烧，一站式吃遍京味小吃，性价比极高。', addr:'北京市西城区护国寺街', photos:[
+        'images/Beijing_Huguosi_Snack_Street__2026-06-10T08-28-04.png',
+        'images/Beijing_Huguosi_Snack_Street__2026-06-10T08-28-05.png'
+      ],photoCaptions:{0:'护国寺小吃街',1:'传统京味小吃'}, shops:[
+        {name:'护国寺小吃总店', addr:'护国寺大街93号', price:'约25元/人', recommend:'豌豆黄、艾窝窝、糖火烧、豆汁', lat:39.9350, lng:116.3800},
+        {name:'惠丰门钉肉饼', addr:'护国寺街67号', price:'约35元/人', recommend:'门钉肉饼、牛肉饼、炸酱面', lat:39.9350, lng:116.3800},
+        {name:'老西安饭庄', addr:'护国寺街52号', price:'约60元/人', recommend:'羊肉泡馍、羊肉串、酸梅汤', lat:39.9340, lng:116.3790}
+      ]},
+      { id:'wudaoying', name:'🎨 五道营胡同', desc:'文艺青年聚集地，明清老胡同改造的文艺街区。咖啡馆、独立书店、泰餐厅、手作工坊，适合悠闲漫步。', addr:'北京市东城区五道营胡同', photos:[
+        'images/Beijing_Wudaoying_Hutong_cafe_2026-06-10T08-28-06.png',
+        'images/Beijing_Wudaoying_Hutong_cafe_2026-06-10T08-28-07.png'
+      ],photoCaptions:{0:'五道营胡同街景',1:'文艺咖啡馆'}, shops:[
+        {name:'铁手咖啡制造局', addr:'五道营胡同61号', price:'约45元/人', recommend:'手冲咖啡、澳白、胡同露台', lat:39.9420, lng:116.4100},
+        {name:'兰·泰餐', addr:'五道营胡同35号', price:'约120元/人', recommend:'芥末虾球、冬阴功汤、芒果糯米饭', lat:39.9420, lng:116.4090},
+        {name:'京兆尹', addr:'五道营胡同2号', price:'约500元/人', recommend:'素食套餐、下午茶、米其林三星', lat:39.9410, lng:116.4080}
+      ]},
+      { id:'yangmeizhu', name:'🏘️ 杨梅竹斜街', desc:'前门附近最文艺的胡同，保留民国和清朝建筑。青云阁、模范书局、铃木食堂都藏在老房子里，比南锣鼓巷安静很多。', addr:'北京市西城区杨梅竹斜街', photos:[
+        'images/Beijing_Yangmeizhu_Xiejie_Huto_2026-06-10T08-28-08.png',
+        'images/Beijing_Yangmeizhu_Xiejie_Huto_2026-06-10T08-28-09.png'
+      ],photoCaptions:{0:'杨梅竹斜街街景',1:'模范书局内景'}, shops:[
+        {name:'铃木食堂', addr:'杨梅竹斜街10-14号', price:'约80元/人', recommend:'日式牛肉饭、杏仁豆腐、日式炸鸡', lat:39.8950, lng:116.3970},
+        {name:'模范书局', addr:'杨梅竹斜街31号', price:'约40元/人', recommend:'咖啡、看书、民国建筑拍照', lat:39.8950, lng:116.3980},
+        {name:'壹勺子糖', addr:'杨梅竹斜街55号', price:'约50元/人', recommend:'手作甜品、法式可丽饼、下午茶', lat:39.8940, lng:116.3980},
+        {name:'锦芳小吃', addr:'鲜鱼口街81号', price:'约30元/人', recommend:'奶油炸糕、驴打滚、面茶', lat:39.8950, lng:116.4010}
+      ]}
+    ]
+  },
+
+  // ---- 住宿数据 ----
+  hotels: [
+    { id:'hotel_1x', name:'1号线沿线（西单/王府井）', desc:'逛故宫天安门国博最方便，交通四通八达', area:'市中心', icon:'🚇', recScore:5,
+      examples:['王府井希尔顿','西单大悦城酒店','东方君悦'] },
+    { id:'hotel_4x', name:'4号线沿线（西单/西四）', desc:'去颐和园圆明园北大清华更近', area:'海淀方向', icon:'🚇', recScore:4,
+      examples:['西单美爵酒店','北京饭店'] },
+    { id:'hotel_5x', name:'5号线沿线（东单/磁器口）', desc:'适合逛天坛雍和宫', area:'城南', icon:'🚇', recScore:3,
+      examples:['璞轩酒店','北京诺富特'] },
+    { id:'hotel_68', name:'6/8号线沿线（南锣鼓巷/什刹海）', desc:'体验老北京胡同文化，夜景美', area:'老城', icon:'🏮', recScore:4,
+      examples:['南锣鼓巷精品民宿','什刹海四合院酒店'] },
+    { id:'hotel_8ol', name:'8号线沿线（奥体中心）', desc:'看鸟巢水立方夜景方便', area:'北部', icon:'🏟️', recScore:3,
+      examples:['北京盘古七星酒店','新奥购物中心附近'] }
+  ],
+
+  // ---- 行程规划交通选项 ----
+  transportOptions: [
+    // --- 大交通（往返宁波-北京）---
+    { id:'flight_go_1', category:'✈️ 往返机票', name:'去程：宁波→北京大兴', icon:'🛫',
+      detail:'CA1838 07:20→09:35（2h15m）| 南方航空/国航 | 经济舱约600-1200元' },
+    { id:'flight_go_2', category:'✈️ 往返机票', name:'去程：宁波→北京首都', icon:'🛫',
+      detail:'CA1842 08:10→10:25（2h15m）| 国航 | 经济舱约700-1300元' },
+    { id:'flight_back_1', category:'✈️ 往返机票', name:'返程：北京大兴→宁波', icon:'🛬',
+      detail:'CA1839 20:35→22:55（2h20m）| 晚班机白天多玩半天 | 约600-1200元' },
+    { id:'flight_back_2', category:'✈️ 往返机票', name:'返程：北京首都→宁波', icon:'🛬',
+      detail:'CA1542 19:00→21:20（2h20m）| 国航 | 约700-1300元' },
+    { id:'train_go', category:'🚄 高铁/动车', name:'去程：宁波→北京南', icon:'🚄',
+      detail:'G58 07:36→14:28（6h52m）| 二等座约680元 / 一等座约1140元 | 适合不赶时间的家庭' },
+    { id:'train_back', category:'🚄 高铁/动车', name:'返程：北京南→宁波', icon:'🚄',
+      detail:'G59 14:00→21:06（7h06m）| 二等座约680元 / 一等座约1140元 | 下午出发晚上到' },
+
+    // --- 机场交通 ---
+    { id:'airport_daxing_subway', category:'🚇 机场交通', name:'大兴机场线 → 市区', icon:'🚇',
+      detail:'草桥站换乘地铁 | 约30分钟 | 票价35元 | 出站口服务台可领优惠券' },
+    { id:'airport_daxing_bus', category:'🚌 机场交通', name:'大兴机场大巴 → 市区', icon:'🚌',
+      detail:'多条线路覆盖市区 | 约1小时 | 票价约40元 | 适合行李多的家庭' },
+    { id:'airport_daxing_taxi', category:'🚕 机场交通', name:'大兴机场打车 → 酒店', icon:'🚕',
+      detail:'约50公里 | 打车120-150元 | 使用导航防绕路 | 高峰期可能堵车' },
+    { id:'airport_capital_subway', category:'🚇 机场交通', name:'首都机场线 → 市区', icon:'🚇',
+      detail:'东直门/三元桥换乘 | 约40分钟 | 票价25元 | 不堵车首选' },
+    { id:'airport_capital_bus', category:'🚌 机场交通', name:'首都机场大巴 → 市区', icon:'🚌',
+      detail:'多条线路覆盖 | 约1小时 | 票价约30元 | 覆盖西单王府井等地' },
+    { id:'airport_capital_taxi', category:'🚕 机场交通', name:'首都机场打车 → 酒店', icon:'🚕',
+      detail:'约30公里 | 打车80-120元 | 两个机场都有地铁不怕堵车优先选地铁' },
+
+    // --- 长城专线 ---
+    { id:'mutianyu_bus', category:'🚌 旅游专线', name:'慕田峪长城旅游专线', icon:'🚌',
+      detail:'前门集散中心往返 | 含摆渡车 | 往返80元/人 | 早上7:30出发约9:30到' },
+    { id:'mutianyu_taxi', category:'🚕 包车/打车', name:'慕田峪包车往返', icon:'🚕',
+      detail:'往返约400-500元/车 | 自由安排时间 | 适合5人家庭 | 单程约1.5h' },
+
+    // --- 市内交通建议 ---
+    { id:'city_metro', category:'🚇 市内交通', name:'北京地铁通票', icon:'🚇',
+      detail:'支付宝搜"北京地铁"刷码进站 | 单程3-7元 | 不堵车覆盖广 | 最推荐' },
+    { id:'city_didi', category:'🚕 市内交通', name:'滴滴/高德打车', icon:'🚕',
+      detail:'市内一般30-60元 | 高峰期严重堵车 | 带老人小孩可结合使用' },
+    { id:'city_daypass', category:'🎫 交通卡', name:'一卡通/京津冀互通卡', icon:'🎫',
+      detail:'押金20元可退 | 地铁公交打5折 | 7天行程很划算 | 手机NFC开通' }
+  ],
+
+  // ---- 交通数据 ----
+  transport: {
+    fromNingbo: { duration:'2小时15分', price:'往返约2000-4000元/人' },
+    airport: [
+      { name:'✈️ 北京大兴国际机场', distance:'距市区约50公里', subway:'大兴机场线：草桥站换乘地铁，约30分钟到市区', bus:'机场大巴：多条线路，到市区约1小时', taxi:'打车约120-150元，使用导航防绕路', tip:'地铁大兴机场线可领优惠券，出站口服务台免费领' },
+      { name:'✈️ 北京首都国际机场', distance:'距市区约30公里', subway:'机场线：东直门/三元桥换乘，约40分钟到市区', bus:'机场大巴：多条线路覆盖市区', taxi:'打车约80-120元', tip:'两个机场都有地铁不怕堵车优先选地铁' }
+    ],
+    city: [
+      { icon:'🚇', mode:'地铁（最推荐）', desc:'北京地铁覆盖广不堵车支持支付宝/微信乘车码', tool:'支付宝搜"北京地铁"可刷码进站' },
+      { icon:'🚕', mode:'打车/网约车', desc:'滴滴高德打车都可用但高峰期堵车严重', note:'夏天高峰期建议提前叫车景区周边打车难' },
+      { icon:'🚌', mode:'公交', desc:'票价便宜但路线复杂不建议带老人小孩首选', tool:'支付宝/微信可刷码' }
+    ],
+    warnings: ['拒绝黄牛"付费带路""快速通道"，正规预约后刷身份证即可','景区间距离远带老人小孩建议打车+地铁结合','下载离线地图部分景区内信号差','备好充电宝夏天出门一整天手机耗电快']
+  },
+
+  // ---- 攻略数据 ----
+  tips: [
+    { icon:'👟', title:'穿着建议', color:'#C0392B', items:['舒适运动鞋！每天暴走2万步鞋最重要','防晒帽+防晒霜+遮阳伞6月底北京紫外线很强','随身带折叠小马扎老人等降旗排队时能坐着'] },
+    { icon:'📅', title:'行程安排', color:'#FF9800', items:['中午11:00-14:00最热安排室内或回酒店休息','景点预约至少提前3-7天故宫最难抢','周一故宫部分博物馆闭馆行程避开周一安排','每天最多2个景点上午1个下午1个'] },
+    { icon:'👶', title:'带娃提示', color:'#27AE60', items:['推车选轻便折叠款故宫石板路推车会颠','景点内有母婴室故宫颐和园都有','备好零食湿巾防蚊液北京夏天蚊子多'] },
+    { icon:'☀️', title:'防暑降温', color:'#E67E22', items:['随身带水！景区内水贵提前买好','中午最热时段（11:00-14:00）安排室内或回酒店','带小风扇冰贴实测有效'] },
+    { icon:'🚫', title:'避坑指南', color:'#8E44AD', items:['不要在南锣鼓巷主街吃饭贵且一般','拒绝黄牛带路快速通道都是骗人的','景区周边一日游大巴慎报强制购物'] },
+    { icon:'📱', title:'实用APP', color:'#2E86C1', items:['高德地图：导航查公交地铁','支付宝：刷地铁码景区码','大众点评：找美食看评价','故宫博物院小程序：预约门票'] },
+    { icon:'💰', title:'花费参考', color:'#1ABC9C', items:['故宫60元景山2元天坛28元（联票）','烤鸭人均100-150元涮肉人均80-120元','地铁单程3-7元打车市内一般30-60元','5大2小7天预算约8000-18000元（含机票）'] }
+  ]
+};
+
+// ============================================================
+// 模式切换
+// ============================================================
+var currentMode = 'plan'; // 'plan' | 'view'
+
+async function getMode() {
+  try {
+    var cloud = await loadFromCloud('mode');
+    if (cloud) return cloud.mode || 'plan';
+  } catch(e) {}
+  try { return localStorage.getItem('beijing_trip_mode') || 'plan'; } catch(e) { return 'plan'; }
+}
+
+async function setMode(mode) {
+  currentMode = mode;
+  try { localStorage.setItem('beijing_trip_mode', mode); } catch(e) {}
+  saveToCloud('mode', { mode: mode });
+  applyMode(mode);
+}
+
+function applyMode(mode) {
+  var icon = document.getElementById('modeIcon');
+  var label = document.getElementById('modeLabel');
+  var toggle = document.getElementById('modeToggle');
+  var budgetTab = document.getElementById('tabBudget');
+  var budgetPage = document.getElementById('page-budget');
+  if (mode === 'view') {
+    document.body.classList.add('view-mode');
+    icon.textContent = '🔒';
+    label.textContent = '仅查看';
+    toggle.classList.add('viewing');
+    // 隐藏预算，规划→行程
+    budgetTab.style.display = 'none';
+    document.getElementById('tabPlanLabel').textContent = '行程';
+    if (budgetPage.classList.contains('active')) {
+      budgetPage.classList.remove('active');
+      document.getElementById('tabBudget').classList.remove('active');
+    }
+  } else {
+    document.body.classList.remove('view-mode');
+    icon.textContent = '🔓';
+    label.textContent = '规划中';
+    toggle.classList.remove('viewing');
+    // 显示预算，恢复规划
+    budgetTab.style.display = '';
+    document.getElementById('tabPlanLabel').textContent = '规划';
+  }
+  // 如果当前在规划页，重新渲染以反映模式变化
+  var planPage = document.getElementById('page-plan');
+  if (planPage.classList.contains('active')) {
+    renderPlan();
+  }
+}
+
+function toggleMode() {
+  var newMode = currentMode === 'plan' ? 'view' : 'plan';
+  setMode(newMode);
+  showToast(newMode === 'view' ? '已切换为查看模式，家人只能查看行程' : '已切换为规划模式，可以编辑行程');
+}
+
+// ============================================================
+// Tab切换
+// ============================================================
+function switchTab(pageId, el) {
+  document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
+  document.querySelectorAll('.tab-item').forEach(function(t) { t.classList.remove('active'); });
+  document.getElementById(pageId).classList.add('active');
+  el.classList.add('active');
+  if (pageId === 'page-spots') { setTimeout(initMap, 100); }
+  if (pageId === 'page-plan') { renderPlan(); }
+}
+
+// ============================================================
+// 高德地图
+// ============================================================
+var map = null;
+var markers = [];
+var infoWindow = null;
+var activeSpotId = null;
+var mapInitialized = false;
+
+function initMap() {
+  if (mapInitialized) return;
+  if (typeof AMap === 'undefined') {
+    setTimeout(initMap, 500);
+    return;
+  }
+  mapInitialized = true;
+
+  map = new AMap.Map('mapContainer', {
+    center: [116.39, 39.91],
+    zoom: 12,
+    resizeEnable: true,
+    showIndoorMap: false
+  });
+
+  map.on('complete', function() {
+    addMarkers();
+    var positions = DATA.spots.filter(function(s){return s.lat<50}).map(function(s) { return [s.lng, s.lat]; });
+    if (positions.length > 0) { map.setFitView(null, false, [40, 40, 40, 100]); }
+  });
+
+  console.log('高德地图初始化成功');
+}
+
+function addMarkers() {
+  // 先清除旧标记
+  markers.forEach(function(m) { map.remove(m); });
+  markers = [];
+
+  DATA.spots.forEach(function(spot) {
+    if (!spot.lat || spot.lat > 50) return; // 过滤无效坐标
+
+    var markerDom = document.createElement('div');
+    markerDom.className = 'custom-marker';
+    markerDom.innerHTML = spot.icon;
+    markerDom.onclick = function() { showSpotInfoWindow(spot); };
+
+    var marker = new AMap.Marker({
+      position: [spot.lng, spot.lat],
+      content: markerDom,
+      offset: new AMap.Pixel(-19, -19),
+      zIndex: 10
+    });
+
+    markers.push(marker);
+    map.add(marker);
+  });
+}
+
+function showSpotInfoWindow(spot) {
+  activeSpotId = spot.id;
+  document.querySelectorAll('.custom-marker').forEach(function(el) {
+    el.classList.toggle('active', el.textContent === spot.icon);
+  });
+
+  if (infoWindow) { infoWindow.close(); infoWindow = null; }
+
+  var content = document.createElement('div');
+  content.style.cssText = 'padding:14px;max-width:240px;font-size:15px;font-family:-apple-system,sans-serif;';
+  content.innerHTML =
+    '<div style="font-size:17px;font-weight:700;color:#1A1A1A;margin-bottom:6px;">' + spot.icon + ' ' + spot.name + '</div>' +
+    '<div style="color:#666;margin-bottom:4px;font-size:14px;">' + spot.subtitle + '</div>' +
+    '<div style="display:flex;gap:8px;margin-bottom:8px;">' +
+      '<span style="background:#F3E5F5;color:#7E57C2;padding:3px 10px;border-radius:12px;font-size:13px;font-weight:600;">' + spot.price + '</span>' +
+      '<span style="color:#666;font-size:13px;">⏱ ' + spot.duration + '</span>' +
+    '</div>' +
+    '<div style="margin-bottom:10px;">' + (spot.tags||[]).map(function(t) { return '<span style="display:inline-block;background:#F3E5F5;color:#7E57C2;font-size:12px;padding:2px 8px;border-radius:14px;margin-right:4px;font-weight:500;">' + t + '</span>'; }).join('') + '</div>' +
+    '<div style="font-size:13px;color:#666;margin-bottom:10px;">📍 ' + spot.address + '</div>' +
+    '<div style="display:flex;gap:8px;">' +
+      '<div onclick="showSpotDetail(\'' + spot.id + '\')" style="flex:1;background:linear-gradient(135deg,#B39DDB,#CE93D8);color:#FFF;text-align:center;padding:9px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(126,87,194,0.25);">查看详情 ›</div>' +
+      '<div onclick="addToPlan(\'' + spot.id + '\')" style="background:linear-gradient(135deg,#FFB300,#FFC107);color:#FFF;text-align:center;padding:9px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;box-shadow:0 2px 8px rgba(255,179,0,0.3);">+ 规划</div>' +
+    '</div>';
+
+  infoWindow = new AMap.InfoWindow({
+    content: content,
+    offset: new AMap.Pixel(0, -22),
+    closeWhenClickMap: true
+  });
+
+  infoWindow.open(map, [spot.lng, spot.lat]);
+  map.setCenter([spot.lng, spot.lat]);
+  if (map.getZoom() < 13) map.setZoom(13);
+}
+
+// ============================================================
+// 景点面板
+// ============================================================
+var panelCollapsed = false;
+function togglePanel() {
+  panelCollapsed = !panelCollapsed;
+  document.getElementById('spotPanel').classList.toggle('collapsed', panelCollapsed);
+  document.getElementById('panelToggle').textContent = panelCollapsed ? '展开' : '收起';
+}
+
+function renderPanelList(spots) {
+  var el = document.getElementById('panelList');
+  if (!spots || spots.length === 0) {
+    el.innerHTML = '<div style="text-align:center;padding:20px;color:#999;">未找到匹配的景点</div>';
+    return;
+  }
+  el.innerHTML = spots.map(function(s) {
+    var inPlan = isItemInPlan(s.id) ? '<span style="font-size:12px;color:#27AE60;">✓已加入规划</span>' : '';
+    return '<div class="panel-spot-item" onclick="showSpotDetail(\'' + s.id + '\')">' +
+      '<div class="panel-spot-icon">' + s.icon + '</div>' +
+      '<div class="panel-spot-info">' +
+        '<span class="panel-spot-name">' + s.name + ' <span class="panel-spot-highlight">' + s.price + '</span> ' + inPlan + '</span>' +
+        '<span class="panel-spot-detail">' + s.subtitle + ' · ' + s.duration + '</span>' +
+      '</div>' +
+      '<span class="panel-spot-arrow">›</span>' +
+    '</div>';
+  }).join('');
+}
+
+function filterMarkers() {
+  var kw = document.getElementById('searchInput').value.trim();
+  var filtered = DATA.spots.filter(function(s) {
+    return s.name.indexOf(kw) !== -1 || s.subtitle.indexOf(kw) !== -1 ||
+      (s.tags||[]).some(function(t) { return t.indexOf(kw) !== -1; }) ||
+      s.address.indexOf(kw) !== -1;
+  });
+  renderPanelList(filtered);
+}
+
+// ============================================================
+// 景点详情
+// ============================================================
+function showSpotDetail(spotId) {
+  var spot = DATA.spots.find(function(s) { return s.id === spotId; });
+  if (!spot) return;
+
+  var html = '';
+  var photos = spot.photos || [];
+  var heroImg = photos.length > 0 ? photos[0] : '';
+  html += '<div class="detail-hero"><div class="hero-bg">' + (heroImg ? '<img src="'+heroImg+'" alt="'+spot.name+'" onerror="this.style.display=\'none\'" />':'') + '</div>' +
+    '<div class="hero-info"><span class="hero-name">' + spot.name + '</span><span class="hero-subtitle">' + spot.subtitle + '</span></div></div>';
+  html += '<div class="detail-body">';
+
+
+  html += '<div class="info-grid">' +
+    '<div class="info-item"><span class="info-label">门票价格</span><span class="info-value info-price">' + spot.price + '</span></div>' +
+    '<div class="info-item"><span class="info-label">建议时长</span><span class="info-value">' + spot.duration + '</span></div>' +
+    '<div class="info-item"><span class="info-label">开放时间</span><span class="info-value">' + spot.time + '</span></div>' +
+    '<div class="info-item"><span class="info-label">闭馆日</span><span class="info-value">' + spot.closedDay + '</span></div>' +
+    '</div>';
+  html += '<div class="info-row"><span class="info-label">📍 地址：</span><span class="info-value">' + spot.address + '</span></div>';
+  html += '<div class="info-row"><span class="info-label">🎫 预约：</span><span class="info-value">' + spot.reservation + '</span></div>';
+
+  if (spot.intro) {
+    html += '<div style="margin:14px 0;padding:14px 16px;background:linear-gradient(135deg,#F3E5F5,#EDE7F6);border-radius:12px;border-left:4px solid #7E57C2;">' +
+      '<div style="font-size:14px;font-weight:600;color:#7E57C2;margin-bottom:6px;">📖 景点介绍</div>' +
+      '<div style="font-size:14px;color:#555;line-height:1.8;">' + spot.intro + '</div></div>';
+  }
+
+  if (spot.route && spot.route.length > 0) {
+    html += makeSection('🗺️', '推荐路线', spot.route.map(function(r, i) {
+      return '<div class="route-item"><span class="route-num">' + (i+1) + '</span><span class="route-text">' + r + '</span></div>';
+    }).join(''));
+  }
+
+  if (spot.tips && spot.tips.length > 0) {
+    html += makeSection('💡', '省力技巧', spot.tips.map(function(t) {
+      return '<div class="tip-item"><span class="tip-icon">' + t.icon + '</span><span class="tip-text">' + t.text + '</span></div>';
+    }).join(''));
+  }
+
+  if (spot.dining || spot.rest) {
+    html += makeSection('🍜', '餐饮与休息',
+      (spot.dining?'<div class="dining-card"><span class="dining-label">餐饮</span><span class="dining-text">'+spot.dining+'</span></div>':'')+
+      (spot.rest?'<div class="dining-card"><span class="dining-label">休息</span><span class="dining-text">'+spot.rest+'</span></div>':''));
+  }
+
+  if (spot.guide && spot.guide.length > 0) {
+    html += makeSection('🎤', '讲解服务', spot.guide.map(function(g) {
+      return '<div class="guide-item"><div class="guide-header"><span class="guide-type">'+g.type+'</span><span class="guide-price">'+g.price+'</span></div><span class="guide-desc">'+g.desc+'</span></div>';
+    }).join(''));
+  }
+
+  // 加入规划按钮
+  html += '<div style="margin-top:16px;display:flex;gap:10px;">';
+  html += '<div onclick="addToPlan(\''+spot.id+'\')" style="flex:1;background:linear-gradient(135deg,#B39DDB,#CE93D8);color:#FFF;text-align:center;padding:12px;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;box-shadow:0 3px 10px rgba(126,87,194,0.25);">➕ 加入行程规划</div>';
+  html += '</div>';
+  html += '</div>';
+
+  document.getElementById('detailContent').innerHTML = html;
+  document.getElementById('detailPage').classList.add('show');
+}
+
+function makeSection(icon, title, content) {
+  return '<div class="section-card"><div class="section-header" onclick="var c=this.nextElementSibling,t=this.querySelector(\'.section-toggle\');if(c.style.display===\'none\'){c.style.display=\'\';t.textContent=\'−\'}else{c.style.display=\'none\';t.textContent=\'+\'}">' +
+    '<span class="section-header-icon">' + icon + '</span><span class="section-header-text">' + title + '</span><span class="section-toggle">−</span></div>' +
+    '<div class="section-content">' + content + '</div></div>';
+}
+
+function goBackFromDetail() {
+  document.getElementById('detailPage').classList.remove('show');
+}
+
+function previewPhoto(src) {
+  var overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(8px);cursor:pointer;';
+  overlay.onclick = function() { this.remove(); };
+  var img = new Image();
+  img.src = src;
+  img.style.cssText = 'max-width:100%;max-height:90vh;border-radius:12px;box-shadow:0 8px 40px rgba(0,0,0,0.5);';
+  overlay.appendChild(img);
+  var cap = document.createElement('div');
+  cap.style.cssText = 'position:absolute;bottom:30px;color:#FFF;font-size:14px;text-shadow:0 1px 3px rgba(0,0,0,0.8);text-align:center;width:100%;';
+  overlay.appendChild(cap);
+  document.body.appendChild(overlay);
+}
+
+function showFoodDetail(dishId) {
+  var dish = DATA.food.dishes.find(function(d) { return d.id === dishId; });
+  if (!dish || !dish.photos || dish.photos.length === 0) return;
+
+  var photos = dish.photos;
+  var captions = dish.photoCaptions || {};
+  var html = '';
+  var heroImg = photos[0] || '';
+  html += '<div class="detail-hero"><div class="hero-bg">' + (heroImg ? '<img src="'+heroImg+'" alt="'+dish.name+'" onerror="this.style.display=\'none\'" />':'') + '</div>' +
+    '<div class="hero-info"><span class="hero-name">' + dish.icon + ' ' + dish.name + '</span><span class="hero-subtitle">' + dish.desc + '</span></div></div>';
+  html += '<div class="detail-body">';
+
+  // 美食简介
+  html += '<div style="margin:0 0 14px;padding:14px 16px;background:linear-gradient(135deg,#FFF8E1,#FFF3E0);border-radius:12px;border-left:4px solid #FF9800;">' +
+    '<div style="font-size:14px;font-weight:600;color:#E65100;margin-bottom:4px;">🍽️ 美食简介</div>' +
+    '<div style="font-size:14px;color:#555;line-height:1.7;">' + dish.desc + '</div></div>';
+
+  // 推荐店铺 - 卡片形式
+  html += '<div class="section-card"><div class="section-header"><span class="section-header-icon">🏪</span><span class="section-header-text">推荐店铺（' + dish.shops.length + '家）</span><span class="section-toggle">−</span></div>' +
+    '<div class="section-content">';
+  dish.shops.forEach(function(s) {
+    var shopId = dish.id + '_' + s.name.replace(/[^a-zA-Z0-9]/g,'_');
+    html += '<div style="background:#FAFAFA;border-radius:12px;padding:14px;margin-bottom:10px;border:1px solid #E8E8E8;">' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">' +
+        '<span style="font-size:16px;font-weight:700;color:#333;">🏠 ' + s.name + '</span>' +
+        '<span style="font-size:13px;color:#E65100;font-weight:600;background:#FFF3E0;padding:3px 10px;border-radius:12px;">' + (s.price || '') + '</span>' +
+      '</div>' +
+      (s.addr ? '<div style="font-size:13px;color:#888;margin-bottom:6px;">📍 ' + s.addr + '</div>' : '') +
+      (s.recommend ? '<div style="font-size:13px;color:#555;margin-bottom:10px;">👍 推荐：' + s.recommend + '</div>' : '') +
+      '<button onclick="addFoodShopToPlan(\'' + shopId + '\')" style="width:100%;padding:10px;background:linear-gradient(135deg,#7E57C2,#9575CD);color:#FFF;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;">📅 添加到规划</button>' +
+      '</div>';
+  });
+  html += '</div></div>';
+
+  html += '</div>';
+  document.getElementById('detailContent').innerHTML = html;
+  document.getElementById('detailPage').classList.add('show');
+}
+
+function showStreetDetail(streetId) {
+  var street = DATA.food.streets.find(function(s) { return s.id === streetId; });
+  if (!street) return;
+
+  var photos = street.photos || [];
+  var captions = street.photoCaptions || {};
+  var html = '';
+  var heroImg = photos[0] || '';
+  html += '<div class="detail-hero"><div class="hero-bg">' + (heroImg ? '<img src="'+heroImg+'" alt="'+street.name+'" onerror="this.style.display=\'none\'" />':'') + '</div>' +
+    '<div class="hero-info"><span class="hero-name">' + street.name + '</span><span class="hero-subtitle">' + (street.addr || '') + '</span></div></div>';
+  html += '<div class="detail-body">';
+
+  // 街区简介
+  html += '<div style="margin:0 0 14px;padding:14px 16px;background:linear-gradient(135deg,#F3E5F5,#EDE7F6);border-radius:12px;border-left:4px solid #7E57C2;">' +
+    '<div style="font-size:14px;font-weight:600;color:#5E35B1;margin-bottom:4px;">📍 街区简介</div>' +
+    '<div style="font-size:14px;color:#555;line-height:1.7;">' + street.desc + '</div></div>';
+
+  // 地址
+  if (street.addr) {
+    html += '<div style="margin:0 0 14px;padding:14px 16px;background:#FFF;border-radius:12px;border:1px solid #E8E8E8;">' +
+      '<div style="font-size:14px;font-weight:600;color:#333;margin-bottom:4px;">📍 地址</div>' +
+      '<div style="font-size:14px;color:#666;">' + street.addr + '</div></div>';
+  }
+
+  // 推荐店铺
+  html += '<div class="section-card"><div class="section-header"><span class="section-header-icon">🏪</span><span class="section-header-text">推荐店铺（' + street.shops.length + '家）</span><span class="section-toggle">−</span></div>' +
+    '<div class="section-content">';
+  street.shops.forEach(function(s) {
+    var shopId = 'street_' + street.id + '_' + s.name.replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g,'_');
+    html += '<div style="background:#FAFAFA;border-radius:12px;padding:14px;margin-bottom:10px;border:1px solid #E8E8E8;">' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">' +
+        '<span style="font-size:16px;font-weight:700;color:#333;">🏠 ' + s.name + '</span>' +
+        '<span style="font-size:13px;color:#E65100;font-weight:600;background:#FFF3E0;padding:3px 10px;border-radius:12px;">' + (s.price || '') + '</span>' +
+      '</div>' +
+      (s.addr ? '<div style="font-size:13px;color:#888;margin-bottom:6px;">📍 ' + s.addr + '</div>' : '') +
+      (s.recommend ? '<div style="font-size:13px;color:#555;margin-bottom:10px;">👍 推荐：' + s.recommend + '</div>' : '') +
+      '<button onclick="addStreetShopToPlan(\'' + street.id + '\',\'' + s.name.replace(/'/g,'\\\'') + '\')" style="width:100%;padding:10px;background:linear-gradient(135deg,#7E57C2,#9575CD);color:#FFF;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;">📅 添加到规划</button>' +
+      '</div>';
+  });
+  html += '</div></div>';
+
+  // 照片画廊
+  if (photos.length > 1) {
+    html += '<div class="section-card"><div class="section-header"><span class="section-header-icon">🖼️</span><span class="section-header-text">街区图集</span><span class="section-toggle">−</span></div>' +
+      '<div class="section-content">' +
+        '<div class="gallery-scroll">';
+    photos.forEach(function(src, i) {
+      html += '<div class="gallery-item" onclick="openLightbox(\'' + src + '\')">' +
+        '<img src="' + src + '" alt="' + (captions[i] || '') + '" loading="lazy" onerror="this.style.display=\'none\'" />' +
+        (captions[i] ? '<span class="gallery-cap">' + captions[i] + '</span>' : '') +
+        '</div>';
+    });
+    html += '</div></div></div>';
+  }
+
+  html += '</div>';
+  document.getElementById('detailContent').innerHTML = html;
+  document.getElementById('detailPage').classList.add('show');
+}
+
+function addStreetShopToPlan(streetId, shopName) {
+  if (currentMode === 'view') { showToast('当前为查看模式，无法编辑行程'); return; }
+  var street = DATA.food.streets.find(function(s) { return s.id === streetId; });
+  if (!street) return;
+  var shop = street.shops.find(function(s) { return s.name === shopName; });
+  if (!shop) return;
+  var shopId = 'street_' + streetId + '_' + shopName.replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g,'_');
+  addFoodShopToPlan(shopId);
+}
+
+// ============================================================
+// 行程规划系统（核心新功能）
+// ============================================================
+var planCache = null;
+
+async function getPlan() {
+  // 优先从云端加载
+  if (planCache) return planCache;
+  try {
+    var cloud = await loadFromCloud('plan');
+    if (cloud) { planCache = cloud; return cloud; }
+  } catch(e) {}
+  // 降级到本地
+  try {
+    var data = localStorage.getItem('beijing_trip_plan_v2');
+    if (data) { planCache = JSON.parse(data); return planCache; }
+  } catch(e) {}
+  planCache = createDefaultPlan();
+  return planCache;
+}
+
+function getPlanSync() {
+  // 同步版本，用于渲染等不需要异步的场景
+  return planCache || createDefaultPlan();
+}
+
+async function savePlan(plan) {
+  planCache = plan;
+  try { localStorage.setItem('beijing_trip_plan_v2', JSON.stringify(plan)); } catch(e) {}
+  saveToCloud('plan', plan);
+  renderPlan();
+}
+
+function createDefaultPlan() {
+  var days = [];
+  for (var i = 1; i <= 7; i++) {
+    var labels = ['第一天 出发','第二天 故宫天安门','第三天 颐和园圆明园','第四天 什刹海胡同','第五天 长城','第六天 奥林匹克','第七天 返程'];
+    days.push({
+      dayNum: i,
+      label: labels[i-1] || ('第'+i+'天'),
+      slots: []  // [{type:'spot'|'food'|'hotel'|'transport'|'other', id:'', slotType:'morning'|'noon'|'afternoon'|'evening'|'hotel'|'transport', name:'', detail:'', memo:'', lat:null, lng:null, custom:true|false}]
+    });
+  }
+  return { totalDays: 7, days: days };
+}
+
+function getCurrentDayIndex() {
+  return parseInt(document.querySelector('.day-chip.active')?.dataset?.day || '0') || 0;
+}
+
+function isItemInPlan(itemId) {
+  var plan = getPlanSync();
+  for (var d = 0; d < plan.days.length; d++) {
+    for (var s = 0; s < plan.days[d].slots.length; s++) {
+      if (plan.days[d].slots[s].id === itemId) return true;
+    }
+  }
+  return false;
+}
+
+// --- 渲染行程规划页 ---
+function renderPlan() {
+  var plan = getPlanSync();
+  renderDaysTabs(plan);
+  renderPlanContent(plan);
+
+}
+
+function renderDaysTabs(plan) {
+  var html = '';
+  for (var i = 0; i < plan.days.length; i++) {
+    var d = plan.days[i];
+    var activeClass = i === 0 ? ' active' : '';
+    var count = d.slots.length;
+    html += '<div class="day-chip' + activeClass + '" data-day="' + i + '" onclick="selectDay(' + i + ',this)">第' + d.dayNum + '天' + (count?'('+count+')':'') + '</div>';
+  }
+  document.getElementById('planDaysTabs').innerHTML = html;
+}
+
+function selectDay(dayIndex, el) {
+  document.querySelectorAll('.day-chip').forEach(function(c) { c.classList.remove('active'); });
+  el.classList.add('active');
+  var plan = getPlanSync();
+  renderDaySection(plan, dayIndex);
+}
+
+function renderPlanContent(plan) {
+  renderDaySection(plan, 0);
+}
+
+function renderDaySection(plan, dayIdx) {
+  var day = plan.days[dayIdx];
+  var container = document.getElementById('planContent');
+
+  if (day.slots.length === 0) {
+    container.innerHTML = '<div class="plan-empty"><span class="plan-empty-icon">📋</span><span class="plan-empty-text">第' + day.dayNum + '天还没有安排<br/>点击上方按钮添加景点/美食/住宿</span></div>';
+    return;
+  }
+
+  var html = '';
+  html += '<div class="plan-day-section">';
+  html += '<div class="plan-day-header">';
+  html += '<span class="plan-day-title">' + day.label + '</span>';
+  html += '<span class="plan-day-actions"><span class="plan-day-action" onclick="clearDay(' + dayIdx + ')">清空当天</span></span>';
+  html += '</div>';
+  html += '<div class="plan-day-body">';
+
+  // 按时间段分组排序
+  var slotOrder = {'hotel':0,'morning':1,'noon':2,'afternoon':3,'evening':4,'transport':5};
+  var sortedSlots = day.slots.slice().sort(function(a,b){
+    return (slotOrder[a.slotType]||99) - (slotOrder[b.slotType]||99);
+  });
+
+  var slotLabels = {
+    morning:'🌅 上午', noon:'☀️ 中午', afternoon:'🌤️ 下午', evening:'🌙 晚上', hotel:'🏨 住宿', transport:'✈️ 交通'
+  };
+  var slotColors = {
+    morning:'#E67E22', noon:'#E74C3C', afternoon:'#27AE60', evening:'#8E44AD', hotel:'#2980B9', transport:'#78909C'
+  };
+
+  sortedSlots.forEach(function(slot, idx) {
+    var cls = slot.slotType || 'afternoon';
+    if (slot.custom) cls += ' plan-slot-custom';
+    var originalIdx = day.slots.indexOf(slot);
+    html += '<div class="plan-slot ' + cls + '" onclick="showSlotOnMap(\'' + slot.id + '\',\'' + slot.type + '\',\'' + (slot.lat||'') + '\',\'' + (slot.lng||'') + '\')">';
+    html += '<div class="plan-slot-icon">' + getSlotIcon(slot.type) + '</div>';
+    html += '<div class="plan-slot-info">';
+    html += '<span class="plan-slot-name">' + (slotLabels[slot.slotType]||'') + ' · ' + slot.name + '</span>';
+    html += '<span class="plan-slot-detail">' + (slot.detail || '') + '</span>';
+    if (slot.memo) html += '<span class="plan-slot-memo">💬 ' + slot.memo + '</span>';
+    html += '</div>';
+    html += '<span class="plan-slot-edit" onclick="event.stopPropagation();openSlotEdit(' + dayIdx + ',' + originalIdx + ')">✏️</span>';
+    html += '<span class="plan-slot-remove" onclick="event.stopPropagation();removeSlot(' + dayIdx + ',' + originalIdx + ')">×</span>';
+    html += '</div>';
+  });
+
+  html += '</div></div>';
+  container.innerHTML = html;
+}
+
+function getSlotIcon(type) {
+  switch(type) {
+    case 'spot': return '📍';
+    case 'food': return '🍜';
+    case 'hotel': return '🏨';
+    case 'transport': return '✈️';
+    case 'other': return '📌';
+    default: return '📍';
+  }
+}
+
+
+
+// --- 操作函数 ---
+var pendingShopId = '';
+var selectedDaySlotIndex = 0;
+var selectedDaySlotTime = '';
+
+function addFoodShopToPlan(shopId) {
+  if (currentMode === 'view') { showToast('当前为查看模式，无法编辑行程'); return; }
+  pendingShopId = shopId;
+  selectedDaySlotIndex = 0;
+  selectedDaySlotTime = '';
+
+  // 查找店铺名称用于显示
+  var shopName = '';
+  var dishName = '';
+  // 先在菜品中查找
+  for (var di = 0; di < DATA.food.dishes.length; di++) {
+    var d = DATA.food.dishes[di];
+    for (var si = 0; si < d.shops.length; si++) {
+      if (shopId === d.id + '_' + d.shops[si].name.replace(/[^a-zA-Z0-9]/g,'_')) {
+        shopName = d.shops[si].name;
+        dishName = d.name;
+        break;
+      }
+    }
+  }
+  // 在街区中查找
+  if (!shopName) {
+    for (var sti = 0; sti < DATA.food.streets.length; sti++) {
+      var st = DATA.food.streets[sti];
+      for (var sj = 0; sj < st.shops.length; sj++) {
+        if (shopId === 'street_' + st.id + '_' + st.shops[sj].name.replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g,'_')) {
+          shopName = st.shops[sj].name;
+          dishName = st.name;
+          break;
+        }
+      }
+    }
+  }
+
+  document.getElementById('daySlotHeader').textContent = '📅 添加「' + shopName + '」到规划';
+
+  // 渲染天数选择
+  var plan = getPlanSync();
+  var dayTabsHtml = '';
+  for (var i = 0; i < plan.days.length; i++) {
+    var d = plan.days[i];
+    var activeClass = i === 0 ? ' active' : '';
+    dayTabsHtml += '<span class="day-chip' + activeClass + '" data-day="' + i + '" onclick="selectDaySlotDay(' + i + ',this)" style="cursor:pointer;">第' + d.dayNum + '天</span>';
+  }
+  document.getElementById('daySlotTabs').innerHTML = dayTabsHtml;
+
+  // 渲染时段选择
+  var times = [
+    {id:'morning', label:'☀️ 上午', desc:'9:00-12:00'},
+    {id:'noon', label:'🌤️ 中午', desc:'12:00-14:00'},
+    {id:'afternoon', label:'🌅 下午', desc:'14:00-18:00'},
+    {id:'evening', label:'🌙 晚上', desc:'18:00-21:00'}
+  ];
+  var timesHtml = '';
+  for (var t = 0; t < times.length; t++) {
+    timesHtml += '<div class="slot-time-chip" data-time="' + times[t].id + '" onclick="selectDaySlotTime(\'' + times[t].id + '\',this)" style="flex:1;min-width:70px;padding:12px 8px;text-align:center;border-radius:12px;border:2px solid #E8E8E8;cursor:pointer;background:#FAFAFA;transition:all 0.2s;">' +
+      '<div style="font-size:18px;margin-bottom:2px;">' + times[t].label.split(' ')[0] + '</div>' +
+      '<div style="font-size:12px;font-weight:600;color:#555;">' + times[t].label.split(' ')[1] + '</div>' +
+      '<div style="font-size:11px;color:#999;">' + times[t].desc + '</div>' +
+      '</div>';
+  }
+  document.getElementById('daySlotTimes').innerHTML = timesHtml;
+
+  selectedDaySlotIndex = 0;
+  selectedDaySlotTime = '';
+  document.getElementById('daySlotMask').classList.add('show');
+  document.getElementById('daySlotModal').classList.add('show');
+}
+
+function selectDaySlotDay(idx, el) {
+  selectedDaySlotIndex = idx;
+  var chips = document.querySelectorAll('#daySlotTabs .day-chip');
+  for (var i = 0; i < chips.length; i++) { chips[i].classList.remove('active'); }
+  el.classList.add('active');
+}
+
+function selectDaySlotTime(time, el) {
+  selectedDaySlotTime = time;
+  var chips = document.querySelectorAll('#daySlotTimes .slot-time-chip');
+  for (var i = 0; i < chips.length; i++) {
+    chips[i].style.borderColor = '#E8E8E8';
+    chips[i].style.background = '#FAFAFA';
+  }
+  el.style.borderColor = '#7E57C2';
+  el.style.background = '#F3E5F5';
+}
+
+function closeDaySlotPicker() {
+  document.getElementById('daySlotMask').classList.remove('show');
+  document.getElementById('daySlotModal').classList.remove('show');
+}
+
+function confirmDaySlotAdd() {
+  if (!selectedDaySlotTime) { showToast('请先选择一个时段'); return; }
+  if (!pendingShopId) { showToast('未选择店铺'); return; }
+
+  var shopData = findSlotData('food', pendingShopId);
+  if (!shopData) { showToast('未找到店铺信息'); return; }
+
+  var plan = getPlanSync();
+  var dayIdx = selectedDaySlotIndex;
+  plan.days[dayIdx].slots.push({
+    type: 'food',
+    id: pendingShopId,
+    slotType: selectedDaySlotTime,
+    name: shopData.name,
+    detail: shopData.detail || '',
+    custom: false
+  });
+
+  savePlan(plan);
+  closeDaySlotPicker();
+
+  // 自动切换到规划页
+  switchTab('page-plan', document.querySelector('[data-page="page-plan"]'));
+  // 选中对应的天数
+  setTimeout(function() {
+    var dayChip = document.querySelector('#planDaysTabs .day-chip[data-day="' + dayIdx + '"]');
+    if (dayChip) selectDay(dayIdx, dayChip);
+  }, 200);
+
+  showToast('已添加到第' + (dayIdx + 1) + '天');
+}
+
+function addToPlan(itemId) {
+  if (currentMode === 'view') { showToast('当前为查看模式，无法编辑行程'); return; }
+  openPicker('spot', itemId);
+  showToast('请在规划页选择要添加到的日期和时段');
+  setTimeout(function(){ switchTab('page-plan',document.querySelector('[data-page="page-plan"]')); }, 300);
+}
+
+function removeSlot(dayIdx, slotIdx) {
+  if (currentMode === 'view') { showToast('当前为查看模式，无法编辑行程'); return; }
+  var plan = getPlanSync();
+  plan.days[dayIdx].slots.splice(slotIdx, 1);
+  savePlan(plan);
+  showToast('已移除');
+}
+
+function clearDay(dayIdx) {
+  if (currentMode === 'view') { showToast('当前为查看模式，无法编辑行程'); return; }
+  if (!confirm('确定清空第' + (dayIdx+1) + '天的所有安排吗？')) return;
+  var plan = getPlanSync();
+  plan.days[dayIdx].slots = [];
+  savePlan(plan);
+  showToast('已清空');
+}
+
+function clearPlan() {
+  if (currentMode === 'view') { showToast('当前为查看模式，无法编辑行程'); return; }
+  if (!confirm('确定清空所有天的行程安排吗？')) return;
+  savePlan(createDefaultPlan());
+  showToast('已重置全部行程');
+}
+
+// --- 选择器弹窗 ---
+var currentPickerType = '';  // 'spot' | 'food' | 'hotel'
+var preselectedItemId = '';
+
+function openPicker(type, preselectId) {
+  currentPickerType = type;
+  preselectedItemId = preselectId || '';
+
+  var header = '', listHtml = '';
+
+  if (type === 'spot') {
+    header = '📍 选择景点';
+    // 按区域分组
+    var groups = {};
+    DATA.spots.forEach(function(s) {
+      if (s.area) { if(!groups[s.area])groups[s.area]=[]; groups[s.area].push(s); }
+    });
+    Object.keys(groups).sort().forEach(function(area) {
+      listHtml += '<div class="picker-category">' + area + '</div>';
+      groups[area].forEach(function(s) {
+        var checked = isItemInPlan(s.id) ? ' checked' : '';
+        var preselect = s.id === preselectId ? ' checked' : '';
+        listHtml += '<div class="picker-item' + (checked||preselect?' checked':'') + '" data-id="' + s.id + '" onclick="togglePickerItem(this,\'' + s.id + '\')">' +
+          '<div class="picker-check">' + (checked||preselect?'✓':'') + '</div>' +
+          '<div class="picker-info"><div class="picker-name">' + s.icon + ' ' + s.name + '</div><div class="picker-detail">' + s.subtitle + ' · ' + s.duration + ' · ' + s.price + '</div></div>' +
+          '</div>';
+      });
+    });
+  } else if (type === 'food') {
+    header = '🍜 选择美食/餐厅';
+    DATA.food.dishes.forEach(function(d) {
+      d.shops.forEach(function(shop) {
+        listHtml += '<div class="picker-item" data-id="' + d.id + '_' + shop.name.replace(/[^a-zA-Z0-9]/g,'_') + '" onclick="togglePickerItem(this,this.dataset.id)">' +
+          '<div class="picker-check"></div>' +
+          '<div class="picker-info"><div class="picker-name">' + d.icon + ' ' + shop.name + '</div><div class="picker-detail">' + d.name + '</div></div>' +
+        '</div>';
+      });
+    });
+    DATA.food.streets.forEach(function(st) {
+      listHtml += '<div class="picker-item" data-id="street_' + st.name.replace(/[^a-zA-Z0-9]/g,'_') + '" onclick="togglePickerItem(this,this.dataset.id)">' +
+        '<div class="picker-check"></div>' +
+        '<div class="picker-info"><div class="picker-name">' + st.name.split(' ')[0] + '</div><div class="picker-detail">' + st.recommend + '</div></div>' +
+      '</div>';
+    });
+  } else if (type === 'hotel') {
+    header = '🏨 选择住宿';
+    DATA.hotels.forEach(function(h) {
+      listHtml += '<div class="picker-item" data-id="' + h.id + '" onclick="togglePickerItem(this,\'' + h.id + '\')">' +
+        '<div class="picker-check"></div>' +
+        '<div class="picker-info"><div class="picker-name">' + h.icon + ' ' + h.name + '</div><div class="picker-detail">' + h.desc + ' · 推荐指数:'+'★'.repeat(h.recScore)+'</div></div>' +
+      '</div>';
+    });
+  } else if (type === 'transport') {
+    header = '✈️ 选择交通';
+    var tGroups = {};
+    DATA.transportOptions.forEach(function(t) {
+      if (!tGroups[t.category]) tGroups[t.category] = [];
+      tGroups[t.category].push(t);
+    });
+    Object.keys(tGroups).forEach(function(cat) {
+      listHtml += '<div class="picker-category">' + cat + '</div>';
+      tGroups[cat].forEach(function(t) {
+        var checked = isItemInPlan(t.id) ? ' checked' : '';
+        listHtml += '<div class="picker-item' + (checked ? ' checked' : '') + '" data-id="' + t.id + '" onclick="togglePickerItem(this,\'' + t.id + '\')">' +
+          '<div class="picker-check">' + (checked ? '✓' : '') + '</div>' +
+          '<div class="picker-info"><div class="picker-name">' + t.icon + ' ' + t.name + '</div><div class="picker-detail">' + t.detail + '</div></div>' +
+          '</div>';
+      });
+    });
+  }
+
+  document.getElementById('pickerHeader').textContent = header;
+  document.getElementById('pickerList').innerHTML = listHtml || '<div style="padding:20px;text-align:center;color:#999;">暂无可选项</div>';
+  document.getElementById('pickerMask').classList.add('show');
+  document.getElementById('pickerModal').classList.add('show');
+}
+
+function showSpotPicker() { if (currentMode === 'view') { showToast('当前为查看模式，无法编辑行程'); return; } openPicker('spot'); }
+function showFoodPicker() { if (currentMode === 'view') { showToast('当前为查看模式，无法编辑行程'); return; } openPicker('food'); }
+function showHotelPicker() { if (currentMode === 'view') { showToast('当前为查看模式，无法编辑行程'); return; } openPicker('hotel'); }
+function showTransportPicker() { if (currentMode === 'view') { showToast('当前为查看模式，无法编辑行程'); return; } openPicker('transport'); }
+
+function togglePickerItem(el, id) {
+  el.classList.toggle('checked');
+  var checkEl = el.querySelector('.picker-check');
+  checkEl.textContent = el.classList.contains('checked') ? '✓' : '';
+}
+
+function closePicker() {
+  document.getElementById('pickerMask').classList.remove('show');
+  document.getElementById('pickerModal').classList.remove('show');
+}
+
+function confirmPicker() {
+  if (currentMode === 'view') { showToast('当前为查看模式，无法编辑行程'); return; }
+  // 收集所有选中的项目
+  var checkedItems = [];
+  document.querySelectorAll('#pickerList .picker-item.checked').forEach(function(el) {
+    checkedItems.push({id: el.dataset.id, el: el});
+  });
+
+  if (checkedItems.length === 0) { showToast('请先选择要添加的项目'); return; }
+
+  // 批量添加到当前选中的天数
+  var dayIdx = getCurrentDayIndex();
+  var plan = getPlanSync();
+
+  checkedItems.forEach(function(item) {
+    // 根据类型查找详细信息
+    var slot = findSlotData(currentPickerType, item.id);
+    if (slot) {
+      // 自动分配时间段
+      var slotType = assignSlotType(currentPickerType, slot, plan, dayIdx);
+      plan.days[dayIdx].slots.push({
+        type: currentPickerType === 'spot' ? 'spot' : (currentPickerType === 'food' ? 'food' : (currentPickerType === 'hotel' ? 'hotel' : 'transport')),
+        id: item.id,
+        slotType: slotType,
+        name: slot.name,
+        detail: slot.detail || slot.subtitle || '',
+        custom: false
+      });
+    }
+  });
+
+  savePlan(plan);
+  closePicker();
+  showToast('已添加 ' + checkedItems.length + ' 个项目到第' + (dayIdx+1) + '天');
+}
+
+// ========== 自定义选择器（住宿/自定义） ==========
+var customPickerMode = 'hotel'; // 'hotel' | 'custom'
+var geoTimer = null;
+
+function showCustomPicker(mode) {
+  if (currentMode === 'view') { showToast('当前为查看模式，无法编辑行程'); return; }
+  customPickerMode = mode;
+  var header = mode === 'hotel' ? '🏨 添加住宿（自定义）' : '✏️ 添加自定义项目';
+  document.getElementById('customPickerHeader').textContent = header;
+
+  // 重置表单
+  document.getElementById('customItemName').value = '';
+  document.getElementById('customItemAddr').value = '';
+  document.getElementById('customItemLng').value = '';
+  document.getElementById('customItemLat').value = '';
+  document.getElementById('customItemMemo').value = '';
+  document.getElementById('geoStatus').innerHTML = '';
+  // 重置交通字段
+  document.getElementById('customTransportNo').value = '';
+  document.getElementById('customTransportDepTime').value = '';
+  document.getElementById('customTransportArrTime').value = '';
+  document.getElementById('customTransportFrom').value = '';
+  document.getElementById('customTransportTo').value = '';
+  document.getElementById('customTransportPrice').value = '';
+  // 重置交通子类型选择
+  var ttOpts = document.querySelectorAll('#customTransportTypeSelect .type-option');
+  ttOpts.forEach(function(o) { o.classList.remove('active'); });
+  if (ttOpts.length > 0) ttOpts[0].classList.add('active');
+
+  // 设置类型选择
+  var typeOpts = document.querySelectorAll('#customTypeSelect .type-option');
+  typeOpts.forEach(function(opt) {
+    opt.classList.remove('active');
+    if (mode === 'hotel' && opt.dataset.type === 'hotel') opt.classList.add('active');
+    else if (mode === 'custom' && opt.dataset.type === 'other') opt.classList.add('active');
+  });
+
+  // 设置时间段
+  var slotOpts = document.querySelectorAll('#customSlotSelect .type-option');
+  slotOpts.forEach(function(opt) {
+    opt.classList.remove('active');
+    if (mode === 'hotel' && opt.dataset.slot === 'hotel') opt.classList.add('active');
+    else if (mode === 'custom' && opt.dataset.slot === 'afternoon') opt.classList.add('active');
+  });
+
+  // 绑定类型选择事件（含交通字段切换）
+  typeOpts.forEach(function(opt) {
+    opt.onclick = function() {
+      typeOpts.forEach(function(o) { o.classList.remove('active'); });
+      opt.classList.add('active');
+      toggleTransportFields(opt.dataset.type);
+    };
+  });
+  // 初始状态：非交通
+  toggleTransportFields(mode === 'hotel' ? 'hotel' : 'other');
+
+  // 绑定时间段选择事件
+  slotOpts.forEach(function(opt) {
+    opt.onclick = function() {
+      slotOpts.forEach(function(o) { o.classList.remove('active'); });
+      opt.classList.add('active');
+    };
+  });
+
+  document.getElementById('customPickerMask').classList.add('show');
+  document.getElementById('customPickerModal').classList.add('show');
+  setTimeout(function() { document.getElementById('customItemName').focus(); }, 300);
+}
+
+function closeCustomPicker() {
+  document.getElementById('customPickerMask').classList.remove('show');
+  document.getElementById('customPickerModal').classList.remove('show');
+}
+
+// 根据类型切换显示通用字段 vs 交通字段
+function toggleTransportFields(type) {
+  var geoFields = document.getElementById('customGeoFields');
+  var transportFields = document.getElementById('customTransportFields');
+  if (type === 'transport') {
+    geoFields.style.display = 'none';
+    transportFields.style.display = 'block';
+    // 初始化交通子类型选择
+    var ttOpts = document.querySelectorAll('#customTransportTypeSelect .type-option');
+    ttOpts.forEach(function(o) {
+      o.onclick = function() {
+        ttOpts.forEach(function(x) { x.classList.remove('active'); });
+        o.classList.add('active');
+      };
+    });
+  } else {
+    geoFields.style.display = 'block';
+    transportFields.style.display = 'none';
+  }
+}
+
+function onCustomNameInput() {
+  // 清除之前的定时器
+  if (geoTimer) clearTimeout(geoTimer);
+  var name = document.getElementById('customItemName').value.trim();
+  if (name.length < 2) return;
+
+  // 用名称作为地址去查询位置
+  geoTimer = setTimeout(function() {
+    var addr = document.getElementById('customItemAddr').value.trim() || name;
+    geoCodeAddress(addr + ' 北京');
+  }, 600);
+}
+
+function onCustomAddrInput() {
+  if (geoTimer) clearTimeout(geoTimer);
+  var addr = document.getElementById('customItemAddr').value.trim();
+  if (addr.length < 2) return;
+
+  geoTimer = setTimeout(function() {
+    geoCodeAddress(addr + ' 北京');
+  }, 600);
+}
+
+function geoCodeAddress(address) {
+  var statusEl = document.getElementById('geoStatus');
+  statusEl.innerHTML = '<span class="geo-loading">🔍 正在查找位置...</span>';
+
+  if (typeof AMap === 'undefined' || !AMap.Geocoder) {
+    // 高德地图未加载，尝试使用简单方式
+    statusEl.innerHTML = '<span class="geo-error">⚠️ 地图未加载，可手动输入坐标</span>';
+    document.getElementById('customItemLng').readOnly = false;
+    document.getElementById('customItemLat').readOnly = false;
+    return;
+  }
+
+  var geocoder = new AMap.Geocoder({ city: '北京' });
+  geocoder.getLocation(address, function(status, result) {
+    if (status === 'complete' && result.info === 'OK') {
+      var geocode = result.geocodes[0];
+      var lng = geocode.location.lng.toFixed(6);
+      var lat = geocode.location.lat.toFixed(6);
+      document.getElementById('customItemLng').value = lng;
+      document.getElementById('customItemLat').value = lat;
+      statusEl.innerHTML = '<span class="geo-success">✅ 已定位：' + geocode.formattedAddress + '</span>';
+    } else {
+      statusEl.innerHTML = '<span class="geo-error">⚠️ 未找到位置，请手动输入坐标</span>';
+      document.getElementById('customItemLng').readOnly = false;
+      document.getElementById('customItemLat').readOnly = false;
+    }
+  });
+}
+
+function confirmCustomItem() {
+  if (currentMode === 'view') { showToast('当前为查看模式，无法编辑行程'); return; }
+  var name = document.getElementById('customItemName').value.trim();
+  if (!name) { showToast('请输入项目名称'); return; }
+
+  // 获取选中的类型
+  var activeType = document.querySelector('#customTypeSelect .type-option.active');
+  var type = activeType ? activeType.dataset.type : (customPickerMode === 'hotel' ? 'hotel' : 'other');
+
+  // 获取选中的时间段
+  var activeSlot = document.querySelector('#customSlotSelect .type-option.active');
+  var slotType = activeSlot ? activeSlot.dataset.slot : (type === 'hotel' ? 'hotel' : 'afternoon');
+
+  var memo = document.getElementById('customItemMemo').value.trim();
+  var lat = parseFloat(document.getElementById('customItemLat').value) || null;
+  var lng = parseFloat(document.getElementById('customItemLng').value) || null;
+
+  // 交通类型：收集航班/火车信息生成 detail
+  var detail = '';
+  if (type === 'transport') {
+    var activeTT = document.querySelector('#customTransportTypeSelect .type-option.active');
+    var ttLabel = activeTT ? activeTT.textContent : '';
+    var tNo = document.getElementById('customTransportNo').value.trim();
+    var tDep = document.getElementById('customTransportDepTime').value.trim();
+    var tArr = document.getElementById('customTransportArrTime').value.trim();
+    var tFrom = document.getElementById('customTransportFrom').value.trim();
+    var tTo = document.getElementById('customTransportTo').value.trim();
+    var tPrice = document.getElementById('customTransportPrice').value.trim();
+    var parts = [];
+    if (ttLabel) parts.push(ttLabel);
+    if (tNo) parts.push(tNo);
+    if (tDep && tArr) parts.push(tDep + '→' + tArr);
+    else if (tDep) parts.push(tDep + '出发');
+    if (tFrom && tTo) parts.push(tFrom + '→' + tTo);
+    else if (tFrom) parts.push(tFrom);
+    if (tPrice) parts.push(tPrice);
+    detail = parts.join(' | ');
+    if (memo) memo = memo;
+  } else {
+    detail = memo || '';
+  }
+
+  var dayIdx = getCurrentDayIndex();
+  var plan = getPlanSync();
+
+  var uniqueId = 'custom_' + type + '_' + Date.now();
+  plan.days[dayIdx].slots.push({
+    type: type,
+    id: uniqueId,
+    slotType: slotType,
+    name: name,
+    detail: detail,
+    memo: memo || '',
+    lat: lat,
+    lng: lng,
+    custom: true
+  });
+
+  savePlan(plan);
+  closeCustomPicker();
+  showToast('已添加「' + name + '」到第' + (dayIdx+1) + '天');
+}
+
+// ========== Slot编辑功能 ==========
+var editingDayIdx = -1;
+var editingSlotIdx = -1;
+
+function openSlotEdit(dayIdx, slotIdx) {
+  if (currentMode === 'view') { showToast('当前为查看模式，无法编辑行程'); return; }
+  editingDayIdx = dayIdx;
+  editingSlotIdx = slotIdx;
+  var plan = getPlanSync();
+  var slot = plan.days[dayIdx].slots[slotIdx];
+
+  document.getElementById('slotEditName').value = slot.name || '';
+  document.getElementById('slotEditMemo').value = slot.memo || '';
+
+  // 交通类型：显示交通编辑字段
+  var isTransport = slot.type === 'transport';
+  var transportFields = document.getElementById('slotEditTransportFields');
+  transportFields.style.display = isTransport ? 'block' : 'none';
+  if (isTransport && slot.detail) {
+    // 尝试从 detail 中解析交通信息
+    var parts = slot.detail.split('|').map(function(p) { return p.trim(); });
+    // parts 大致顺序：交通方式 | 航班号/车次 | 时间 | 地点 | 价格
+    document.getElementById('slotEditTransportNo').value = parts.length > 1 ? parts[1] : '';
+    var timeStr = parts.length > 2 ? parts[2] : '';
+    document.getElementById('slotEditTransportTime').value = timeStr.indexOf('→') >= 0 ? timeStr : '';
+    document.getElementById('slotEditTransportPrice').value = parts.length > 3 ? parts[parts.length-1].indexOf('元') >= 0 ? parts[parts.length-1] : '' : '';
+  } else {
+    document.getElementById('slotEditTransportNo').value = '';
+    document.getElementById('slotEditTransportTime').value = '';
+    document.getElementById('slotEditTransportPrice').value = '';
+  }
+
+  // 设置时间段选择
+  var slotOpts = document.querySelectorAll('#slotEditTypeSelect .type-option');
+  slotOpts.forEach(function(opt) {
+    opt.classList.remove('active');
+    if (opt.dataset.slot === slot.slotType) opt.classList.add('active');
+  });
+  slotOpts.forEach(function(opt) {
+    opt.onclick = function() {
+      slotOpts.forEach(function(o) { o.classList.remove('active'); });
+      opt.classList.add('active');
+    };
+  });
+
+  document.getElementById('slotEditMask').classList.add('show');
+  document.getElementById('slotEditModal').classList.add('show');
+  setTimeout(function() { document.getElementById('slotEditName').focus(); }, 300);
+}
+
+function closeSlotEdit() {
+  document.getElementById('slotEditMask').classList.remove('show');
+  document.getElementById('slotEditModal').classList.remove('show');
+  editingDayIdx = -1;
+  editingSlotIdx = -1;
+}
+
+function saveSlotEdit() {
+  if (currentMode === 'view') { showToast('当前为查看模式，无法编辑行程'); return; }
+  var name = document.getElementById('slotEditName').value.trim();
+  if (!name) { showToast('请输入项目名称'); return; }
+
+  var memo = document.getElementById('slotEditMemo').value.trim();
+  var activeSlot = document.querySelector('#slotEditTypeSelect .type-option.active');
+  var slotType = activeSlot ? activeSlot.dataset.slot : 'afternoon';
+
+  var plan = getPlanSync();
+  var slot = plan.days[editingDayIdx].slots[editingSlotIdx];
+  slot.name = name;
+  slot.memo = memo;
+  slot.slotType = slotType;
+
+  // 交通类型：更新 detail
+  if (slot.type === 'transport') {
+    var tNo = document.getElementById('slotEditTransportNo').value.trim();
+    var tTime = document.getElementById('slotEditTransportTime').value.trim();
+    var tPrice = document.getElementById('slotEditTransportPrice').value.trim();
+    var parts = [];
+    if (tNo) parts.push(tNo);
+    if (tTime) parts.push(tTime);
+    if (tPrice) parts.push(tPrice);
+    slot.detail = parts.join(' | ') || memo || '';
+  } else {
+    if (memo && !slot.detail) slot.detail = memo;
+    else if (memo) slot.detail = memo;
+  }
+
+  savePlan(plan);
+  closeSlotEdit();
+  showToast('已更新「' + name + '」');
+}
+
+function findSlotData(type, id) {
+  if (type === 'spot') {
+    return DATA.spots.find(function(s) { return s.id === id; }) || null;
+  } else if (type === 'food') {
+    for (var di = 0; di < DATA.food.dishes.length; di++) {
+      var d = DATA.food.dishes[di];
+      for (var si = 0; si < d.shops.length; si++) {
+        if (id === d.id + '_' + d.shops[si].name.replace(/[^a-zA-Z0-9]/g,'_')) {
+          return {name: d.shops[si].name, detail: d.name + ' · ' + d.desc};
+        }
+      }
+    }
+    for (var sti = 0; sti < DATA.food.streets.length; sti++) {
+      var st = DATA.food.streets[sti];
+      for (var sj = 0; sj < st.shops.length; sj++) {
+        if (id === 'street_' + st.id + '_' + st.shops[sj].name.replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g,'_')) {
+          return {name: st.shops[sj].name, detail: st.name + ' · ' + st.desc};
+        }
+      }
+      // 兼容旧的街区ID格式
+      if (id === 'street_' + st.name.replace(/[^a-zA-Z0-9]/g,'_')) {
+        return {name: st.name, detail: st.desc};
+      }
+    }
+  } else if (type === 'hotel') {
+    return DATA.hotels.find(function(h) { return h.id === id; }) || null;
+  } else if (type === 'transport') {
+    return DATA.transportOptions.find(function(t) { return t.id === id; }) || null;
+  }
+  return null;
+}
+
+function assignSlotType(type, slot, plan, dayIdx) {
+  var day = plan.days[dayIdx];
+  var existingTypes = day.slots.map(function(s) { return s.slotType; });
+
+  if (type === 'hotel') return 'hotel';
+  if (type === 'transport') return 'morning';  // 交通默认放上午时段
+
+  // 检查是否已有该类型的slot
+  var slots = ['morning','noon','afternoon','evening'];
+  for (var i = 0; i < slots.length; i++) {
+    if (existingTypes.indexOf(slots[i]) === -1) return slots[i];
+  }
+  return 'evening'; // 默认放晚上
+}
+
+// --- 在地图上显示行程路线 ---
+function showSlotOnMap(id, type, customLat, customLng) {
+  // 切换到地图tab并定位
+  switchTab('page-spots', document.querySelector('[data-page="page-spots"]'));
+
+  setTimeout(function() {
+    var targetLng = null, targetLat = null;
+
+    // 优先使用自定义坐标
+    if (customLat && customLng) {
+      targetLat = parseFloat(customLat);
+      targetLng = parseFloat(customLng);
+    } else if (type === 'spot') {
+      var spot = DATA.spots.find(function(s) { return s.id === id; });
+      if (spot) { targetLng = spot.lng; targetLat = spot.lat; }
+    } else if (type === 'food') {
+      var foodData = findFoodCoords(id);
+      if (foodData) { targetLng = foodData.lng; targetLat = foodData.lat; }
+    }
+
+    if (targetLng && targetLat && map) {
+      map.setZoomAndCenter(14, [targetLng, targetLat], false, 500);
+
+      // 绘制当天的路线连线
+      var dayIdx = getCurrentDayIndex();
+      drawDayRoute(dayIdx);
+    }
+  }, 500);
+}
+
+function drawDayRoute(dayIdx) {
+  // 清除旧的路线
+  if (window._routeLine) { map.remove(window._routeLine); window._routeLine = null; }
+  if (window._routeMarkers) {
+    window._routeMarkers.forEach(function(m) { map.remove(m); });
+    window._routeMarkers = [];
+  }
+
+  var plan = getPlanSync();
+  var day = plan.days[dayIdx];
+  if (!day || day.slots.length < 2) return;
+
+  // 收集有效坐标
+  var pathPoints = [];
+  var routeMarkers = [];
+
+  day.slots.forEach(function(slot) {
+    // 自定义项有坐标则优先使用
+    if (slot.custom && slot.lat && slot.lng) {
+      pathPoints.push([slot.lng, slot.lat]);
+      var mDom = document.createElement('div');
+      mDom.className = 'custom-marker route-marker';
+      mDom.innerHTML = getSlotIcon(slot.type);
+      var rm = new AMap.Marker({
+        position: [slot.lng, slot.lat],
+        content: mDom,
+        offset: new AMap.Pixel(-14, -14),
+        zIndex: 20
+      });
+      routeMarkers.push(rm);
+      map.add(rm);
+    } else if (slot.type === 'spot') {
+      var spot = DATA.spots.find(function(s) { return s.id === slot.id; });
+      if (spot && spot.lat && spot.lat < 50) {
+        pathPoints.push([spot.lng, spot.lat]);
+
+        // 路线上加小标记
+        var mDom = document.createElement('div');
+        mDom.className = 'custom-marker route-marker';
+        mDom.innerHTML = spot.icon;
+        var rm = new AMap.Marker({
+          position: [spot.lng, spot.lat],
+          content: mDom,
+          offset: new AMap.Pixel(-14, -14),
+          zIndex: 20
+        });
+        routeMarkers.push(rm);
+        map.add(rm);
+      }
+    } else if (slot.type === 'food') {
+      // 尝试找美食坐标
+      var foodData = findFoodCoords(slot.id);
+      if (foodData) {
+        pathPoints.push([foodData.lng, foodData.lat]);
+
+        var fDom = document.createElement('div');
+        fDom.className = 'custom-marker food-marker';
+        fDom.innerHTML = '🍜';
+        var fm = new AMap.Marker({
+          position: [foodData.lng, foodData.lat],
+          content: fDom,
+          offset: new AMap.Pixel(-14, -14),
+          zIndex: 20
+        });
+        routeMarkers.push(fm);
+        map.add(fm);
+      }
+    }
+  });
+
+  // 绘制折线连接所有点
+  if (pathPoints.length >= 2) {
+    var polyline = new AMap.Polyline({
+      path: pathPoints,
+      strokeColor: '#B39DDB',
+      strokeWeight: 4,
+      strokeOpacity: 0.8,
+      strokeStyle: 'solid',
+      lineJoin: 'round',
+      lineCap: 'round',
+      zIndex: 5
+    });
+    map.add(polyline);
+    window._routeLine = polyline;
+    window._routeMarkers = routeMarkers;
+
+    // 自适应视野
+    map.setFitView(routeMarkers, false, [60, 120, 60, 120]);
+  }
+}
+
+function findFoodCoords(foodId) {
+  for (var di = 0; di < DATA.food.dishes.length; di++) {
+    var d = DATA.food.dishes[di];
+    for (var si = 0; si < d.shops.length; si++) {
+      if (foodId === d.id + '_' + d.shops[si].name.replace(/[^a-zA-Z0-9]/g,'_')) {
+        return d.shops[si];
+      }
+    }
+  }
+  return null;
+}
+
+// ============================================================
+// 美食
+// ============================================================
+var foodTab = 'dishes';
+var warningExpanded = false;
+function switchFoodTab(tab, el) {
+  foodTab = tab;
+  document.querySelectorAll('.food-tab').forEach(function(t) { t.classList.remove('active'); });
+  el.classList.add('active');
+  renderFood();
+}
+function toggleWarning() {
+  warningExpanded = !warningExpanded;
+  document.getElementById('warningText').style.display = warningExpanded ? 'block' : 'none';
+  document.getElementById('warningToggle').textContent = warningExpanded ? '收起' : '展开';
+}
+function renderFood() {
+  document.getElementById('warningText').textContent = DATA.food.warning;
+  if (foodTab === 'dishes') {
+    document.getElementById('foodContent').innerHTML = DATA.food.dishes.map(function(d) {
+      var hasPhotos = d.photos && d.photos.length > 0;
+      return '<div class="dish-card" onclick="'+(hasPhotos ? 'showFoodDetail(\''+d.id+'\')' : '')+'"><div class="dish-header"><span class="dish-icon">' + d.icon + '</span><div class="dish-info"><span class="dish-name">' + d.name + '</span><span class="dish-desc">' + d.desc + '</span></div></div>' +
+        '<div class="dish-shops"><span class="shops-label">推荐店铺：</span><div class="shop-tags">' + d.shops.map(function(s) { return '<span class="shop-tag" onclick="event.stopPropagation();addToPlan(\''+d.id+'_'+s.name.replace(/[^a-zA-Z0-9]/g,'_')+'\')">' + s.name + '</span>'; }).join('') + '</div></div></div>';
+    }).join('');
+  } else {
+    document.getElementById('foodContent').innerHTML = DATA.food.streets.map(function(s) {
+      var hasPhotos = s.photos && s.photos.length > 0;
+      var shopCount = s.shops ? s.shops.length : 0;
+      var shopPreview = s.shops ? s.shops.slice(0, 3).map(function(sh){ return sh.name; }).join('、') : '';
+      var onclick = hasPhotos ? 'onclick="showStreetDetail(\''+s.id+'\')"' : '';
+      return '<div class="street-card" ' + onclick + ' style="' + (hasPhotos ? 'cursor:pointer;' : '') + '">' +
+        '<div class="street-header">' +
+          '<span class="street-name">' + s.name + '</span>' +
+          '<span class="street-shop-count">' + shopCount + '家店铺</span>' +
+        '</div>' +
+        '<span class="street-desc">' + s.desc + '</span>' +
+        (s.addr ? '<div class="street-addr">📍 ' + s.addr + '</div>' : '') +
+        (shopPreview ? '<div class="street-shops-preview">🏪 ' + shopPreview + (shopCount > 3 ? ' 等' : '') + '</div>' : '') +
+        (hasPhotos ? '<div class="street-card-arrow">查看详情 →</div>' : '') +
+      '</div>';
+    }).join('');
+  }
+}
+
+// ============================================================
+// 交通
+// ============================================================
+function renderTransport() {
+  var t = DATA.transport;
+  document.getElementById('transportContent').innerHTML =
+    '<div class="section-title">✈️ 宁波→北京</div><div style="padding:0 0 12px;color:#666;font-size:15px;">直飞约 ' + t.fromNingbo.duration + ' · ' + t.fromNingbo.price + '</div>' +
+    '<div class="flight-compare">' +
+      '<div class="flight-card"><div class="flight-header"><span class="flight-type">去程推荐</span></div><span class="flight-time">07:20→09:35</span><span class="flight-airport">🛫 宁波栎社 → 北京大兴</span><span class="flight-desc">✅ 早班机中午前到不耽误行程</span></div>' +
+      '<div class="flight-card"><div class="flight-header"><span class="flight-type">返程推荐</span></div><span class="flight-time">20:35→22:55</span><span class="flight-airport">🛬 北京大兴 → 宁波栎社</span><span class="flight-desc">✅ 晚班机白天可多玩半天</span></div>' +
+    '</div>' +
+    '<div class="section-title">🛩️ 机场交通</div>' +
+    t.airport.map(function(a) {
+      return '<div class="airport-card"><div class="airport-header"><span class="airport-name">' + a.name + '</span><span class="airport-distance">' + a.distance + '</span></div>' +
+        '<div class="airport-row"><span>🚇</span><span class="airport-text">' + a.subway + '</span></div>' +
+        '<div class="airport-row"><span>🚌</span><span class="airport-text">' + a.bus + '</span></div>' +
+        '<div class="airport-row"><span>🚕</span><span class="airport-text">' + a.taxi + '</span></div>' +
+        '<div class="airport-tip"><span>💡</span><span class="tip-text">' + a.tip + '</span></div></div>';
+    }).join('') +
+    '<div class="section-title">🚇 市内交通</div>' +
+    t.city.map(function(c) {
+      return '<div class="city-card"><div class="city-header"><span class="city-icon">' + c.icon + '</span><span class="city-mode">' + c.mode + '</span></div>' +
+        '<span class="city-desc">' + c.desc + '</span>' + (c.tool ? '<div style="margin-top:8px;font-size:14px;color:#7E57C2;font-weight:500;">📱 ' + c.tool + '</div>' : '') + '</div>';
+    }).join('') +
+    '<div class="section-title">⚠️ 避坑提示</div>' +
+    t.warnings.map(function(w) {
+      return '<div class="warn-item"><span class="warn-icon">⚠️</span><span class="warn-text">' + w + '</span></div>';
+    }).join('');
+}
+
+// ============================================================
+// 攻略
+// ============================================================
+function renderTips() {
+  document.getElementById('tipsContent').innerHTML = DATA.tips.map(function(t) {
+    return '<div class="tip-card" style="border-left-color:' + t.color + '">' +
+      '<div class="tip-card-header"><span class="tip-card-icon">' + t.icon + '</span><span class="tip-card-title" style="color:' + t.color + '">' + t.title + '</span></div>' +
+      '<div class="tip-card-body">' + t.items.map(function(item) {
+        return '<div class="tip-list-item"><span class="tip-bullet" style="background:' + t.color + '"></span><span class="tip-text">' + item + '</span></div>';
+      }).join('') + '</div></div>';
+  }).join('');
+}
+
+// ============================================================
+// 预算
+// ============================================================
+var budgetCache = null;
+
+function getDefaultBudget() {
+  return [
+    { id:'flight', name:'机票', amount:0, icon:'✈️', preset:true },
+    { id:'hotel', name:'住宿', amount:0, icon:'🏨', preset:true },
+    { id:'ticket', name:'门票', amount:0, icon:'🎫', preset:true },
+    { id:'food', name:'餐饮', amount:0, icon:'🍜', preset:true },
+    { id:'transport', name:'市内交通', amount:0, icon:'🚕', preset:true }
+  ];
+}
+
+function loadBudget() {
+  if (budgetCache) return budgetCache;
+  // 先从本地快速加载
+  try {
+    var local = JSON.parse(localStorage.getItem('beijing_trip_budget'));
+    if (local && local.length > 0) { budgetCache = local; }
+  } catch(e) {}
+  if (!budgetCache) budgetCache = getDefaultBudget();
+  return budgetCache;
+}
+
+async function loadBudgetAsync() {
+  // 异步从云端加载，用于首次加载
+  try {
+    var cloud = await loadFromCloud('budget');
+    if (cloud && Array.isArray(cloud) && cloud.length > 0) {
+      budgetCache = cloud;
+      try { localStorage.setItem('beijing_trip_budget', JSON.stringify(cloud)); } catch(e) {}
+      return cloud;
+    }
+  } catch(e) {}
+  return loadBudget();
+}
+
+function saveBudget(items) {
+  budgetCache = items;
+  try { localStorage.setItem('beijing_trip_budget', JSON.stringify(items)); } catch(e) {}
+  saveToCloud('budget', items);
+  renderBudget();
+}
+function renderBudget() {
+  var items = loadBudget();
+  var total = items.reduce(function(s, i) { return s + (Number(i.amount) || 0); }, 0);
+  document.getElementById('totalAmount').textContent = '¥' + total;
+  document.getElementById('budgetList').innerHTML = items.map(function(item, index) {
+    return '<div class="budget-item"><div class="item-left"><span class="item-icon">' + item.icon + '</span><div class="item-info"><span class="item-name">' + item.name + '</span><span class="item-amount">¥' + (item.amount || 0) + '</span></div></div>' +
+      '<div class="item-actions"><button class="action-btn edit-btn" onclick="startEdit(' + index + ')">✏️</button>' +
+      (!item.preset ? '<button class="action-btn delete-btn" onclick="deleteItem(' + index + ')">🗑️</button>' : '') + '</div></div>';
+  }).join('');
+}
+var editIndex = -1;
+function startEdit(index) {
+  editIndex = index;
+  document.getElementById('editAmountInput').value = loadBudget()[index].amount || '';
+  document.getElementById('editMask').classList.add('show');
+  document.getElementById('editModal').classList.add('show');
+}
+function closeEdit() {
+  document.getElementById('editMask').classList.remove('show');
+  document.getElementById('editModal').classList.remove('show');
+  editIndex = -1;
+}
+function saveEdit() {
+  if (editIndex < 0) return;
+  var items = loadBudget();
+  items[editIndex].amount = parseFloat(document.getElementById('editAmountInput').value) || 0;
+  saveBudget(items);
+  closeEdit();
+  showToast('保存成功');
+}
+function showAddModal() {
+  document.getElementById('newNameInput').value = '';
+  document.getElementById('newAmountInput').value = '';
+  document.getElementById('addMask').classList.add('show');
+  document.getElementById('addModal').classList.add('show');
+}
+function closeAdd() {
+  document.getElementById('addMask').classList.remove('show');
+  document.getElementById('addModal').classList.remove('show');
+}
+function addCustomItem() {
+  var name = document.getElementById('newNameInput').value.trim();
+  if (!name) { showToast('请输入项目名称'); return; }
+  var amount = parseFloat(document.getElementById('newAmountInput').value) || 0;
+  var items = loadBudget();
+  items.push({ id:'custom_' + Date.now(), name:name, amount:amount, icon:'📝', preset:false });
+  saveBudget(items);
+  closeAdd();
+  showToast('添加成功');
+}
+function deleteItem(index) {
+  var items = loadBudget();
+  if (items[index].preset) { showToast('预设项目不能删除'); return; }
+  if (!confirm('确定删除"' + items[index].name + '"吗？')) return;
+  items.splice(index, 1);
+  saveBudget(items);
+}
+function resetBudget() {
+  if (!confirm('将清空所有金额，预设项目会保留。确定吗？')) return;
+  saveBudget([{ id:'flight', name:'机票', amount:0, icon:'✈️', preset:true },{ id:'hotel', name:'住宿', amount:0, icon:'🏨', preset:true },{ id:'ticket', name:'门票', amount:0, icon:'🎫', preset:true },{ id:'food', name:'餐饮', amount:0, icon:'🍜', preset:true },{ id:'transport', name:'市内交通', amount:0, icon:'🚕', preset:true }]);
+  showToast('已重置');
+}
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show';
+  setTimeout(function() { t.className = 'toast'; }, 1600);
+}
+
+
+// ============================================================
+// 初始化
+// ============================================================
+async function initApp() {
+  // 1. 从云端加载模式
+  currentMode = await getMode();
+  applyMode(currentMode);
+
+  // 2. 从云端加载行程数据
+  try {
+    var cloudPlan = await loadFromCloud('plan');
+    if (cloudPlan) { planCache = cloudPlan; }
+  } catch(e) { console.warn('云端行程加载失败:', e.message); }
+
+  // 3. 从云端加载预算数据
+  try {
+    var cloudBudget = await loadFromCloud('budget');
+    if (cloudBudget && Array.isArray(cloudBudget) && cloudBudget.length > 0) {
+      budgetCache = cloudBudget;
+      try { localStorage.setItem('beijing_trip_budget', JSON.stringify(cloudBudget)); } catch(e) {}
+    }
+  } catch(e) { console.warn('云端预算加载失败:', e.message); }
+
+  // 4. 渲染页面
+  renderPanelList(DATA.spots);
+  renderFood();
+  renderTransport();
+  renderTips();
+  renderBudget();
+  setTimeout(initMap, 300);
+  console.log('京城游记 H5 页面加载完成 - 共' + DATA.spots.length + '个景点（数据来源：Supabase + 本地）');
+}
+
+initApp();
+</script>
+</body>
+</html>

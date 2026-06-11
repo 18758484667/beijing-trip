@@ -1,0 +1,17 @@
+# 微信小程序文件（不需要部署到 GitHub Pages）
+pages/
+app.js
+app.json
+app.wxss
+project.config.json
+sitemap.json
+utils/
+
+# 文档和临时文件
+*.docx
+mockup.png
+.env
+
+# 系统文件
+.DS_Store
+Thumbs.db
