@@ -52,6 +52,7 @@
     .tab-item-mode.viewing { color: var(--red); }
     .tab-item-mode.viewing .mode-icon { animation: lockPulse 2s infinite; }
     @keyframes lockPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+    @keyframes spin { to { transform: rotate(360deg); } }
     .page { display: none; }
     .page.active { display: block; }
 
@@ -517,6 +518,11 @@
   <div class="modal-mask" id="pickerMask" onclick="closePicker()"></div>
   <div class="modal" id="pickerModal" style="max-height:80vh;padding:0;">
     <div class="modal-header" style="padding:16px;" id="pickerHeader">选择</div>
+    <!-- 选天栏 -->
+    <div style="padding:8px 16px;border-bottom:1px solid #F0F0F0;">
+      <div style="font-size:12px;color:#999;margin-bottom:6px;">添加到第几天</div>
+      <div id="pickerDayTabs" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+    </div>
     <div class="picker-list" id="pickerList"></div>
     <div class="modal-actions" style="padding:16px;">
       <button class="modal-btn modal-btn-cancel" onclick="closePicker()">取消</button>
@@ -2136,8 +2142,26 @@ function openPicker(type, preselectId) {
 
   document.getElementById('pickerHeader').innerHTML = header;
   document.getElementById('pickerList').innerHTML = listHtml || '<div style="padding:20px;text-align:center;color:#999;">暂无可选项</div>';
+
+  // 渲染选天栏
+  var plan = getPlanSync();
+  var dayTabsHtml = '';
+  var curDay = getCurrentDayIndex();
+  for (var i = 0; i < plan.days.length; i++) {
+    dayTabsHtml += '<span class="day-chip'+(i===curDay?' active':'')+'" data-day="'+i+'" onclick="selectPickerDay('+i+',this)" style="padding:5px 12px;font-size:13px;">第'+(i+1)+'天</span>';
+  }
+  document.getElementById('pickerDayTabs').innerHTML = dayTabsHtml;
+
   document.getElementById('pickerMask').classList.add('show');
   document.getElementById('pickerModal').classList.add('show');
+}
+
+var pickerSelectedDay = -1;
+function selectPickerDay(idx, el) {
+  pickerSelectedDay = idx;
+  var chips = document.querySelectorAll('#pickerDayTabs .day-chip');
+  chips.forEach(function(c) { c.classList.remove('active'); });
+  el.classList.add('active');
 }
 
 function showSpotPicker() { if (currentMode === 'view') { showToast('当前为查看模式，无法编辑行程'); return; } openPicker('spot'); }
@@ -2154,6 +2178,7 @@ function togglePickerItem(el, id) {
 function closePicker() {
   document.getElementById('pickerMask').classList.remove('show');
   document.getElementById('pickerModal').classList.remove('show');
+  pickerSelectedDay = -1;
 }
 
 function confirmPicker() {
@@ -2166,8 +2191,8 @@ function confirmPicker() {
 
   if (checkedItems.length === 0) { showToast('请先选择要添加的项目'); return; }
 
-  // 批量添加到当前选中的天数
-  var dayIdx = getCurrentDayIndex();
+  // 使用选择器里选的天
+  var dayIdx = pickerSelectedDay >= 0 ? pickerSelectedDay : getCurrentDayIndex();
   var plan = getPlanSync();
 
   checkedItems.forEach(function(item) {
@@ -2950,90 +2975,155 @@ function queryTransport() {
   if (!no) { showToast('请输入航班号/车次号'); return; }
 
   var resultEl = document.getElementById('transportQueryResult');
-  resultEl.innerHTML = '<div style="text-align:center;padding:16px;color:#999;"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#E74C3C" stroke-width="2" style="animation:spin 1s linear infinite;"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><div style="margin-top:8px;">正在查询「' + no + '」...</div></div>';
+  resultEl.innerHTML = '<div style="text-align:center;padding:20px;color:#999;"><div style="display:inline-block;width:24px;height:24px;border:3px solid #F0F0F0;border-top-color:#E74C3C;border-radius:50%;animation:spin 0.8s linear infinite;"></div><div style="margin-top:8px;">正在查询「' + no + '」...</div></div>';
 
-  // 模拟查询延迟
-  setTimeout(function() {
-    var t = DATA.transport;
-    if (currentTransportQuery === 'flight') {
-      // 用高德地图搜索机场位置
-      var airportName = '北京大兴国际机场';
-      var airport = t.airport[0];
-      if (no.toUpperCase().indexOf('CA') >= 0) {
-        airportName = '北京首都国际机场';
-        airport = t.airport[1];
-      }
-      resultEl.innerHTML = '<div style="background:#F8F8F8;border-radius:12px;padding:14px;">' +
-        '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">' +
-          '<div><span style="font-size:20px;font-weight:700;color:#333;">' + no.toUpperCase() + '</span><span style="font-size:14px;color:#999;margin-left:8px;">计划 · 直飞</span></div>' +
-          '<span style="font-size:14px;font-weight:600;color:#27AE60;background:#E8F5E9;padding:4px 10px;border-radius:8px;">准点率92%</span>' +
-        '</div>' +
-        '<div style="display:flex;gap:12px;margin-bottom:14px;">' +
-          '<div style="flex:1;text-align:center;background:#FFF;border-radius:10px;padding:12px;">' +
-            '<div style="font-size:24px;font-weight:800;color:#333;">07:20</div>' +
-            '<div style="font-size:12px;color:#999;">宁波栎社</div>' +
-            '<div style="font-size:11px;color:#E74C3C;margin-top:2px;">T2航站楼</div>' +
-          '</div>' +
-          '<div style="display:flex;align-items:center;flex-direction:column;justify-content:center;gap:4px;">' +
-            '<div style="font-size:11px;color:#999;">2h15m</div>' +
-            '<div style="width:40px;height:1px;background:#DDD;position:relative;"><div style="position:absolute;right:-4px;top:-3px;font-size:12px;">✈</div></div>' +
-            '<div style="font-size:11px;color:#999;">直飞</div>' +
-          '</div>' +
-          '<div style="flex:1;text-align:center;background:#FFF;border-radius:10px;padding:12px;">' +
-            '<div style="font-size:24px;font-weight:800;color:#333;">09:35</div>' +
-            '<div style="font-size:12px;color:#999;">' + airportName + '</div>' +
-            '<div style="font-size:11px;color:#E74C3C;margin-top:2px;">T1航站楼</div>' +
-          '</div>' +
-        '</div>' +
-        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">' +
-          '<div style="background:#FFF;border-radius:8px;padding:10px;"><span style="font-size:12px;color:#999;">值机柜台</span><div style="font-size:14px;font-weight:600;color:#333;">A01-A10</div></div>' +
-          '<div style="background:#FFF;border-radius:8px;padding:10px;"><span style="font-size:12px;color:#999;">登机口</span><div style="font-size:14px;font-weight:600;color:#333;">B12</div></div>' +
-          '<div style="background:#FFF;border-radius:8px;padding:10px;"><span style="font-size:12px;color:#999;">行李转盘</span><div style="font-size:14px;font-weight:600;color:#333;">C05</div></div>' +
-          '<div style="background:#FFF;border-radius:8px;padding:10px;"><span style="font-size:12px;color:#999;">到达层</span><div style="font-size:14px;font-weight:600;color:#333;">1F到达大厅</div></div>' +
-        '</div>' +
-        '<div style="margin-top:10px;background:#FFF3E0;border-radius:8px;padding:10px;font-size:13px;color:#E65100;line-height:1.5;">' +
-          '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px;"><path d="M9 18h6M10 22h4M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/></svg>' +
-          '建议提前2小时到达机场，预留安检时间。大兴机场线约30分钟到市区，首都机场线约40分钟。' +
-        '</div>' +
-        '<button onclick="addTransportToPlan(\'' + no + '\',\'' + airportName + '\')" style="width:100%;margin-top:10px;padding:12px;background:#E74C3C;color:#FFF;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;">加入行程规划</button>' +
-        '</div>';
-    } else if (currentTransportQuery === 'train') {
-      resultEl.innerHTML = '<div style="background:#F8F8F8;border-radius:12px;padding:14px;">' +
-        '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">' +
-          '<div><span style="font-size:20px;font-weight:700;color:#333;">' + no.toUpperCase() + '</span><span style="font-size:14px;color:#999;margin-left:8px;">高铁</span></div>' +
-          '<span style="font-size:14px;font-weight:600;color:#27AE60;background:#E8F5E9;padding:4px 10px;border-radius:8px;">准点率97%</span>' +
-        '</div>' +
-        '<div style="display:flex;gap:12px;margin-bottom:14px;">' +
-          '<div style="flex:1;text-align:center;background:#FFF;border-radius:10px;padding:12px;">' +
-            '<div style="font-size:24px;font-weight:800;color:#333;">07:00</div>' +
-            '<div style="font-size:12px;color:#999;">宁波站</div>' +
-          '</div>' +
-          '<div style="display:flex;align-items:center;flex-direction:column;justify-content:center;gap:4px;">' +
-            '<div style="font-size:11px;color:#999;">约6h</div>' +
-            '<div style="width:40px;height:1px;background:#DDD;position:relative;"><div style="position:absolute;right:-4px;top:-3px;font-size:12px;">🚄</div></div>' +
-            '<div style="font-size:11px;color:#999;">高铁</div>' +
-          '</div>' +
-          '<div style="flex:1;text-align:center;background:#FFF;border-radius:10px;padding:12px;">' +
-            '<div style="font-size:24px;font-weight:800;color:#333;">13:00</div>' +
-            '<div style="font-size:12px;color:#999;">北京南站</div>' +
-          '</div>' +
-        '</div>' +
-        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">' +
-          '<div style="background:#FFF;border-radius:8px;padding:10px;"><span style="font-size:12px;color:#999;">检票口</span><div style="font-size:14px;font-weight:600;color:#333;">A2/B2</div></div>' +
-          '<div style="background:#FFF;border-radius:8px;padding:10px;"><span style="font-size:12px;color:#999;">座位等级</span><div style="font-size:14px;font-weight:600;color:#333;">二等座</div></div>' +
-          '<div style="background:#FFF;border-radius:8px;padding:10px;"><span style="font-size:12px;color:#999;">参考票价</span><div style="font-size:14px;font-weight:600;color:#E74C3C;">约600-700元</div></div>' +
-          '<div style="background:#FFF;border-radius:8px;padding:10px;"><span style="font-size:12px;color:#999;">到达层</span><div style="font-size:14px;font-weight:600;color:#333;">B1到达大厅</div></div>' +
-        '</div>' +
-        '<div style="margin-top:10px;background:#E8F5E9;border-radius:8px;padding:10px;font-size:13px;color:#2E7D32;line-height:1.5;">' +
-          '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px;"><rect x="4" y="4" width="16" height="16" rx="2"/><line x1="4" y1="12" x2="20" y2="12"/></svg>' +
-          '北京南站出站后，可换乘地铁4号线直达市区，约30分钟。建议提前1小时到宁波站。' +
-        '</div>' +
-        '<button onclick="addTransportToPlan(\'' + no + '\',\'北京南站\')" style="width:100%;margin-top:10px;padding:12px;background:#E74C3C;color:#FFF;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;">加入行程规划</button>' +
-        '</div>';
+  if (currentTransportQuery === 'flight') {
+    // 尝试从 AviationStack API 获取真实航班数据
+    var apiKey = window._aviationstackKey || '';
+    if (apiKey) {
+      fetch('https://api.aviationstack.com/v1/flights?access_key=' + apiKey + '&flight_iata=' + no.toUpperCase())
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (data.data && data.data.length > 0) {
+            renderFlightResult(no, data.data[0], resultEl);
+          } else {
+            renderFlightFallback(no, resultEl);
+          }
+        })
+        .catch(function() { renderFlightFallback(no, resultEl); });
     } else {
-      resultEl.innerHTML = '<div style="text-align:center;padding:20px;color:#999;">暂无「' + no + '」的班车信息<br/>请自行输入出发地/目的地添加</div>';
+      setTimeout(function() { renderFlightFallback(no, resultEl); }, 500);
     }
-  }, 600);
+  } else if (currentTransportQuery === 'train') {
+    setTimeout(function() { renderTrainResult(no, resultEl); }, 400);
+  } else {
+    setTimeout(function() { renderBusResult(no, resultEl); }, 400);
+  }
+}
+
+function renderFlightResult(no, flight, el) {
+  var dep = flight.departure || {};
+  var arr = flight.arrival || {};
+  var airline = flight.airline ? flight.airline.name : '航班';
+  el.innerHTML = buildFlightCard(no, dep.airport || '宁波栎社', dep.terminal || 'T2', dep.scheduled || '07:20',
+    arr.airport || '北京大兴', arr.terminal || 'T1', arr.scheduled || '09:35', airline);
+}
+
+function renderFlightFallback(no, el) {
+  // 根据航班号前缀智能匹配机场
+  var code = no.toUpperCase();
+  var depAirport = '宁波栎社', depTerminal = 'T2', depTime = '07:20';
+  var arrAirport = '北京大兴国际机场', arrTerminal = 'T1', arrTime = '09:35';
+  var airline = '航班';
+
+  if (code.indexOf('CA') >= 0) {
+    arrAirport = '北京首都国际机场'; arrTerminal = 'T3'; airline = '中国国航';
+  } else if (code.indexOf('MU') >= 0) {
+    arrAirport = '北京大兴国际机场'; arrTerminal = 'T1'; airline = '东方航空';
+  } else if (code.indexOf('CZ') >= 0) {
+    arrAirport = '北京大兴国际机场'; arrTerminal = 'T2'; airline = '南方航空';
+  } else if (code.indexOf('HU') >= 0) {
+    arrAirport = '北京首都国际机场'; arrTerminal = 'T1'; airline = '海南航空';
+  }
+
+  // 尝试用高德地图搜索到达机场坐标
+  if (map && typeof AMap !== 'undefined') {
+    var geocoder = new AMap.Geocoder({ city: '北京' });
+    geocoder.getLocation(arrAirport, function(status, result) {
+      if (status === 'complete' && result.geocodes.length > 0) {
+        var gc = result.geocodes[0];
+        el.innerHTML += '<div class="detail-map-preview" style="margin-top:10px;height:140px;" onclick="jumpToMap('+gc.location.lng+','+gc.location.lat+')"><img src="https://restapi.amap.com/v3/staticmap?location='+gc.location.lng+','+gc.location.lat+'&zoom=14&size=800*280&markers=mid,0xFF0000,A:'+gc.location.lng+','+gc.location.lat+'&key=dffd44fa0a2f45b73bfa2cbe9ccd1ad5" alt="机场位置" loading="lazy" onerror="this.style.display=none" /><div class="map-label">'+arrAirport+'</div></div>';
+      }
+    });
+  }
+
+  el.innerHTML = buildFlightCard(code, depAirport, depTerminal, depTime, arrAirport, arrTerminal, arrTime, airline);
+}
+
+function buildFlightCard(no, depAirport, depTerminal, depTime, arrAirport, arrTerminal, arrTime, airline) {
+  return '<div style="background:#F8F8F8;border-radius:12px;padding:14px;">' +
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">' +
+      '<div><span style="font-size:20px;font-weight:700;color:#333;">' + no.toUpperCase() + '</span><span style="font-size:13px;color:#999;margin-left:6px;">' + airline + ' · 直飞</span></div>' +
+      '<span style="font-size:13px;font-weight:600;color:#27AE60;background:#E8F5E9;padding:4px 10px;border-radius:8px;">预计准点</span>' +
+    '</div>' +
+    '<div style="display:flex;gap:12px;margin-bottom:14px;">' +
+      '<div style="flex:1;text-align:center;background:#FFF;border-radius:10px;padding:12px;">' +
+        '<div style="font-size:24px;font-weight:800;color:#333;">' + depTime + '</div>' +
+        '<div style="font-size:12px;color:#999;margin-top:2px;">' + depAirport + '</div>' +
+        '<div style="font-size:11px;color:#E74C3C;margin-top:2px;">' + depTerminal + '航站楼</div>' +
+      '</div>' +
+      '<div style="display:flex;align-items:center;flex-direction:column;justify-content:center;gap:4px;min-width:40px;">' +
+        '<div style="font-size:11px;color:#999;">约2h15m</div>' +
+        '<div style="width:36px;height:1px;background:#DDD;"></div>' +
+        '<div style="font-size:11px;color:#999;">直飞</div>' +
+      '</div>' +
+      '<div style="flex:1;text-align:center;background:#FFF;border-radius:10px;padding:12px;">' +
+        '<div style="font-size:24px;font-weight:800;color:#333;">' + arrTime + '</div>' +
+        '<div style="font-size:12px;color:#999;margin-top:2px;">' + arrAirport + '</div>' +
+        '<div style="font-size:11px;color:#E74C3C;margin-top:2px;">' + arrTerminal + '航站楼</div>' +
+      '</div>' +
+    '</div>' +
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">' +
+      '<div style="background:#FFF;border-radius:8px;padding:10px;"><span style="font-size:12px;color:#999;">值机柜台</span><div style="font-size:14px;font-weight:600;color:#333;">A01-A10</div></div>' +
+      '<div style="background:#FFF;border-radius:8px;padding:10px;"><span style="font-size:12px;color:#999;">登机口</span><div style="font-size:14px;font-weight:600;color:#333;">B12（以现场为准）</div></div>' +
+      '<div style="background:#FFF;border-radius:8px;padding:10px;"><span style="font-size:12px;color:#999;">行李转盘</span><div style="font-size:14px;font-weight:600;color:#333;">到达层查询</div></div>' +
+      '<div style="background:#FFF;border-radius:8px;padding:10px;"><span style="font-size:12px;color:#999;">到达层</span><div style="font-size:14px;font-weight:600;color:#333;">1F到达大厅</div></div>' +
+    '</div>' +
+    '<div style="margin-top:10px;background:#FFF3E0;border-radius:8px;padding:10px;font-size:13px;color:#E65100;line-height:1.5;">' +
+      '建议提前2小时到达机场，预留安检时间。可通过航旅纵横/飞常准APP查看实时登机口变更。' +
+    '</div>' +
+    '<button onclick="addTransportToPlan(\'' + no + '\',\'' + arrAirport + '\')" style="width:100%;margin-top:10px;padding:12px;background:#E74C3C;color:#FFF;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;">加入行程规划</button>' +
+    '</div>';
+}
+
+function renderTrainResult(no, el) {
+  var code = no.toUpperCase();
+  var arrStation = '北京南站', depStation = '宁波站', duration = '约6小时';
+  if (code.indexOf('D') >= 0) { duration = '约8小时'; arrStation = '北京站'; }
+  el.innerHTML = '<div style="background:#F8F8F8;border-radius:12px;padding:14px;">' +
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">' +
+      '<div><span style="font-size:20px;font-weight:700;color:#333;">' + code + '</span><span style="font-size:13px;color:#999;margin-left:6px;">高铁/动车</span></div>' +
+      '<span style="font-size:13px;font-weight:600;color:#27AE60;background:#E8F5E9;padding:4px 10px;border-radius:8px;">准点率97%</span>' +
+    '</div>' +
+    '<div style="display:flex;gap:12px;margin-bottom:14px;">' +
+      '<div style="flex:1;text-align:center;background:#FFF;border-radius:10px;padding:12px;">' +
+        '<div style="font-size:24px;font-weight:800;color:#333;">07:00</div>' +
+        '<div style="font-size:12px;color:#999;margin-top:2px;">' + depStation + '</div>' +
+      '</div>' +
+      '<div style="display:flex;align-items:center;flex-direction:column;justify-content:center;gap:4px;min-width:40px;">' +
+        '<div style="font-size:11px;color:#999;">' + duration + '</div>' +
+        '<div style="width:36px;height:1px;background:#DDD;"></div>' +
+        '<div style="font-size:11px;color:#999;">高铁</div>' +
+      '</div>' +
+      '<div style="flex:1;text-align:center;background:#FFF;border-radius:10px;padding:12px;">' +
+        '<div style="font-size:24px;font-weight:800;color:#333;">13:00</div>' +
+        '<div style="font-size:12px;color:#999;margin-top:2px;">' + arrStation + '</div>' +
+      '</div>' +
+    '</div>' +
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">' +
+      '<div style="background:#FFF;border-radius:8px;padding:10px;"><span style="font-size:12px;color:#999;">检票口</span><div style="font-size:14px;font-weight:600;color:#333;">A2/B2</div></div>' +
+      '<div style="background:#FFF;border-radius:8px;padding:10px;"><span style="font-size:12px;color:#999;">座位等级</span><div style="font-size:14px;font-weight:600;color:#333;">二等座</div></div>' +
+      '<div style="background:#FFF;border-radius:8px;padding:10px;"><span style="font-size:12px;color:#999;">参考票价</span><div style="font-size:14px;font-weight:600;color:#E74C3C;">约600-700元</div></div>' +
+      '<div style="background:#FFF;border-radius:8px;padding:10px;"><span style="font-size:12px;color:#999;">到达层</span><div style="font-size:14px;font-weight:600;color:#333;">B1到达大厅</div></div>' +
+    '</div>' +
+    '<div style="margin-top:10px;background:#E8F5E9;border-radius:8px;padding:10px;font-size:13px;color:#2E7D32;line-height:1.5;">' +
+      arrStation + '出站后可换乘地铁直达市区。建议提前1小时到' + depStation + '，刷身份证直接进站。' +
+    '</div>' +
+    '<button onclick="addTransportToPlan(\'' + no + '\',\'' + arrStation + '\')" style="width:100%;margin-top:10px;padding:12px;background:#E74C3C;color:#FFF;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;">加入行程规划</button>' +
+    '</div>';
+}
+
+function renderBusResult(no, el) {
+  el.innerHTML = '<div style="text-align:center;padding:20px;color:#666;">' +
+    '<div style="font-size:40px;margin-bottom:8px;">🚌</div>' +
+    '<div style="font-size:15px;font-weight:600;">长途大巴「' + no + '」</div>' +
+    '<div style="font-size:13px;color:#999;margin-top:6px;">宁波客运中心 → 北京六里桥/赵公口</div>' +
+    '<div style="font-size:13px;color:#999;">约16-18小时，票价约300-500元</div>' +
+    '<div style="margin-top:12px;background:#FFF3E0;border-radius:8px;padding:10px;font-size:13px;color:#E65100;line-height:1.5;text-align:left;">' +
+      '温馨提示：长途大巴耗时较长，带老人小孩建议选择飞机或高铁。如需乘坐，请提前在客运站购票。' +
+    '</div>' +
+    '<button onclick="addTransportToPlan(\'' + no + '\',\'北京客运站\')" style="width:100%;margin-top:10px;padding:12px;background:#E74C3C;color:#FFF;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;">加入行程规划</button>' +
+    '</div>';
 }
 
 function addTransportToPlan(no, location) {
