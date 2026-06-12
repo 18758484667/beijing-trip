@@ -1373,8 +1373,8 @@ function showSpotDetail(spotId) {
   if (spot.lat && spot.lng) {
     var mapSrc = 'https://restapi.amap.com/v3/staticmap?location='+spot.lng+','+spot.lat+'&zoom=14&size=800*320&markers=mid,0xFF0000,A:'+spot.lng+','+spot.lat+'&key=dffd44fa0a2f45b73bfa2cbe9ccd1ad5';
     html += '<div style="padding:12px 16px;border-top:1px solid #F0F0F0;">' +
-      '<div class="detail-map-preview" onclick="switchTab(\'page-spots\',document.querySelector(\'[data-page=page-spots]\'));setTimeout(function(){if(map){map.setZoomAndCenter(14,[\'+spot.lng+','+spot.lat+\'],false,500)}},300)">' +
-        '<img src="'+mapSrc+'" alt="地图位置" loading="lazy" onerror="this.style.display=\'none\'" />' +
+      '<div class="detail-map-preview" onclick="jumpToMap('+spot.lng+','+spot.lat+')">' +
+        '<img src="'+mapSrc+'" alt="地图位置" loading="lazy" onerror="this.style.display=none" />' +
         '<div class="map-label"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#FFF" stroke-width="3" style="vertical-align:middle;margin-right:2px;"><circle cx="12" cy="10" r="3"/><path d="M12 2a8 8 0 0 0-8 8c0 5.4 8 12 8 12s8-6.6 8-12a8 8 0 0 0-8-8z"/></svg>查看地图</div>' +
       '</div></div>';
   }
@@ -1482,6 +1482,16 @@ function goBackFromDetail() {
   document.getElementById('detailPage').classList.remove('show');
 }
 
+function jumpToMap(lng, lat) {
+  switchTab('page-spots', document.querySelector('[data-page=page-spots]'));
+  setTimeout(function() {
+    if (map) { map.setZoomAndCenter(14, [lng, lat], false, 500); }
+  }, 400);
+}
+
+
+
+
 
 
 function showFoodDetail(dishId) {
@@ -1535,7 +1545,7 @@ function showFoodDetail(dishId) {
         (s.website ? '<a href="'+s.website+'" target="_blank" style="flex:1;text-align:center;padding:8px;background:#E8F5E9;color:#27AE60;border-radius:8px;font-size:13px;font-weight:500;text-decoration:none;" onclick="event.stopPropagation()"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:3px;"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>网站</a>' : '') +
       '</div>' : '') +
       // 地图截图
-      (s.lat && s.lng ? '<div class="detail-map-preview" style="margin-top:8px;height:120px;" onclick="event.stopPropagation();switchTab(\'page-spots\',document.querySelector(\'[data-page=page-spots]\'));setTimeout(function(){if(map){map.setZoomAndCenter(15,[\'+s.lng+','+s.lat+\'],false,500)}},300)"><img src="https://restapi.amap.com/v3/staticmap?location='+s.lng+','+s.lat+'&zoom=15&size=800*240&markers=mid,0xFF0000,A:'+s.lng+','+s.lat+'&key=dffd44fa0a2f45b73bfa2cbe9ccd1ad5" alt="地图" loading="lazy" onerror="this.style.display=\'none\'" /></div>' : '') +
+      (s.lat && s.lng ? '<div class="detail-map-preview" style="margin-top:8px;height:120px;" onclick="event.stopPropagation();jumpToMap('+s.lng+','+s.lat+')"><img src="https://restapi.amap.com/v3/staticmap?location='+s.lng+','+s.lat+'&zoom=15&size=800*240&markers=mid,0xFF0000,A:'+s.lng+','+s.lat+'&key=dffd44fa0a2f45b73bfa2cbe9ccd1ad5" alt="地图" loading="lazy" onerror="this.style.display=none" /></div>' : '') +
       '<button class="mf-shop-btn" onclick="event.stopPropagation();addFoodShopToPlan(\'' + shopId + '\')">添加到规划</button>' +
       '</div>';
   });
