@@ -1532,21 +1532,15 @@ function showFoodDetail(dishId) {
     '<div class="mf-card-body open">';
   dish.shops.forEach(function(s) {
     var shopId = dish.id + '_' + s.name.replace(/[^a-zA-Z0-9]/g,'_');
-    html += '<div class="mf-shop-card">' +
+    html += '<div class="mf-shop-card" onclick="event.stopPropagation();showShopDetail(\'' + shopId + '\',\'' + dish.icon.replace(/'/g,'') + '\',\'' + dish.name.replace(/'/g,'') + '\')">' +
       '<div style="display:flex;align-items:center;">' +
         '<span class="mf-shop-name">' + s.name + '</span>' +
         (s.price ? '<span class="mf-shop-price">' + s.price + '</span>' : '') +
+        '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#CCC" stroke-width="2" style="margin-left:4px;"><polyline points="9 18 15 12 9 6"/></svg>' +
       '</div>' +
       (s.addr ? '<div class="mf-shop-addr"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#999" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 2a8 8 0 0 0-8 8c0 5.4 8 12 8 12s8-6.6 8-12a8 8 0 0 0-8-8z"/></svg>' + s.addr + '</div>' : '') +
       (s.recommend ? '<div class="mf-shop-rec">' + s.recommend + '</div>' : '') +
-      // 电话和网站
-      ((s.phone || s.website) ? '<div style="display:flex;gap:8px;margin-top:8px;">' +
-        (s.phone ? '<a href="tel:'+s.phone+'" style="flex:1;text-align:center;padding:8px;background:#E8F0FE;color:#2980B9;border-radius:8px;font-size:13px;font-weight:500;text-decoration:none;" onclick="event.stopPropagation()"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:3px;"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>电话</a>' : '') +
-        (s.website ? '<a href="'+s.website+'" target="_blank" style="flex:1;text-align:center;padding:8px;background:#E8F5E9;color:#27AE60;border-radius:8px;font-size:13px;font-weight:500;text-decoration:none;" onclick="event.stopPropagation()"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:3px;"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>网站</a>' : '') +
-      '</div>' : '') +
-      // 地图截图
-      (s.lat && s.lng ? '<div class="detail-map-preview" style="margin-top:8px;height:120px;" onclick="event.stopPropagation();jumpToMap('+s.lng+','+s.lat+')"><img src="https://restapi.amap.com/v3/staticmap?location='+s.lng+','+s.lat+'&zoom=15&size=800*240&markers=mid,0xFF0000,A:'+s.lng+','+s.lat+'&key=dffd44fa0a2f45b73bfa2cbe9ccd1ad5" alt="地图" loading="lazy" onerror="this.style.display=none" /></div>' : '') +
-      '<button class="mf-shop-btn" onclick="event.stopPropagation();addFoodShopToPlan(\'' + shopId + '\')">添加到规划</button>' +
+      '<button class="mf-shop-btn" style="padding:6px 12px;font-size:13px;border-radius:8px;width:auto;display:inline-block;" onclick="event.stopPropagation();addFoodShopToPlan(\'' + shopId + '\')">+ 加入行程</button>' +
       '</div>';
   });
   html += '</div></div>';
@@ -1604,14 +1598,15 @@ function showStreetDetail(streetId) {
     '<div class="mf-card-body open">';
   street.shops.forEach(function(s) {
     var shopId = 'street_' + street.id + '_' + s.name.replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g,'_');
-    html += '<div class="mf-shop-card">' +
+    html += '<div class="mf-shop-card" onclick="event.stopPropagation();showShopDetail(\'' + shopId + '\',\'<svg viewBox=\\\'0 0 24 24\\\' width=\\\'16\\\' height=\\\'16\\\' fill=\\\'none\\\' stroke=\\\'#E74C3C\\\' stroke-width=\\\'2\\\'><path d=\\\'M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z\\\'/><polyline points=\\\'9 22 9 12 15 12 15 22\\\'/></svg>\',\'' + street.name.replace(/'/g,'') + '\')">' +
       '<div style="display:flex;align-items:center;">' +
         '<span class="mf-shop-name">' + s.name + '</span>' +
         (s.price ? '<span class="mf-shop-price">' + s.price + '</span>' : '') +
+        '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#CCC" stroke-width="2" style="margin-left:4px;"><polyline points="9 18 15 12 9 6"/></svg>' +
       '</div>' +
       (s.addr ? '<div class="mf-shop-addr"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#999" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 2a8 8 0 0 0-8 8c0 5.4 8 12 8 12s8-6.6 8-12a8 8 0 0 0-8-8z"/></svg>' + s.addr + '</div>' : '') +
       (s.recommend ? '<div class="mf-shop-rec">' + s.recommend + '</div>' : '') +
-      '<button class="mf-shop-btn" onclick="event.stopPropagation();addStreetShopToPlan(\'' + street.id + '\',\'' + s.name.replace(/'/g,'\\\'') + '\')">添加到规划</button>' +
+      '<button class="mf-shop-btn" style="padding:6px 12px;font-size:13px;border-radius:8px;width:auto;display:inline-block;" onclick="event.stopPropagation();addStreetShopToPlan(\'' + street.id + '\',\'' + s.name.replace(/'/g,'\\\'') + '\')">+ 加入行程</button>' +
       '</div>';
   });
   html += '</div></div>';
@@ -1634,6 +1629,101 @@ function showStreetDetail(streetId) {
       '<div class="mf-card-body open"><div class="mf-gallery">' + galleryHtml + '</div></div>' +
       '</div>';
   }
+
+  html += '</div>';
+
+  document.getElementById('detailContent').innerHTML = html;
+  document.getElementById('detailPage').classList.add('show');
+  document.getElementById('detailPage').scrollTop = 0;
+
+  var detailPage = document.getElementById('detailPage');
+  var backBar = document.getElementById('detailBackBar');
+  detailPage.onscroll = function() {
+    backBar.classList.toggle('scrolled', detailPage.scrollTop > 200);
+  };
+}
+
+// 店铺独立详情页
+function showShopDetail(shopId, dishIcon, dishName) {
+  // 查找店铺数据
+  var shop = null;
+  for (var di = 0; di < DATA.food.dishes.length; di++) {
+    var d = DATA.food.dishes[di];
+    for (var si = 0; si < d.shops.length; si++) {
+      if (shopId === d.id + '_' + d.shops[si].name.replace(/[^a-zA-Z0-9]/g,'_')) {
+        shop = d.shops[si];
+        if (!dishIcon) dishIcon = d.icon;
+        if (!dishName) dishName = d.name;
+        break;
+      }
+    }
+    if (shop) break;
+  }
+  if (!shop) {
+    // 从街区查找
+    for (var sti = 0; sti < DATA.food.streets.length; sti++) {
+      var st = DATA.food.streets[sti];
+      for (var sj = 0; sj < st.shops.length; sj++) {
+        if (shopId === 'street_' + st.id + '_' + st.shops[sj].name.replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g,'_')) {
+          shop = st.shops[sj];
+          break;
+        }
+      }
+      if (shop) break;
+    }
+  }
+  if (!shop) { showToast('未找到店铺信息'); return; }
+
+  var html = '';
+  html += '<div class="detail-back" id="detailBackBar" onclick="goBackFromDetail()">' +
+    '<div class="detail-back-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#FFF" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg></div></div>';
+  html += '<div class="detail-hero" style="height:200px;">' +
+    '<div style="height:100%;background:linear-gradient(135deg,#E74C3C,#C0392B);display:flex;align-items:center;justify-content:center;">' +
+      '<div style="text-align:center;color:#FFF;">' +
+        '<div style="font-size:40px;margin-bottom:8px;">' + (dishIcon || '') + '</div>' +
+        '<div style="font-size:14px;opacity:0.7;">' + (dishName || '') + '</div>' +
+      '</div>' +
+    '</div>' +
+    '<div class="hero-info" style="right:20px;">' +
+      '<span class="hero-name" style="font-size:22px;">' + shop.name + '</span>' +
+      (shop.price ? '<span class="hero-subtitle">' + shop.price + '</span>' : '') +
+    '</div></div>';
+
+  html += '<div class="detail-body">';
+
+  // 信息卡片
+  html += '<div class="detail-info-card">';
+  if (shop.addr) {
+    html += '<div class="mf-addr-row">' +
+      '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#999" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 2a8 8 0 0 0-8 8c0 5.4 8 12 8 12s8-6.6 8-12a8 8 0 0 0-8-8z"/></svg>' +
+      '<span class="mf-addr-row-text">' + shop.addr + '</span></div>';
+  }
+  if (shop.recommend) {
+    html += '<div style="padding:12px 16px;border-top:1px solid #F0F0F0;">' +
+      '<span style="font-size:12px;color:#999;">推荐菜</span>' +
+      '<div style="font-size:15px;color:#FF6B35;margin-top:4px;line-height:1.5;">' + shop.recommend + '</div></div>';
+  }
+  // 电话和网站
+  if (shop.phone || shop.website) {
+    html += '<div class="info-contact-row">';
+    if (shop.phone) html += '<a class="info-contact-item" href="tel:'+shop.phone+'"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#2980B9" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg> 拨打电话</a>';
+    if (shop.website) html += '<a class="info-contact-item" href="'+shop.website+'" target="_blank"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#2980B9" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg> 官方网站</a>';
+    html += '</div>';
+  }
+  // 地图截图
+  if (shop.lat && shop.lng) {
+    var mapSrc = 'https://restapi.amap.com/v3/staticmap?location='+shop.lng+','+shop.lat+'&zoom=16&size=800*320&markers=mid,0xFF0000,A:'+shop.lng+','+shop.lat+'&key=dffd44fa0a2f45b73bfa2cbe9ccd1ad5';
+    html += '<div style="padding:12px 16px;border-top:1px solid #F0F0F0;">' +
+      '<div class="detail-map-preview" onclick="jumpToMap('+shop.lng+','+shop.lat+')">' +
+        '<img src="'+mapSrc+'" alt="地图位置" loading="lazy" onerror="this.style.display=none" />' +
+        '<div class="map-label"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#FFF" stroke-width="3" style="vertical-align:middle;margin-right:2px;"><circle cx="12" cy="10" r="3"/><path d="M12 2a8 8 0 0 0-8 8c0 5.4 8 12 8 12s8-6.6 8-12a8 8 0 0 0-8-8z"/></svg>查看地图</div>' +
+      '</div></div>';
+  }
+  html += '</div>';
+
+  // 加入规划按钮
+  html += '<div class="mf-add-bar">' +
+    '<div class="mf-add-btn" onclick="addFoodShopToPlan(\''+shopId+'\')">加入行程规划</div></div>';
 
   html += '</div>';
 
