@@ -111,20 +111,35 @@
     .detail-hero { position: relative; width: 100%; height: 280px; overflow: hidden; background: #E8E8E8; }
     .detail-hero img { width: 100%; height: 100%; object-fit: cover; }
     .detail-hero::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 100px; background: linear-gradient(transparent, rgba(0,0,0,0.45)); z-index: 1; }
-    .hero-info { position: absolute; bottom: 20px; left: 20px; right: 20px; z-index: 2; }
+    .hero-info { position: absolute; bottom: 20px; left: 20px; right: 80px; z-index: 2; }
     .hero-name { font-size: 28px; font-weight: 700; color: #FFF; display: block; line-height: 1.2; text-shadow: 0 1px 4px rgba(0,0,0,0.2); }
     .hero-subtitle { font-size: 15px; color: rgba(255,255,255,0.85); margin-top: 6px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
     .hero-tag { font-size: 13px; color: #FFF; background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 10px; backdrop-filter: blur(10px); }
+    /* 浮动加入按钮 */
+    .hero-add-btn { position: absolute; bottom: 16px; right: 16px; width: 50px; height: 50px; border-radius: 50%; background: #27AE60; z-index: 3; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 14px rgba(39,174,96,0.4); transition: transform 0.15s; }
+    .hero-add-btn:active { transform: scale(0.9); }
+    .hero-add-btn svg { width: 22px; height: 22px; stroke: #FFF; stroke-width: 2.5; }
     .detail-body { padding: 0 16px 24px; position: relative; z-index: 2; margin-top: -16px; }
-    /* 信息卡片 - 浮在头图下方 */
-    .detail-info-card { background: #FFF; border-radius: 16px; padding: 16px; margin-bottom: 12px; box-shadow: 0 1px 8px rgba(0,0,0,0.04); }
+    /* 信息卡片 */
+    .detail-info-card { background: #FFF; border-radius: 16px; padding: 0; margin-bottom: 12px; box-shadow: 0 1px 8px rgba(0,0,0,0.04); overflow: hidden; }
     .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
-    .info-cell { padding: 10px 12px; text-align: center; border-right: 1px solid #F0F0F0; border-bottom: 1px solid #F0F0F0; }
+    .info-cell { padding: 12px 14px; text-align: center; border-right: 1px solid #F0F0F0; border-bottom: 1px solid #F0F0F0; }
     .info-cell:nth-child(2n) { border-right: none; }
     .info-cell:nth-child(n+3) { border-bottom: none; }
-    .info-cell-label { font-size: 13px; color: #999; display: block; margin-bottom: 4px; }
-    .info-cell-val { font-size: 16px; font-weight: 600; display: block; color: #333; }
+    .info-cell-label { font-size: 12px; color: #999; display: block; margin-bottom: 4px; }
+    .info-cell-val { font-size: 15px; font-weight: 600; display: block; color: #333; }
     .info-cell-val.price { color: #FF6B35; }
+    .info-cell-val a { color: #2980B9; text-decoration: none; }
+    /* 可点击行 */
+    .info-row-link { display: flex; align-items: center; padding: 12px 16px; border-top: 1px solid #F0F0F0; font-size: 14px; color: #666; gap: 8px; cursor: pointer; }
+    .info-row-link:active { background: #F8F8F8; }
+    .info-row-link svg { flex-shrink: 0; }
+    .info-row-link-text { flex: 1; }
+    .info-row-link-arrow { color: #CCC; font-size: 16px; }
+    /* 地图截图 */
+    .detail-map-preview { width: 100%; height: 160px; overflow: hidden; border-radius: 12px; margin-top: 8px; background: #F0F0F0; position: relative; cursor: pointer; }
+    .detail-map-preview img { width: 100%; height: 100%; object-fit: cover; }
+    .detail-map-preview .map-label { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); background: #E74C3C; color: #FFF; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
     /* 段落卡片 */
     .mf-card { background: #FFF; border-radius: 16px; padding: 0; margin-bottom: 12px; overflow: hidden; box-shadow: 0 1px 8px rgba(0,0,0,0.04); }
     .mf-card-header { display: flex; align-items: center; padding: 16px; font-size: 18px; font-weight: 600; color: #1A1A1A; cursor: pointer; }
@@ -135,7 +150,6 @@
     .mf-card-body { padding: 0 16px 14px; display: none; }
     .mf-card-body.open { display: block; }
     .mf-card-body.no-collapse { display: block; padding: 0 16px 14px; }
-    /* 介绍文本 */
     .mf-intro { font-size: 16px; color: #555; line-height: 1.8; }
     /* 路线 */
     .mf-route-item { display: flex; align-items: flex-start; padding: 8px 0; gap: 10px; }
@@ -145,7 +159,7 @@
     .mf-route-divider::before { content: ''; display: inline-block; width: 1px; height: 12px; background: #DDD; }
     /* 贴士 */
     .mf-tip-item { display: flex; align-items: flex-start; padding: 8px 0; gap: 10px; }
-    .mf-tip-dot { width: 6px; height: 6px; border-radius: 50%; background: #E74C3C; flex-shrink: 0; margin-top: 6px; }
+    .mf-tip-dot { width: 6px; height: 6px; border-radius: 50%; background: #E74C3C; flex-shrink: 0; margin-top: 7px; }
     .mf-tip-text { font-size: 16px; color: #444; line-height: 1.5; flex: 1; }
     /* 店铺卡片 */
     .mf-shop-card { background: #F8F8F8; border-radius: 12px; padding: 14px; margin-bottom: 8px; }
@@ -155,7 +169,7 @@
     .mf-shop-price { font-size: 14px; color: #FF6B35; font-weight: 600; background: #FFF5F0; padding: 2px 8px; border-radius: 8px; margin-left: auto; }
     .mf-shop-btn { display: block; width: 100%; margin-top: 10px; padding: 10px; background: #E74C3C; color: #FFF; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; text-align: center; }
     .mf-shop-btn:active { opacity: 0.85; }
-    /* 加入规划按钮 */
+    /* 加入规划按钮（底部） */
     .mf-add-bar { margin-top: 16px; }
     .mf-add-btn { display: block; width: 100%; padding: 16px; background: #E74C3C; color: #FFF; border: none; border-radius: 14px; font-size: 18px; font-weight: 600; cursor: pointer; text-align: center; }
     .mf-add-btn:active { opacity: 0.85; }
@@ -169,6 +183,11 @@
     .mf-addr-row { display: flex; align-items: flex-start; padding: 12px 16px; font-size: 15px; color: #666; gap: 6px; border-top: 1px solid #F0F0F0; }
     .mf-addr-row svg { flex-shrink: 0; margin-top: 1px; }
     .mf-addr-row-text { flex: 1; line-height: 1.5; }
+    /* 电话/网址行 */
+    .info-contact-row { display: flex; gap: 0; border-top: 1px solid #F0F0F0; }
+    .info-contact-item { flex: 1; display: flex; align-items: center; justify-content: center; padding: 12px; gap: 6px; font-size: 14px; color: #2980B9; cursor: pointer; font-weight: 500; }
+    .info-contact-item:first-child { border-right: 1px solid #F0F0F0; }
+    .info-contact-item:active { background: #F8F8F8; }
 
     .food-tabs { display: flex; background: #F5F5F5; border-radius: 8px; padding: 3px; margin-bottom: 14px; gap: 3px; }
     .food-tab { flex: 1; text-align: center; padding: 10px; border-radius: 6px; font-size: 16px; color: var(--text2); cursor: pointer; font-weight: 500; transition: all 0.2s; }
@@ -702,7 +721,7 @@ var DATA = {
   // ---- 全部景点（按区域/主题分类）----
   spots: [
     // === 天安门-故宫片区（地铁1号线）===
-    { id:'gugong', name:'故宫博物院', subtitle:'世界文化遗产·紫禁城', price:'60元', duration:'3-4小时', time:'8:30-17:00', closedDay:'周一闭馆', address:'东城区景山前街4号', reservation:'提前7天20:00在「故宫博物院」小程序抢票', lat:39.9163, lng:116.3972, icon:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--red)" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6"/><path d="M9 11h6"/></svg>',
+    { id:'gugong', name:'故宫博物院', subtitle:'世界文化遗产·紫禁城', price:'60元', duration:'3-4小时', time:'8:30-17:00', closedDay:'周一闭馆', address:'东城区景山前街4号', reservation:'提前7天20:00在「故宫博物院」小程序抢票', lat:39.9163, lng:116.3972, phone:'010-85007421', website:'https://www.dpm.org.cn', icon:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--red)" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6"/><path d="M9 11h6"/></svg>',
       photos:[
         'images/Beijing_Forbidden_City_Hall_of_2026-06-10T08-24-29.jpg',
         'images/Red_walls_and_golden_roof_tile_2026-06-10T08-27-38.jpg',
@@ -746,7 +765,7 @@ var DATA = {
       intro:'景山公园位于北京城中轴线上，曾是元明清三代的皇家御苑。园内制高点万春亭是俯瞰故宫全景的绝佳位置，也是拍摄北京中轴线的最佳机位。公园门票仅2元，性价比极高。登上万春亭，故宫的红墙金瓦尽收眼底，南望故宫、北望鼓楼，十分壮观。', dining:'公园附近有小吃摊', rest:'公园内有休息椅', tags:['便宜','全景','拍照','轻松'], area:'天安门-故宫' },
 
     // === 颐和园-圆明园片区（地铁4号线）===
-    { id:'yiheyuan', name:'颐和园', subtitle:'中国古典园林之首', price:'30元（旺季）/20元（淡季）', duration:'3-4小时', time:'6:00-20:00', closedDay:'园中园周一闭馆', address:'海淀区新建宫门路19号', reservation:'提前1-7天在「颐和园」公众号预约，60岁以上老人免票', lat:39.9996, lng:116.2755, icon:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--red)" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 2v4M12 18v4M4.22 4.22l2.83 2.83M16.97 16.97l2.83 2.83M2 12h4M18 12h4"/></svg>',
+    { id:'yiheyuan', name:'颐和园', subtitle:'中国古典园林之首', price:'30元（旺季）/20元（淡季）', duration:'3-4小时', time:'6:00-20:00', closedDay:'园中园周一闭馆', address:'海淀区新建宫门路19号', reservation:'提前1-7天在「颐和园」公众号预约，60岁以上老人免票', lat:39.9996, lng:116.2755, phone:'010-62881144', website:'https://www.summerpalace-china.com', icon:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--red)" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 2v4M12 18v4M4.22 4.22l2.83 2.83M16.97 16.97l2.83 2.83M2 12h4M18 12h4"/></svg>',
       photos:[
         'images/Summer_Palace_Beijing__Kunming_2026-06-10T08-24-33.jpg',
         'images/北京颐和园昆明湖与万寿山全景_十七孔桥_古典中国园林_山水园_2026-06-10T07-59-31.jpg',
@@ -892,7 +911,7 @@ var DATA = {
         'images/Beijing_roast_duck_Peking_duck_2026-06-10T08-25-02.jpg',
         'images/Beijing_roast_duck_Peking_duck_2026-06-10T08-25-02.jpg'
       ],photoCaptions:{0:'片皮烤鸭',1:'卷饼蘸酱',2:'整只上桌'}, shops:[
-        {name:'四季民福烤鸭店', addr:'南池子大街11号（故宫东门旁）', price:'约150元/人', recommend:'烤鸭、鸭架汤、芥末鸭掌', lat:39.9090, lng:116.4150},
+        {name:'四季民福烤鸭店', addr:'南池子大街11号（故宫东门旁）', price:'约150元/人', recommend:'烤鸭、鸭架汤、芥末鸭掌', lat:39.9090, lng:116.4150, phone:'010-65267331', website:'https://www.sijiminfu.com'},
         {name:'全聚德（起源店）', addr:'前门大街32号', price:'约200元/人', recommend:'挂炉烤鸭、火燎鸭心、芥末鸭掌', lat:39.8970, lng:116.4000},
         {name:'大董烤鸭', addr:'南新仓大厦1-2层', price:'约300元/人', recommend:'酥不腻烤鸭、董氏烧海参', lat:39.9200, lng:116.4500},
         {name:'利群烤鸭', addr:'北翔凤胡同11号', price:'约120元/人', recommend:'果木烤鸭、盐水鸭肝', lat:39.9050, lng:116.4100}
@@ -901,8 +920,8 @@ var DATA = {
         'images/Beijing_copper_pot_hotpot_mutt_2026-06-10T08-26-39.jpg',
         'images/Beijing_copper_pot_hotpot_mutt_2026-06-10T08-26-39.jpg'
       ],photoCaptions:{0:'炭火铜锅涮肉',1:'手切鲜羊肉'}, shops:[
-        {name:'南门涮肉', addr:'安定门东大街56号', price:'约100元/人', recommend:'手切鲜羊肉、麻酱烧饼、百叶', lat:39.8820, lng:116.4080},
-        {name:'聚宝源（牛街）', addr:'牛街西里商业1号楼', price:'约110元/人', recommend:'手切鲜羊肉、烧饼、羊尾油', lat:39.8930, lng:116.3720},
+        {name:'南门涮肉', addr:'安定门东大街56号', price:'约100元/人', recommend:'手切鲜羊肉、麻酱烧饼、百叶', lat:39.8820, lng:116.4080, phone:'010-64017030'},
+        {name:'聚宝源（牛街）', addr:'牛街西里商业1号楼', price:'约110元/人', recommend:'手切鲜羊肉、烧饼、羊尾油', lat:39.8930, lng:116.3720, phone:'010-63520556'},
         {name:'满恒记', addr:'平安里西大街甲14号', price:'约90元/人', recommend:'手切鲜羊肉、糖饼、麻酱', lat:39.9300, lng:116.3600},
         {name:'东来顺', addr:'东安市场北门', price:'约130元/人', recommend:'手切鲜羊肉、它似蜜、奶油炸糕', lat:39.9100, lng:116.4200}
       ]},
@@ -932,14 +951,14 @@ var DATA = {
         'images/Beijing_Zhajiangmian_noodles___2026-06-10T08-27-09.jpg',
         'images/Beijing_Zhajiangmian_noodles___2026-06-10T08-27-09.jpg'
       ],photoCaptions:{0:'老北京炸酱面',1:'菜码丰富'}, shops:[
-        {name:'海碗居', addr:'甘家口大厦B1层', price:'约45元/人', recommend:'炸酱面、炸灌肠、麻豆腐', lat:39.9400, lng:116.3700},
+        {name:'海碗居', addr:'甘家口大厦B1层', price:'约45元/人', recommend:'炸酱面、炸灌肠、麻豆腐', lat:39.9400, lng:116.3700, phone:'010-88370973'},
         {name:'方砖厂69号炸酱面', addr:'方砖厂胡同69号', price:'约30元/人', recommend:'老北京炸酱面、炸酱面套餐', lat:39.9350, lng:116.3950}
       ]},
       { id:'luzhu', icon:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="var(--red)" stroke-width="2"><circle cx="12" cy="10" r="7"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>', name:'卤煮火烧', desc:'经典北京美食火烧炖猪肠猪肺', photos:[
         'images/Beijing_Luzhu_huoshao__traditi_2026-06-10T08-27-35.jpg',
         'images/Beijing_Luzhu_huoshao__traditi_2026-06-10T08-27-35.jpg'
       ],photoCaptions:{0:'卤煮火烧',1:'老店招牌'}, shops:[
-        {name:'门框胡同百年卤煮', addr:'门框胡同19号（前门附近）', price:'约35元/人', recommend:'卤煮火烧、炸灌肠、麻豆腐', lat:39.9350, lng:116.4000},
+        {name:'门框胡同百年卤煮', addr:'门框胡同19号（前门附近）', price:'约35元/人', recommend:'卤煮火烧、炸灌肠、麻豆腐', lat:39.9350, lng:116.4000, phone:'010-63033116'},
         {name:'陈记卤煮小肠', addr:'取灯胡同3号', price:'约30元/人', recommend:'卤煮火烧、炸酱面', lat:39.9300, lng:116.3950}
       ]},
       { id:'chaogan', icon:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="var(--red)" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v7M12 15v7M4.93 4.93l4.24 4.24M14.83 14.83l4.24 4.24M2 12h7M15 12h7"/></svg>', name:'炒肝', desc:'猪大肠猪肝制成传统小吃', photos:[
@@ -947,7 +966,7 @@ var DATA = {
         'images/Beijing_Chaogan__traditional_C_2026-06-10T08-27-36.jpg'
       ],photoCaptions:{0:'老北京炒肝',1:'姚记招牌'}, shops:[
         {name:'天兴居', addr:'鲜鱼口街95号', price:'约25元/人', recommend:'炒肝、包子、炸酱面', lat:39.8950, lng:116.4000},
-        {name:'姚记炒肝', addr:'鼓楼东大街311号', price:'约30元/人', recommend:'炒肝、卤煮、炸酱面', lat:39.9450, lng:116.3950}
+        {name:'姚记炒肝', addr:'鼓楼东大街311号', price:'约30元/人', recommend:'炒肝、卤煮、炸酱面', lat:39.9450, lng:116.3950, phone:'010-84031525'}
       ]}
     ],
     streets: [
@@ -973,7 +992,7 @@ var DATA = {
         'images/Beijing_Guijie_night_food_stre_2026-06-10T08-28-02.jpg',
         'images/Beijing_Guijie_night_food_stre_2026-06-10T08-28-03.jpg'
       ],photoCaptions:{0:'簋街夜市',1:'麻辣小龙虾'}, shops:[
-        {name:'胡大饭馆', addr:'簋街233号', price:'约150元/人', recommend:'麻辣小龙虾、馋嘴蛙、烤鱼', lat:39.9400, lng:116.4300},
+        {name:'胡大饭馆', addr:'簋街233号', price:'约150元/人', recommend:'麻辣小龙虾、馋嘴蛙、烤鱼', lat:39.9400, lng:116.4300, phone:'010-64045921'},
         {name:'花家怡园', addr:'簋街235号', price:'约120元/人', recommend:'烤鸭、小龙虾、四合院环境', lat:39.9400, lng:116.4300},
         {name:'通乐饭馆', addr:'簋街89号', price:'约100元/人', recommend:'麻辣小龙虾、香辣蟹', lat:39.9400, lng:116.4280}
       ]},
@@ -981,7 +1000,7 @@ var DATA = {
         'images/Beijing_Huguosi_Snack_Street__2026-06-10T08-28-04.jpg',
         'images/Beijing_Huguosi_Snack_Street__2026-06-10T08-28-05.jpg'
       ],photoCaptions:{0:'护国寺小吃街',1:'传统京味小吃'}, shops:[
-        {name:'护国寺小吃总店', addr:'护国寺大街93号', price:'约25元/人', recommend:'豌豆黄、艾窝窝、糖火烧、豆汁', lat:39.9350, lng:116.3800},
+        {name:'护国寺小吃总店', addr:'护国寺大街93号', price:'约25元/人', recommend:'豌豆黄、艾窝窝、糖火烧、豆汁', lat:39.9350, lng:116.3800, phone:'010-66181705'},
         {name:'惠丰门钉肉饼', addr:'护国寺街67号', price:'约35元/人', recommend:'门钉肉饼、牛肉饼、炸酱面', lat:39.9350, lng:116.3800},
         {name:'老西安饭庄', addr:'护国寺街52号', price:'约60元/人', recommend:'羊肉泡馍、羊肉串、酸梅汤', lat:39.9340, lng:116.3790}
       ]},
@@ -989,7 +1008,7 @@ var DATA = {
         'images/Beijing_Wudaoying_Hutong_cafe_2026-06-10T08-28-06.jpg',
         'images/Beijing_Wudaoying_Hutong_cafe_2026-06-10T08-28-07.jpg'
       ],photoCaptions:{0:'五道营胡同街景',1:'文艺咖啡馆'}, shops:[
-        {name:'铁手咖啡制造局', addr:'五道营胡同61号', price:'约45元/人', recommend:'手冲咖啡、澳白、胡同露台', lat:39.9420, lng:116.4100},
+        {name:'铁手咖啡制造局', addr:'五道营胡同61号', price:'约45元/人', recommend:'手冲咖啡、澳白、胡同露台', lat:39.9420, lng:116.4100, phone:'010-84028670'},
         {name:'兰·泰餐', addr:'五道营胡同35号', price:'约120元/人', recommend:'芥末虾球、冬阴功汤、芒果糯米饭', lat:39.9420, lng:116.4090},
         {name:'京兆尹', addr:'五道营胡同2号', price:'约500元/人', recommend:'素食套餐、下午茶、米其林三星', lat:39.9410, lng:116.4080}
       ]},
@@ -1309,7 +1328,7 @@ function showSpotDetail(spotId) {
   var heroImg = photos.length > 0 ? photos[0] : '';
 
   var html = '';
-  // 头图 + 返回按钮
+  // 头图 + 返回按钮 + 浮动添加
   html += '<div class="detail-back" id="detailBackBar" onclick="goBackFromDetail()">' +
     '<div class="detail-back-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#FFF" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg></div></div>';
   html += '<div class="detail-hero">' +
@@ -1319,12 +1338,15 @@ function showSpotDetail(spotId) {
       '<span class="hero-subtitle">' + spot.subtitle +
         (spot.tags || []).map(function(t) { return '<span class="hero-tag">'+t+'</span>'; }).join('') +
       '</span>' +
+    '</div>' +
+    '<div class="hero-add-btn" onclick="addToPlan(\''+spot.id+'\')" title="加入行程">' +
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="22"/><line x1="8" y1="18" x2="16" y2="18"/></svg>' +
     '</div></div>';
 
   // 内容区
   html += '<div class="detail-body">';
 
-  // 信息卡片（浮在头图下方）
+  // 信息卡片
   html += '<div class="detail-info-card">' +
     '<div class="info-grid">' +
       '<div class="info-cell"><span class="info-cell-label">门票</span><span class="info-cell-val price">' + spot.price + '</span></div>' +
@@ -1339,8 +1361,24 @@ function showSpotDetail(spotId) {
     '<div class="mf-addr-row">' +
       '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#999" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>' +
       '<span class="mf-addr-row-text">' + spot.reservation + '</span>' +
-    '</div>' +
     '</div>';
+  // 电话和网站
+  if (spot.phone || spot.website) {
+    html += '<div class="info-contact-row">';
+    if (spot.phone) html += '<a class="info-contact-item" href="tel:'+spot.phone+'"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#2980B9" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg> 拨打电话</a>';
+    if (spot.website) html += '<a class="info-contact-item" href="'+spot.website+'" target="_blank"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#2980B9" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg> 官方网站</a>';
+    html += '</div>';
+  }
+  // 地图预览
+  if (spot.lat && spot.lng) {
+    var mapSrc = 'https://restapi.amap.com/v3/staticmap?location='+spot.lng+','+spot.lat+'&zoom=14&size=800*320&markers=mid,0xFF0000,A:'+spot.lng+','+spot.lat+'&key=dffd44fa0a2f45b73bfa2cbe9ccd1ad5';
+    html += '<div style="padding:12px 16px;border-top:1px solid #F0F0F0;">' +
+      '<div class="detail-map-preview" onclick="switchTab(\'page-spots\',document.querySelector(\'[data-page=page-spots]\'));setTimeout(function(){if(map){map.setZoomAndCenter(14,[\'+spot.lng+','+spot.lat+\'],false,500)}},300)">' +
+        '<img src="'+mapSrc+'" alt="地图位置" loading="lazy" onerror="this.style.display=\'none\'" />' +
+        '<div class="map-label"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#FFF" stroke-width="3" style="vertical-align:middle;margin-right:2px;"><circle cx="12" cy="10" r="3"/><path d="M12 2a8 8 0 0 0-8 8c0 5.4 8 12 8 12s8-6.6 8-12a8 8 0 0 0-8-8z"/></svg>查看地图</div>' +
+      '</div></div>';
+  }
+  html += '</div>';
 
   // 景点介绍
   if (spot.intro) {
@@ -1400,11 +1438,6 @@ function showSpotDetail(spotId) {
       '<div class="mf-card-body open">' + restHtml + '</div>' +
       '</div>';
   }
-
-  // 加入规划按钮
-  html += '<div class="mf-add-bar">' +
-    '<div class="mf-add-btn" onclick="addToPlan(\''+spot.id+'\')"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle;margin-right:6px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>加入行程规划</div>' +
-    '</div>';
 
   html += '</div>'; // detail-body
 
@@ -1496,6 +1529,13 @@ function showFoodDetail(dishId) {
       '</div>' +
       (s.addr ? '<div class="mf-shop-addr"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#999" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 2a8 8 0 0 0-8 8c0 5.4 8 12 8 12s8-6.6 8-12a8 8 0 0 0-8-8z"/></svg>' + s.addr + '</div>' : '') +
       (s.recommend ? '<div class="mf-shop-rec">' + s.recommend + '</div>' : '') +
+      // 电话和网站
+      ((s.phone || s.website) ? '<div style="display:flex;gap:8px;margin-top:8px;">' +
+        (s.phone ? '<a href="tel:'+s.phone+'" style="flex:1;text-align:center;padding:8px;background:#E8F0FE;color:#2980B9;border-radius:8px;font-size:13px;font-weight:500;text-decoration:none;" onclick="event.stopPropagation()"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:3px;"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>电话</a>' : '') +
+        (s.website ? '<a href="'+s.website+'" target="_blank" style="flex:1;text-align:center;padding:8px;background:#E8F5E9;color:#27AE60;border-radius:8px;font-size:13px;font-weight:500;text-decoration:none;" onclick="event.stopPropagation()"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:3px;"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>网站</a>' : '') +
+      '</div>' : '') +
+      // 地图截图
+      (s.lat && s.lng ? '<div class="detail-map-preview" style="margin-top:8px;height:120px;" onclick="event.stopPropagation();switchTab(\'page-spots\',document.querySelector(\'[data-page=page-spots]\'));setTimeout(function(){if(map){map.setZoomAndCenter(15,[\'+s.lng+','+s.lat+\'],false,500)}},300)"><img src="https://restapi.amap.com/v3/staticmap?location='+s.lng+','+s.lat+'&zoom=15&size=800*240&markers=mid,0xFF0000,A:'+s.lng+','+s.lat+'&key=dffd44fa0a2f45b73bfa2cbe9ccd1ad5" alt="地图" loading="lazy" onerror="this.style.display=\'none\'" /></div>' : '') +
       '<button class="mf-shop-btn" onclick="event.stopPropagation();addFoodShopToPlan(\'' + shopId + '\')">添加到规划</button>' +
       '</div>';
   });
