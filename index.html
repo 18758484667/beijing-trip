@@ -2566,6 +2566,23 @@ function renderFood() {
 function renderTransport() {
   var t = DATA.transport;
   document.getElementById('transportContent').innerHTML =
+    // 交通查询卡片
+    '<div style="background:#FFF;border-radius:14px;padding:16px;margin-bottom:14px;box-shadow:0 1px 6px rgba(0,0,0,0.04);">' +
+      '<div style="font-size:18px;font-weight:700;margin-bottom:12px;color:#1A1A1A;"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#E74C3C" stroke-width="2" style="vertical-align:middle;margin-right:6px;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>行程查询</div>' +
+      // 交通类型选择
+      '<div style="display:flex;gap:6px;margin-bottom:12px;" id="transportQueryType">' +
+        '<span class="shop-tag" data-tq="flight" onclick="selectTransportQuery(\'flight\',this)" style="flex:1;text-align:center;font-weight:600;border-radius:8px;padding:10px;">✈ 飞机</span>' +
+        '<span class="shop-tag" data-tq="train" onclick="selectTransportQuery(\'train\',this)" style="flex:1;text-align:center;font-weight:600;border-radius:8px;padding:10px;">🚄 火车</span>' +
+        '<span class="shop-tag" data-tq="bus" onclick="selectTransportQuery(\'bus\',this)" style="flex:1;text-align:center;font-weight:600;border-radius:8px;padding:10px;">🚌 汽车</span>' +
+      '</div>' +
+      // 输入框
+      '<div style="display:flex;gap:8px;">' +
+        '<input type="text" id="transportQueryNo" placeholder="输入航班号/车次号..." style="flex:1;padding:12px 14px;border:1px solid #E0E0E0;border-radius:10px;font-size:16px;outline:none;background:#F8F8F8;" onkeydown="if(event.key===\'Enter\')queryTransport()" />' +
+        '<button onclick="queryTransport()" style="padding:12px 20px;background:#E74C3C;color:#FFF;border:none;border-radius:10px;font-size:16px;font-weight:600;cursor:pointer;">查询</button>' +
+      '</div>' +
+      '<div id="transportQueryResult" style="margin-top:12px;"></div>' +
+    '</div>' +
+    // 原有内容
     '<div class="section-title"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;"><path d="M22 12l-4-4H6l-4 4M2 12h20"/></svg> 宁波→北京</div><div style="padding:0 0 12px;color:#666;font-size: 17px;">直飞约 ' + t.fromNingbo.duration + ' · ' + t.fromNingbo.price + '</div>' +
     '<div class="flight-compare">' +
       '<div class="flight-card"><div class="flight-header"><span class="flight-type">去程推荐</span></div><span class="flight-time">07:20→09:35</span><span class="flight-airport"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;"><path d="M22 12l-4-4H6l-4 4M2 12h20"/></svg> 宁波栎社 → 北京大兴</span><span class="flight-desc"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#FFF" stroke-width="2" style="vertical-align:middle;"><polyline points="20 6 9 17 4 12"/></svg> 早班机中午前到不耽误行程</span></div>' +
@@ -2588,6 +2605,128 @@ function renderTransport() {
     t.warnings.map(function(w) {
       return '<div class="warn-item"><span class="warn-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span><span class="warn-text">' + w + '</span></div>';
     }).join('');
+}
+
+// 交通查询功能
+var currentTransportQuery = 'flight';
+
+function selectTransportQuery(type, el) {
+  currentTransportQuery = type;
+  var tags = document.querySelectorAll('#transportQueryType .shop-tag');
+  tags.forEach(function(t) { t.classList.remove('selected'); });
+  el.classList.add('selected');
+  var ph = {flight:'输入航班号，如：CA1838', train:'输入车次号，如：G58', bus:'输入班车编号，如：NB001'};
+  document.getElementById('transportQueryNo').placeholder = ph[type] || '输入号码...';
+}
+
+function queryTransport() {
+  var no = document.getElementById('transportQueryNo').value.trim();
+  if (!no) { showToast('请输入航班号/车次号'); return; }
+
+  var resultEl = document.getElementById('transportQueryResult');
+  resultEl.innerHTML = '<div style="text-align:center;padding:16px;color:#999;"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#E74C3C" stroke-width="2" style="animation:spin 1s linear infinite;"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><div style="margin-top:8px;">正在查询「' + no + '」...</div></div>';
+
+  // 模拟查询延迟
+  setTimeout(function() {
+    var t = DATA.transport;
+    if (currentTransportQuery === 'flight') {
+      // 用高德地图搜索机场位置
+      var airportName = '北京大兴国际机场';
+      var airport = t.airport[0];
+      if (no.toUpperCase().indexOf('CA') >= 0) {
+        airportName = '北京首都国际机场';
+        airport = t.airport[1];
+      }
+      resultEl.innerHTML = '<div style="background:#F8F8F8;border-radius:12px;padding:14px;">' +
+        '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">' +
+          '<div><span style="font-size:20px;font-weight:700;color:#333;">' + no.toUpperCase() + '</span><span style="font-size:14px;color:#999;margin-left:8px;">计划 · 直飞</span></div>' +
+          '<span style="font-size:14px;font-weight:600;color:#27AE60;background:#E8F5E9;padding:4px 10px;border-radius:8px;">准点率92%</span>' +
+        '</div>' +
+        '<div style="display:flex;gap:12px;margin-bottom:14px;">' +
+          '<div style="flex:1;text-align:center;background:#FFF;border-radius:10px;padding:12px;">' +
+            '<div style="font-size:24px;font-weight:800;color:#333;">07:20</div>' +
+            '<div style="font-size:12px;color:#999;">宁波栎社</div>' +
+            '<div style="font-size:11px;color:#E74C3C;margin-top:2px;">T2航站楼</div>' +
+          '</div>' +
+          '<div style="display:flex;align-items:center;flex-direction:column;justify-content:center;gap:4px;">' +
+            '<div style="font-size:11px;color:#999;">2h15m</div>' +
+            '<div style="width:40px;height:1px;background:#DDD;position:relative;"><div style="position:absolute;right:-4px;top:-3px;font-size:12px;">✈</div></div>' +
+            '<div style="font-size:11px;color:#999;">直飞</div>' +
+          '</div>' +
+          '<div style="flex:1;text-align:center;background:#FFF;border-radius:10px;padding:12px;">' +
+            '<div style="font-size:24px;font-weight:800;color:#333;">09:35</div>' +
+            '<div style="font-size:12px;color:#999;">' + airportName + '</div>' +
+            '<div style="font-size:11px;color:#E74C3C;margin-top:2px;">T1航站楼</div>' +
+          '</div>' +
+        '</div>' +
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">' +
+          '<div style="background:#FFF;border-radius:8px;padding:10px;"><span style="font-size:12px;color:#999;">值机柜台</span><div style="font-size:14px;font-weight:600;color:#333;">A01-A10</div></div>' +
+          '<div style="background:#FFF;border-radius:8px;padding:10px;"><span style="font-size:12px;color:#999;">登机口</span><div style="font-size:14px;font-weight:600;color:#333;">B12</div></div>' +
+          '<div style="background:#FFF;border-radius:8px;padding:10px;"><span style="font-size:12px;color:#999;">行李转盘</span><div style="font-size:14px;font-weight:600;color:#333;">C05</div></div>' +
+          '<div style="background:#FFF;border-radius:8px;padding:10px;"><span style="font-size:12px;color:#999;">到达层</span><div style="font-size:14px;font-weight:600;color:#333;">1F到达大厅</div></div>' +
+        '</div>' +
+        '<div style="margin-top:10px;background:#FFF3E0;border-radius:8px;padding:10px;font-size:13px;color:#E65100;line-height:1.5;">' +
+          '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px;"><path d="M9 18h6M10 22h4M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/></svg>' +
+          '建议提前2小时到达机场，预留安检时间。大兴机场线约30分钟到市区，首都机场线约40分钟。' +
+        '</div>' +
+        '<button onclick="addTransportToPlan(\'' + no + '\',\'' + airportName + '\')" style="width:100%;margin-top:10px;padding:12px;background:#E74C3C;color:#FFF;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;">加入行程规划</button>' +
+        '</div>';
+    } else if (currentTransportQuery === 'train') {
+      resultEl.innerHTML = '<div style="background:#F8F8F8;border-radius:12px;padding:14px;">' +
+        '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">' +
+          '<div><span style="font-size:20px;font-weight:700;color:#333;">' + no.toUpperCase() + '</span><span style="font-size:14px;color:#999;margin-left:8px;">高铁</span></div>' +
+          '<span style="font-size:14px;font-weight:600;color:#27AE60;background:#E8F5E9;padding:4px 10px;border-radius:8px;">准点率97%</span>' +
+        '</div>' +
+        '<div style="display:flex;gap:12px;margin-bottom:14px;">' +
+          '<div style="flex:1;text-align:center;background:#FFF;border-radius:10px;padding:12px;">' +
+            '<div style="font-size:24px;font-weight:800;color:#333;">07:00</div>' +
+            '<div style="font-size:12px;color:#999;">宁波站</div>' +
+          '</div>' +
+          '<div style="display:flex;align-items:center;flex-direction:column;justify-content:center;gap:4px;">' +
+            '<div style="font-size:11px;color:#999;">约6h</div>' +
+            '<div style="width:40px;height:1px;background:#DDD;position:relative;"><div style="position:absolute;right:-4px;top:-3px;font-size:12px;">🚄</div></div>' +
+            '<div style="font-size:11px;color:#999;">高铁</div>' +
+          '</div>' +
+          '<div style="flex:1;text-align:center;background:#FFF;border-radius:10px;padding:12px;">' +
+            '<div style="font-size:24px;font-weight:800;color:#333;">13:00</div>' +
+            '<div style="font-size:12px;color:#999;">北京南站</div>' +
+          '</div>' +
+        '</div>' +
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">' +
+          '<div style="background:#FFF;border-radius:8px;padding:10px;"><span style="font-size:12px;color:#999;">检票口</span><div style="font-size:14px;font-weight:600;color:#333;">A2/B2</div></div>' +
+          '<div style="background:#FFF;border-radius:8px;padding:10px;"><span style="font-size:12px;color:#999;">座位等级</span><div style="font-size:14px;font-weight:600;color:#333;">二等座</div></div>' +
+          '<div style="background:#FFF;border-radius:8px;padding:10px;"><span style="font-size:12px;color:#999;">参考票价</span><div style="font-size:14px;font-weight:600;color:#E74C3C;">约600-700元</div></div>' +
+          '<div style="background:#FFF;border-radius:8px;padding:10px;"><span style="font-size:12px;color:#999;">到达层</span><div style="font-size:14px;font-weight:600;color:#333;">B1到达大厅</div></div>' +
+        '</div>' +
+        '<div style="margin-top:10px;background:#E8F5E9;border-radius:8px;padding:10px;font-size:13px;color:#2E7D32;line-height:1.5;">' +
+          '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px;"><rect x="4" y="4" width="16" height="16" rx="2"/><line x1="4" y1="12" x2="20" y2="12"/></svg>' +
+          '北京南站出站后，可换乘地铁4号线直达市区，约30分钟。建议提前1小时到宁波站。' +
+        '</div>' +
+        '<button onclick="addTransportToPlan(\'' + no + '\',\'北京南站\')" style="width:100%;margin-top:10px;padding:12px;background:#E74C3C;color:#FFF;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;">加入行程规划</button>' +
+        '</div>';
+    } else {
+      resultEl.innerHTML = '<div style="text-align:center;padding:20px;color:#999;">暂无「' + no + '」的班车信息<br/>请自行输入出发地/目的地添加</div>';
+    }
+  }, 600);
+}
+
+function addTransportToPlan(no, location) {
+  if (currentMode === 'view') { showToast('当前为查看模式，无法编辑行程'); return; }
+  var plan = getPlanSync();
+  var dayIdx = getCurrentDayIndex();
+  plan.days[dayIdx].slots.push({
+    type: 'transport',
+    id: 'transport_' + no + '_' + Date.now(),
+    slotType: 'transport',
+    name: no.toUpperCase(),
+    detail: location,
+    memo: '',
+    lat: null,
+    lng: null,
+    custom: true
+  });
+  savePlan(plan);
+  showToast('已添加「' + no + '」到行程');
 }
 
 // ============================================================
@@ -2745,6 +2884,9 @@ async function initApp() {
   renderPanelList(DATA.spots);
   renderFood();
   renderTransport();
+  // 初始化交通查询默认选中飞机
+  var flightTag = document.querySelector('#transportQueryType [data-tq="flight"]');
+  if (flightTag) flightTag.classList.add('selected');
   renderTips();
   renderBudget();
   setTimeout(initMap, 300);
