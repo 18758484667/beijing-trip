@@ -292,6 +292,7 @@
     .day-chip.active { background: var(--red-bg); color: var(--red); border-color: var(--red); font-weight: 600; }
     .day-chip:last-child { margin-right: 0; }
 
+
     .plan-day-section { margin-bottom: 14px; }
     .plan-day-title { font-size: 18px; font-weight: 700; padding: 6px 4px 10px; color: var(--text); }
     .plan-day-actions { display: inline-block; font-size: 13px; margin-left: 8px; }
@@ -299,9 +300,20 @@
     .plan-day-action:active { color: var(--red); }
     .plan-day-body { background: #FFF; border-radius: 14px; padding: 8px 12px; box-shadow: 0 1px 6px rgba(0,0,0,0.04); }
 
-    .plan-slot { display: flex; align-items: center; padding: 12px 0; gap: 10px; cursor: pointer; border-bottom: 1px solid #F0F0F0; }
+    /* 规划页地图 */
+    #planMapContainer { width: 100%; height: 0; overflow: hidden; background: #F0F0F0; transition: height 0.3s ease; }
+    #planMapContainer.show { height: 220px; }
+    #planMapInner { width: 100%; height: 220px; }
+
+    /* 拖拽排序 */
+    .plan-slot { display: flex; align-items: center; padding: 12px 0; gap: 10px; cursor: pointer; border-bottom: 1px solid #F0F0F0; position: relative; user-select: none; -webkit-user-select: none; }
     .plan-slot:last-child { border-bottom: none; }
     .plan-slot:active { opacity: 0.7; }
+    .plan-slot.dragging { opacity: 0.5; background: #F8F8F8; border-radius: 10px; padding: 12px 8px; }
+    .plan-slot.drag-over { border-top: 2px solid #E74C3C; }
+    .plan-slot-drag { width: 24px; height: 36px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; cursor: grab; color: #CCC; font-size: 18px; opacity: 0; transition: opacity 0.15s; }
+    .plan-slot:hover .plan-slot-drag, .plan-slot:active .plan-slot-drag { opacity: 1; }
+    .plan-slot-drag:active { cursor: grabbing; }
     .plan-slot-dot { width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
     .plan-slot-dot svg { width: 18px; height: 18px; stroke: #FFF; }
     .plan-slot.morning .plan-slot-dot { background: #E67E22; }
@@ -384,6 +396,7 @@
       <button class="plan-btn plan-btn-custom" onclick="showCustomPicker('custom')"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:2px;"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg> 自定义</button>
       <button class="plan-btn plan-btn-clear" onclick="clearPlan()"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:2px;"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg> 清空</button>
     </div>
+    <div id="planMapContainer"></div>
     <div id="planSummaryBar"></div>
     <div class="plan-days" id="planDaysTabs"></div>
     <div id="planContent" class="page-container"></div>
@@ -1689,6 +1702,20 @@ function renderDaySection(plan, dayIdx) {
   var day = plan.days[dayIdx];
   var container = document.getElementById('planContent');
 
+  // 地图：有 slot 就显示
+  var mapContainer = document.getElementById('planMapContainer');
+  if (day.slots.length > 0) {
+    mapContainer.classList.add('show');
+    if (!document.getElementById('planMapInner')) {
+      var mapInner = document.createElement('div');
+      mapInner.id = 'planMapInner';
+      mapContainer.appendChild(mapInner);
+    }
+    setTimeout(function() { drawPlanMap(dayIdx); }, 400);
+  } else {
+    mapContainer.classList.remove('show');
+  }
+
   if (day.slots.length === 0) {
     container.innerHTML = '<div class="plan-empty"><span class="plan-empty-icon"><svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="var(--text3)" stroke-width="2" style="vertical-align:middle;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span><span class="plan-empty-text">第' + day.dayNum + '天还没有安排<br/>点击上方按钮添加景点/美食/住宿</span></div>';
     return;
@@ -1698,34 +1725,29 @@ function renderDaySection(plan, dayIdx) {
   html += '<div class="plan-day-section">';
   html += '<span class="plan-day-title">' + day.label + '<span class="plan-day-actions"><span class="plan-day-action" onclick="clearDay(' + dayIdx + ')">清空</span></span></span>';
 
-  // 按时间段分组排序
-  var slotOrder = {'hotel':0,'morning':1,'noon':2,'afternoon':3,'evening':4,'transport':5};
-  var sortedSlots = day.slots.slice().sort(function(a,b){
-    return (slotOrder[a.slotType]||99) - (slotOrder[b.slotType]||99);
-  });
-
   var slotLabels = { morning:'上午', noon:'中午', afternoon:'下午', evening:'晚上', hotel:'住宿', transport:'交通' };
 
-  html += '<div class="plan-day-body">';
+  html += '<div class="plan-day-body" id="planDayBody_' + dayIdx + '">';
 
-  sortedSlots.forEach(function(slot, idx) {
+  day.slots.forEach(function(slot, idx) {
     var cls = slot.slotType || 'afternoon';
     if (slot.custom) cls += ' plan-slot-custom';
-    var originalIdx = day.slots.indexOf(slot);
-    html += '<div class="plan-slot ' + cls + '" onclick="showSlotOnMap(\'' + slot.id + '\',\'' + slot.type + '\',\'' + (slot.lat||'') + '\',\'' + (slot.lng||'') + '\')">';
+    html += '<div class="plan-slot ' + cls + '" data-slot-index="' + idx + '" draggable="true" onmousedown="startDragSlot(event,' + dayIdx + ',' + idx + ')" ontouchstart="startDragSlot(event,' + dayIdx + ',' + idx + ')" onclick="showSlotOnMap(\'' + slot.id + '\',\'' + slot.type + '\',\'' + (slot.lat||'') + '\',\'' + (slot.lng||'') + '\')">';
+    html += '<span class="plan-slot-drag" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()">⠿</span>';
     html += '<div class="plan-slot-dot">' + getSlotIcon(slot.type) + '</div>';
     html += '<div class="plan-slot-info">';
     html += '<span class="plan-slot-name"><span style="font-size:12px;color:#999;font-weight:400;margin-right:4px;">' + (slotLabels[slot.slotType]||'') + '</span>' + slot.name + '</span>';
     html += '<span class="plan-slot-detail">' + (slot.detail || '') + '</span>';
     if (slot.memo) html += '<span class="plan-slot-memo"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> ' + slot.memo + '</span>';
     html += '</div>';
-    html += '<span class="plan-slot-edit" onclick="event.stopPropagation();openSlotEdit(' + dayIdx + ',' + originalIdx + ')"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></span>';
-    html += '<span class="plan-slot-remove" onclick="event.stopPropagation();removeSlot(' + dayIdx + ',' + originalIdx + ')">×</span>';
+    html += '<span class="plan-slot-edit" onclick="event.stopPropagation();openSlotEdit(' + dayIdx + ',' + idx + ')"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></span>';
+    html += '<span class="plan-slot-remove" onclick="event.stopPropagation();removeSlot(' + dayIdx + ',' + idx + ')">×</span>';
     html += '</div>';
   });
 
   html += '</div></div>';
   container.innerHTML = html;
+  attachDragListeners(dayIdx);
 }
 
 function getSlotIcon(type) {
@@ -2510,6 +2532,168 @@ function findFoodCoords(foodId) {
     }
   }
   return null;
+}
+
+// ============================================================
+// 规划页地图 + 拖拽排序
+// ============================================================
+var planMapObj = null;
+var planMapMarkers = [];
+
+function drawPlanMap(dayIdx) {
+  var plan = getPlanSync();
+  var day = plan.days[dayIdx];
+  if (!day || day.slots.length === 0) return;
+
+  var mapInner = document.getElementById('planMapInner');
+  if (!mapInner) return;
+
+  // 初始化或重置地图
+  if (!planMapObj) {
+    planMapObj = new AMap.Map('planMapInner', {
+      zoom: 12, center: [116.3972, 39.9163],
+      viewMode: '2D', resizeEnable: true
+    });
+  }
+
+  // 清除旧标记
+  planMapMarkers.forEach(function(m) { planMapObj.remove(m); });
+  planMapMarkers = [];
+  if (window._planPolyline) { planMapObj.remove(window._planPolyline); window._planPolyline = null; }
+
+  // 收集有效坐标
+  var pathPoints = [];
+
+  day.slots.forEach(function(slot, idx) {
+    var lng, lat;
+    if (slot.custom && slot.lat && slot.lng) {
+      lng = slot.lng; lat = slot.lat;
+    } else if (slot.type === 'spot') {
+      var spot = DATA.spots.find(function(s) { return s.id === slot.id; });
+      if (spot) { lng = spot.lng; lat = spot.lat; }
+    } else if (slot.type === 'food') {
+      var foodData = findFoodCoords(slot.id);
+      if (foodData) { lng = foodData.lng; lat = foodData.lat; }
+    }
+
+    if (lng && lat) {
+      pathPoints.push([lng, lat]);
+
+      // 数字编号标记
+      var numLabel = document.createElement('div');
+      numLabel.style.cssText = 'width:28px;height:28px;border-radius:50%;background:#E74C3C;color:#FFF;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #FFF;box-shadow:0 2px 6px rgba(231,76,60,0.4);';
+      numLabel.textContent = (idx + 1);
+
+      var marker = new AMap.Marker({
+        position: [lng, lat],
+        content: numLabel,
+        offset: new AMap.Pixel(-14, -14),
+        zIndex: 30
+      });
+      planMapMarkers.push(marker);
+      planMapObj.add(marker);
+    }
+  });
+
+  // 绘制连线
+  if (pathPoints.length >= 2) {
+    var polyline = new AMap.Polyline({
+      path: pathPoints,
+      strokeColor: '#E74C3C',
+      strokeWeight: 3,
+      strokeOpacity: 0.7,
+      strokeStyle: 'dashed',
+      lineJoin: 'round',
+      lineCap: 'round',
+      zIndex: 10
+    });
+    planMapObj.add(polyline);
+    window._planPolyline = polyline;
+    planMapObj.setFitView(planMapMarkers, false, [40, 80, 40, 80]);
+  } else if (planMapMarkers.length === 1) {
+    planMapObj.setZoomAndCenter(14, pathPoints[0], false, 300);
+  }
+}
+
+// 拖拽排序
+var dragData = null;
+
+function attachDragListeners(dayIdx) {
+  var body = document.getElementById('planDayBody_' + dayIdx);
+  if (!body) return;
+
+  var slots = body.querySelectorAll('.plan-slot');
+  slots.forEach(function(slot, idx) {
+    slot.addEventListener('dragstart', function(e) {
+      if (currentMode === 'view') { e.preventDefault(); return; }
+      dragData = { dayIdx: dayIdx, fromIdx: idx };
+      slot.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', idx);
+    });
+
+    slot.addEventListener('dragend', function(e) {
+      slot.classList.remove('dragging');
+      slots.forEach(function(s) { s.classList.remove('drag-over'); });
+      dragData = null;
+    });
+
+    slot.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      slot.classList.add('drag-over');
+    });
+
+    slot.addEventListener('dragleave', function(e) {
+      slot.classList.remove('drag-over');
+    });
+
+    slot.addEventListener('drop', function(e) {
+      e.preventDefault();
+      slot.classList.remove('drag-over');
+      if (!dragData || dragData.fromIdx === idx) return;
+
+      var plan = getPlanSync();
+      var day = plan.days[dragData.dayIdx];
+      var moved = day.slots.splice(dragData.fromIdx, 1)[0];
+      day.slots.splice(idx, 0, moved);
+      savePlan(plan);
+      renderDaySection(plan, dragData.dayIdx);
+    });
+
+    // Touch support
+    var touchStartY = 0;
+    slot.addEventListener('touchstart', function(e) {
+      if (currentMode === 'view') return;
+      touchStartY = e.touches[0].clientY;
+      dragData = { dayIdx: dayIdx, fromIdx: idx };
+    }, {passive: true});
+
+    slot.addEventListener('touchmove', function(e) {
+      if (!dragData) return;
+      slot.classList.add('dragging');
+    }, {passive: true});
+
+    slot.addEventListener('touchend', function(e) {
+      if (!dragData) return;
+      slot.classList.remove('dragging');
+      var touchEndY = e.changedTouches[0].clientY;
+      var diff = touchEndY - touchStartY;
+
+      if (Math.abs(diff) > 40) {
+        var newIdx = diff > 0 ? Math.min(idx + 1, day.slots.length - 1) : Math.max(idx - 1, 0);
+        if (newIdx !== idx) {
+          var plan = getPlanSync();
+          var day = plan.days[dragData.dayIdx];
+          var moved = day.slots.splice(dragData.fromIdx, 1)[0];
+          day.slots.splice(newIdx, 0, moved);
+          savePlan(plan);
+          renderDaySection(plan, dragData.dayIdx);
+        }
+      }
+      dragData = null;
+    });
+  });
 }
 
 // ============================================================
