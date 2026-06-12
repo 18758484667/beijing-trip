@@ -1732,8 +1732,8 @@ function renderDaySection(plan, dayIdx) {
   day.slots.forEach(function(slot, idx) {
     var cls = slot.slotType || 'afternoon';
     if (slot.custom) cls += ' plan-slot-custom';
-    html += '<div class="plan-slot ' + cls + '" data-slot-index="' + idx + '" draggable="true" onmousedown="startDragSlot(event,' + dayIdx + ',' + idx + ')" ontouchstart="startDragSlot(event,' + dayIdx + ',' + idx + ')" onclick="showSlotOnMap(\'' + slot.id + '\',\'' + slot.type + '\',\'' + (slot.lat||'') + '\',\'' + (slot.lng||'') + '\')">';
-    html += '<span class="plan-slot-drag" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()">⠿</span>';
+    html += '<div class="plan-slot ' + cls + '" data-slot-index="' + idx + '" draggable="true" onclick="showSlotOnMap(\'' + slot.id + '\',\'' + slot.type + '\',\'' + (slot.lat||'') + '\',\'' + (slot.lng||'') + '\')">';
+    html += '<span class="plan-slot-drag">⠿</span>';
     html += '<div class="plan-slot-dot">' + getSlotIcon(slot.type) + '</div>';
     html += '<div class="plan-slot-info">';
     html += '<span class="plan-slot-name"><span style="font-size:12px;color:#999;font-weight:400;margin-right:4px;">' + (slotLabels[slot.slotType]||'') + '</span>' + slot.name + '</span>';
@@ -2547,6 +2547,8 @@ function drawPlanMap(dayIdx) {
 
   var mapInner = document.getElementById('planMapInner');
   if (!mapInner) return;
+  // Check if the page is visible (AMap requires visible container)
+  if (mapInner.offsetParent === null) return;
 
   // 初始化或重置地图
   if (!planMapObj) {
@@ -2681,12 +2683,12 @@ function attachDragListeners(dayIdx) {
       var diff = touchEndY - touchStartY;
 
       if (Math.abs(diff) > 40) {
-        var newIdx = diff > 0 ? Math.min(idx + 1, day.slots.length - 1) : Math.max(idx - 1, 0);
+        var plan = getPlanSync();
+        var targetDay = plan.days[dragData.dayIdx];
+        var newIdx = diff > 0 ? Math.min(idx + 1, targetDay.slots.length - 1) : Math.max(idx - 1, 0);
         if (newIdx !== idx) {
-          var plan = getPlanSync();
-          var day = plan.days[dragData.dayIdx];
-          var moved = day.slots.splice(dragData.fromIdx, 1)[0];
-          day.slots.splice(newIdx, 0, moved);
+          var moved = targetDay.slots.splice(dragData.fromIdx, 1)[0];
+          targetDay.slots.splice(newIdx, 0, moved);
           savePlan(plan);
           renderDaySection(plan, dragData.dayIdx);
         }
