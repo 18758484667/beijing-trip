@@ -69,6 +69,9 @@
     body.view-mode .shop-tag { pointer-events: none; opacity: 0.7; }
 
     #mapContainer { width: 100%; height: 55vh; min-height: 320px; background: #F5F5F5; border-radius: 0 0 12px 12px; overflow: hidden; }
+    .food-map-container { width: 100%; height: 38vh; min-height: 240px; background: #F5F5F5; overflow: hidden; }
+    .food-map-marker { width: 32px; height: 32px; border-radius: 50%; background: var(--red); color: #FFF; display: flex; align-items: center; justify-content: center; font-size: 14px; box-shadow: 0 2px 6px rgba(231,76,60,0.4); border: 2px solid #FFF; cursor: pointer; transition: transform 0.15s; }
+    .food-map-marker:active { transform: scale(1.2); }
 
     .spot-panel { position: fixed; bottom: 56px; left: 0; right: 0; background: #FFF; border-radius: 16px 16px 0 0; z-index: 100; max-height: 45vh; display: flex; flex-direction: column; transition: transform 0.3s ease; }
     .spot-panel.collapsed { transform: translateY(calc(100% - 48px)); }
@@ -346,6 +349,14 @@
     /* 行程列表页 */
     .plan-list-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px 10px; background: #FFF; position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--border); }
     .plan-list-title { font-size: 20px; font-weight: 700; color: var(--text); }
+    /* 日期选择器 */
+    .plan-date-bar { padding: 12px 16px; background: #FFF; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+    .plan-date-item { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+    .plan-date-label { font-size: 12px; color: var(--text3); font-weight: 500; }
+    .plan-date-input { width: 100%; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 10px; font-size: 15px; font-family: inherit; color: var(--text); background: #FAFAFA; outline: none; -webkit-appearance: none; transition: border-color 0.2s; }
+    .plan-date-input:focus { border-color: var(--red); background: #FFF; }
+    .plan-date-arrow { color: var(--text3); font-size: 18px; flex-shrink: 0; padding-top: 18px; }
+    .plan-date-info { padding: 6px 16px 12px; font-size: 13px; color: var(--red); background: #FFF; border-bottom: 1px solid var(--border); }
     .plan-day-card { margin: 12px 14px; background: #FFF; border-radius: 14px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); overflow: hidden; cursor: pointer; transition: all 0.2s; border: 1px solid var(--border); }
     .plan-day-card:active { transform: scale(0.98); box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
     .plan-day-card-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 16px 10px; }
@@ -484,6 +495,18 @@
       <span class="plan-list-title">行程规划</span>
       <button class="plan-btn plan-btn-clear" onclick="clearPlan()" style="padding:6px 12px;font-size:13px;">清空全部</button>
     </div>
+    <div class="plan-date-bar" id="planDateBar">
+      <div class="plan-date-item">
+        <span class="plan-date-label">出发日期</span>
+        <input type="date" class="plan-date-input" id="planStartDate" onchange="onTripDateChange()" />
+      </div>
+      <span class="plan-date-arrow">→</span>
+      <div class="plan-date-item">
+        <span class="plan-date-label">返回日期</span>
+        <input type="date" class="plan-date-input" id="planEndDate" onchange="onTripDateChange()" />
+      </div>
+    </div>
+    <div class="plan-date-info" id="planDateInfo"></div>
     <div id="planListContent" class="page-container"></div>
   </div>
 
@@ -507,6 +530,7 @@
 
   <!-- ===== 美食页 ===== -->
   <div class="page" id="page-food">
+    <div class="food-map-container" id="foodMapContainer"></div>
     <div class="page-container">
       <div style="height:12px;"></div>
       <div class="food-tabs">
@@ -1223,12 +1247,16 @@ var DATA = {
       { name:'北京大兴国际机场', icon:'✈️', distance:'距市区约50公里',
         subway:'地铁大兴机场线：草桥站换乘，约30分钟到市区，票价35元',
         bus:'机场大巴：多条线路覆盖市区主要区域，约1小时，票价40元',
+        busTicket:'购票：到达层机场大巴售票窗口，或微信搜"机场巴士"小程序在线购票',
         taxi:'打车约120-150元，使用导航防绕路，高峰期预留1.5h',
+        taxiGuide:'打车指南：按指示牌前往B1层/1F出租车上客区，排队候车，选择正规京B牌照出租车，拒绝黑车拉客。建议用高德/滴滴叫网约车，定位到航站楼出发层/到达层',
         tip:'出站口服务台可免费领地铁优惠券' },
       { name:'北京首都国际机场', icon:'✈️', distance:'距市区约30公里',
         subway:'机场线：东直门/三元桥换乘，约40分钟到市区，票价25元',
         bus:'机场大巴：多条线路覆盖西单/王府井等地，约1小时，票价30元',
+        busTicket:'购票：T2/T3到达层机场大巴售票窗口，或"机场巴士"公众号/小程序在线购票',
         taxi:'打车约80-120元，T3航站楼打车排队较长',
+        taxiGuide:'打车指南：T2到达层5号门/T3到达层7号门外出租车上客区，认准京B牌照正规出租。T3高峰期排队30分钟+，建议坐地铁或提前约网约车到停车场等候',
         tip:'两个机场都有地铁，不堵车优先选地铁' }
     ],
     // 火车站
@@ -1249,9 +1277,9 @@ var DATA = {
     ],
     // 景区专线
     scenicLines: [
-      { name:'慕田峪长城专线', from:'前门集散中心', time:'7:30出发约9:30到', price:'往返80元/人（含摆渡车）', tip:'提前1天电话确认发车' },
-      { name:'八达岭长城S2线', from:'北京北站/清河站', time:'约1.5小时（火车）', price:'票价约6元', tip:'刷一卡通进站，风景绝美' },
-      { name:'颐和园游船', from:'紫竹院公园→颐和园', time:'约40分钟', price:'单程约100元', tip:'皇家御河水道，体验独特' }
+      { name:'慕田峪长城专线', from:'前门集散中心', time:'7:30出发约9:30到', price:'往返80元/人（含摆渡车）', ticket:'购票：前门集散中心窗口购票，或微信"北京旅游集散中心"小程序提前预约', tip:'提前1天电话确认发车' },
+      { name:'八达岭长城S2线', from:'北京北站/清河站', time:'约1.5小时（火车）', price:'票价约6元', ticket:'购票：车站售票窗口购票，或刷一卡通/亿通行APP直接进站（无需预约）', tip:'刷一卡通进站，风景绝美' },
+      { name:'颐和园游船', from:'紫竹院公园→颐和园', time:'约40分钟', price:'单程约100元', ticket:'购票：紫竹院公园码头窗口购票，美团/携程可提前预订', tip:'皇家御河水道，体验独特' }
     ],
     warnings: [
       '拒绝黄牛"付费带路""快速通道"，正规预约后刷身份证即可',
@@ -1301,12 +1329,22 @@ function applyMode(mode) {
   var toggle = document.getElementById('modeToggle');
   if (mode === 'view') {
     document.body.classList.add('view-mode');
+    // 查看模式下隐藏日期选择器
+    var dateBar = document.getElementById('planDateBar');
+    var dateInfo = document.getElementById('planDateInfo');
+    if (dateBar) dateBar.style.display = 'none';
+    if (dateInfo) dateInfo.style.display = 'none';
     icon.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>';
     label.textContent = '仅查看';
     toggle.classList.add('viewing');
     document.getElementById('tabPlanLabel').textContent = '行程';
   } else {
     document.body.classList.remove('view-mode');
+    // 规划模式下显示日期选择器
+    var dateBar = document.getElementById('planDateBar');
+    var dateInfo = document.getElementById('planDateInfo');
+    if (dateBar) dateBar.style.display = '';
+    if (dateInfo) dateInfo.style.display = '';
     icon.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>';
     label.textContent = '规划中';
     toggle.classList.remove('viewing');
@@ -1341,7 +1379,8 @@ function switchTab(pageId, el) {
   document.getElementById(pageId).classList.add('active');
   el.classList.add('active');
   if (pageId === 'page-spots') { setTimeout(initMap, 100); }
-  if (pageId === 'page-plan') { renderPlanList(); }
+  if (pageId === 'page-plan') { initPlanDatePickers(); renderPlanList(); }
+  if (pageId === 'page-food') { initFoodMap(); }
   if (pageId === 'page-toolbox') { renderToolbox(); }
 }
 
@@ -2030,23 +2069,31 @@ async function savePlan(plan) {
 }
 
 function createDefaultPlan() {
-  var days = [];
-  // 默认从今天开始
   var startDate = getTripStartDate();
-  for (var i = 1; i <= 7; i++) {
-    var labels = ['第一天 出发','第二天 故宫天安门','第三天 颐和园圆明园','第四天 什刹海胡同','第五天 长城','第六天 奥林匹克','第七天 返程'];
+  var endDate = getTripEndDate();
+  // 计算天数差
+  var diffTime = endDate.getTime() - startDate.getTime();
+  var totalDays = Math.max(1, Math.round(diffTime / (1000 * 60 * 60 * 24)) + 1);
+  var days = [];
+  var defaultLabels = ['第一天 出发'];
+  for (var i = 2; i < totalDays; i++) { defaultLabels.push('第' + i + '天'); }
+  defaultLabels.push('第' + totalDays + '天 返程');
+  for (var i = 1; i <= totalDays; i++) {
     var d = new Date(startDate);
     d.setDate(d.getDate() + i - 1);
+    var label = defaultLabels[i-1] || ('第'+i+'天');
+    if (i === 1) label = '第一天 出发';
+    else if (i === totalDays) label = '第' + totalDays + '天 返程';
     days.push({
       dayNum: i,
-      label: labels[i-1] || ('第'+i+'天'),
-      date: formatDate(d), // '6月15日 周日'
-      dateISO: d.toISOString().split('T')[0], // '2026-06-15'
+      label: label,
+      date: formatDate(d),
+      dateISO: d.toISOString().split('T')[0],
       slots: [],
-      weather: null // {text:'晴 28°', icon:'☀️'}
+      weather: null
     });
   }
-  return { totalDays: 7, days: days };
+  return { totalDays: totalDays, days: days };
 }
 
 // 获取行程起始日期
@@ -2059,6 +2106,20 @@ function getTripStartDate() {
 }
 function setTripStartDate(date) {
   localStorage.setItem('bj_trip_start', date.toISOString());
+}
+// 获取/设置行程返回日期
+function getTripEndDate() {
+  try {
+    var saved = localStorage.getItem('bj_trip_end');
+    if (saved) return new Date(saved);
+  } catch(e) {}
+  // 默认：出发日期+6天（7天行程）
+  var d = new Date(getTripStartDate());
+  d.setDate(d.getDate() + 6);
+  return d;
+}
+function setTripEndDate(date) {
+  localStorage.setItem('bj_trip_end', date.toISOString());
 }
 function formatDate(date) {
   var days = ['周日','周一','周二','周三','周四','周五','周六'];
@@ -2086,6 +2147,72 @@ function isItemInPlan(itemId) {
     if (day.slots[s].id === itemId) return true;
   }
   return false;
+}
+
+// --- 日期变更处理 ---
+function initPlanDatePickers() {
+  var startInput = document.getElementById('planStartDate');
+  var endInput = document.getElementById('planEndDate');
+  if (!startInput || !endInput) return;
+  var startDate = getTripStartDate();
+  var endDate = getTripEndDate();
+  // 转为 YYYY-MM-DD 格式
+  startInput.value = startDate.toISOString().split('T')[0];
+  endInput.value = endDate.toISOString().split('T')[0];
+  updateDateInfo();
+}
+
+function onTripDateChange() {
+  var startInput = document.getElementById('planStartDate');
+  var endInput = document.getElementById('planEndDate');
+  if (!startInput || !endInput) return;
+  var startVal = startInput.value;
+  var endVal = endInput.value;
+  if (!startVal || !endVal) return;
+
+  var startDate = new Date(startVal + 'T00:00:00');
+  var endDate = new Date(endVal + 'T00:00:00');
+
+  // 返回日期不能早于出发日期
+  if (endDate < startDate) {
+    showToast('返回日期不能早于出发日期');
+    endInput.value = startVal;
+    endDate = new Date(startVal + 'T00:00:00');
+  }
+
+  // 保存新日期
+  setTripStartDate(startDate);
+  setTripEndDate(endDate);
+
+  // 重新生成规划
+  var newPlan = createDefaultPlan();
+  // 尝试保留已有的 slots 数据（按日期匹配）
+  var oldPlan = getPlanSync();
+  var oldDays = oldPlan.days || [];
+  var newDays = newPlan.days;
+  for (var i = 0; i < newDays.length; i++) {
+    var newDateISO = newDays[i].dateISO;
+    for (var j = 0; j < oldDays.length; j++) {
+      if (oldDays[j].dateISO === newDateISO && oldDays[j].slots && oldDays[j].slots.length > 0) {
+        newDays[i].slots = oldDays[j].slots;
+        break;
+      }
+    }
+  }
+  savePlan(newPlan);
+  updateDateInfo();
+  renderPlanList();
+}
+
+function updateDateInfo() {
+  var infoEl = document.getElementById('planDateInfo');
+  if (!infoEl) return;
+  var startDate = getTripStartDate();
+  var endDate = getTripEndDate();
+  var diffTime = endDate.getTime() - startDate.getTime();
+  var nights = Math.max(0, Math.round(diffTime / (1000 * 60 * 60 * 24)));
+  var totalDays = nights + 1;
+  infoEl.textContent = '共 ' + totalDays + ' 天 ' + nights + ' 晚（' + formatDate(startDate) + ' → ' + formatDate(endDate) + '）';
 }
 
 // --- 渲染行程列表页（概览） ---
@@ -3404,11 +3531,108 @@ function attachDragListeners(dayIdx) {
 // ============================================================
 var foodTab = 'dishes';
 var warningExpanded = false;
+var foodMap = null;
+var foodMarkers = [];
+var foodMapInitialized = false;
+
+function initFoodMap() {
+  if (foodMapInitialized) return;
+  if (typeof AMap === 'undefined') {
+    setTimeout(initFoodMap, 500);
+    return;
+  }
+  foodMapInitialized = true;
+  foodMap = new AMap.Map('foodMapContainer', {
+    center: [116.39, 39.91],
+    zoom: 12,
+    resizeEnable: true,
+    showIndoorMap: false,
+    showLabel: false
+  });
+  foodMap.on('complete', function() {
+    addFoodMarkers();
+  });
+}
+
+function addFoodMarkers() {
+  if (!foodMap) return;
+  // 清除旧标记
+  foodMarkers.forEach(function(m) { foodMap.remove(m); });
+  foodMarkers = [];
+
+  // 收集所有餐馆坐标并去重
+  var allShops = [];
+  var seen = {};
+  // 从 dishes 收集
+  DATA.food.dishes.forEach(function(d) {
+    d.shops.forEach(function(s) {
+      if (s.lat && s.lng && s.lat < 50) {
+        var key = s.lat.toFixed(4) + ',' + s.lng.toFixed(4);
+        if (!seen[key]) {
+          seen[key] = true;
+          allShops.push({ name: s.name, dishName: d.name, lat: s.lat, lng: s.lng, addr: s.addr, price: s.price, recommend: s.recommend });
+        }
+      }
+    });
+  });
+  // 从 streets 收集
+  DATA.food.streets.forEach(function(s) {
+    s.shops.forEach(function(sh) {
+      if (sh.lat && sh.lng && sh.lat < 50) {
+        var key = sh.lat.toFixed(4) + ',' + sh.lng.toFixed(4);
+        if (!seen[key]) {
+          seen[key] = true;
+          allShops.push({ name: sh.name, dishName: s.name, lat: sh.lat, lng: sh.lng, addr: sh.addr, price: sh.price, recommend: sh.recommend });
+        }
+      }
+    });
+  });
+
+  // 为每个店铺创建标记
+  allShops.forEach(function(shop) {
+    var markerDom = document.createElement('div');
+    markerDom.className = 'food-map-marker';
+    markerDom.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#FFF" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/></svg>';
+    markerDom.onclick = function() {
+      var content = '<div style="padding:4px;"><strong style="font-size:14px;">' + shop.name + '</strong>';
+      content += '<div style="font-size:12px;color:#999;margin-top:2px;">' + shop.dishName + '</div>';
+      content += '<div style="font-size:12px;color:#666;margin-top:2px;">' + shop.addr + '</div>';
+      if (shop.price) content += '<div style="font-size:12px;color:#E74C3C;margin-top:2px;">' + shop.price + '</div>';
+      if (shop.recommend) content += '<div style="font-size:11px;color:#E67E22;margin-top:2px;">推荐：' + shop.recommend + '</div>';
+      content += '</div>';
+      var infoWin = new AMap.InfoWindow({ content: content, offset: new AMap.Pixel(0, -36) });
+      infoWin.open(foodMap, [shop.lng, shop.lat]);
+    };
+
+    var marker = new AMap.Marker({
+      position: [shop.lng, shop.lat],
+      content: markerDom,
+      offset: new AMap.Pixel(-16, -16),
+      zIndex: 10
+    });
+    foodMarkers.push(marker);
+    foodMap.add(marker);
+  });
+
+  // 自适应视野
+  if (allShops.length > 0) {
+    foodMap.setFitView(null, false, [40, 40, 40, 100]);
+  }
+}
+
 function switchFoodTab(tab, el) {
   foodTab = tab;
   document.querySelectorAll('.food-tab').forEach(function(t) { t.classList.remove('active'); });
   el.classList.add('active');
   renderFood();
+  // 切换 tab 时重新调整地图视野
+  if (foodMap) {
+    setTimeout(function() {
+      foodMarkers.forEach(function(m) { foodMap.remove(m); });
+      foodMarkers = [];
+      addFoodMarkers();
+    }, 100);
+  }
 }
 function toggleWarning() {
   warningExpanded = !warningExpanded;
@@ -3467,7 +3691,9 @@ function renderTransport() {
     sections[0].html += '<div class="airport-header"><span class="airport-name">' + a.icon + ' ' + a.name + '</span><span class="airport-distance">' + a.distance + '</span></div>';
     sections[0].html += '<div class="airport-row"><span style="width:22px;text-align:center;flex-shrink:0;">🚇</span><span class="airport-text">' + a.subway + '</span></div>';
     sections[0].html += '<div class="airport-row"><span style="width:22px;text-align:center;flex-shrink:0;">🚌</span><span class="airport-text">' + a.bus + '</span></div>';
+    sections[0].html += '<div style="font-size:13px;color:#7E57C2;background:#F3E5F5;padding:6px 10px;border-radius:6px;margin:4px 0 4px 28px;">🎫 ' + a.busTicket + '</div>';
     sections[0].html += '<div class="airport-row"><span style="width:22px;text-align:center;flex-shrink:0;">🚕</span><span class="airport-text">' + a.taxi + '</span></div>';
+    sections[0].html += '<div style="font-size:13px;color:#1565C0;background:#E3F2FD;padding:6px 10px;border-radius:6px;margin:4px 0 4px 28px;">🚖 ' + a.taxiGuide + '</div>';
     sections[0].html += '<div class="airport-tip">💡 ' + a.tip + '</div></div>';
   });
 
@@ -3510,6 +3736,7 @@ function renderTransport() {
     sections[4].html += '<div style="font-size:14px;color:#555;line-height:1.6;">📍 出发：' + s.from + '</div>';
     sections[4].html += '<div style="font-size:14px;color:#555;line-height:1.6;">⏱ ' + s.time + '</div>';
     sections[4].html += '<div style="font-size:14px;color:#555;line-height:1.6;">💰 ' + s.price + '</div>';
+    sections[4].html += '<div style="font-size:13px;color:#7E57C2;background:#F3E5F5;padding:6px 10px;border-radius:6px;margin-top:6px;">🎫 ' + s.ticket + '</div>';
     sections[4].html += '<div style="font-size:13px;color:#999;margin-top:4px;">💡 ' + s.tip + '</div>';
     sections[4].html += '</div>';
   });
