@@ -1,0 +1,1771 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>数学可视化 - 具象理解数学之美</title>
+<style>
+/* ============ CSS Variables & Reset ============ */
+:root {
+  --bg-deep: #06080f;
+  --bg-panel: #0d1117;
+  --bg-card: #161b22;
+  --bg-hover: #1c2333;
+  --border: #21262d;
+  --border-active: #4c6ef5;
+  --text-primary: #e6edf3;
+  --text-secondary: #8b949e;
+  --text-muted: #484f58;
+  --accent: #4c6ef5;
+  --accent-glow: rgba(76, 110, 245, 0.3);
+  --accent-light: #748ffc;
+  --accent-dark: #364fc7;
+  --cyan: #22b8cf;
+  --cyan-glow: rgba(34, 184, 207, 0.25);
+  --green: #40c057;
+  --red: #ff6b6b;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --radius-lg: 16px;
+  --transition: 200ms ease;
+  --font-mono: 'Cascadia Code', 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+  --font-sans: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: var(--font-sans);
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+  user-select: none;
+}
+
+/* ============ Layout ============ */
+#app {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+}
+
+/* ============ Sidebar ============ */
+#sidebar {
+  width: 280px;
+  min-width: 280px;
+  background: linear-gradient(180deg, rgba(13,17,23,0.95) 0%, rgba(22,27,34,0.95) 100%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  z-index: 10;
+  transition: transform var(--transition);
+}
+
+.sidebar-header {
+  padding: 28px 24px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sidebar-logo .icon-wrapper {
+  width: 42px;
+  height: 42px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px var(--accent-glow);
+}
+
+.sidebar-logo svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: #fff;
+  stroke-width: 2;
+}
+
+.sidebar-logo h1 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+}
+
+.sidebar-logo span.sub {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 400;
+  color: var(--text-muted);
+  margin-top: 1px;
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.nav-section-label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 12px 12px 6px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition);
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  font-weight: 500;
+  position: relative;
+}
+
+.nav-item:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.nav-item.active {
+  background: rgba(76, 110, 245, 0.1);
+  color: var(--accent-light);
+  box-shadow: inset 0 0 0 1px rgba(76, 110, 245, 0.2);
+}
+
+.nav-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 20px;
+  background: var(--accent);
+  border-radius: 0 3px 3px 0;
+}
+
+.nav-item svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.nav-item .badge {
+  margin-left: auto;
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: rgba(76, 110, 245, 0.15);
+  color: var(--accent-light);
+}
+
+.sidebar-footer {
+  padding: 16px 24px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.btn-api {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: all var(--transition);
+  font-family: var(--font-sans);
+}
+
+.btn-api:hover {
+  background: var(--bg-hover);
+  border-color: var(--accent);
+  color: var(--accent-light);
+}
+
+.btn-api svg {
+  width: 16px;
+  height: 16px;
+}
+
+.api-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.api-status .dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--text-muted);
+}
+
+.api-status .dot.connected {
+  background: var(--green);
+  box-shadow: 0 0 8px rgba(64, 192, 87, 0.5);
+}
+
+/* ============ Main Area ============ */
+#main-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  min-width: 0;
+}
+
+/* ============ Viewport ============ */
+#viewport {
+  flex: 1;
+  position: relative;
+  background: radial-gradient(ellipse at center, #111827 0%, #06080f 70%);
+  cursor: grab;
+  overflow: hidden;
+}
+
+#viewport:active { cursor: grabbing; }
+#viewport.grabbing { cursor: grabbing; }
+
+#three-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.viewport-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 300ms ease;
+}
+
+.viewport-overlay.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.overlay-bg {
+  position: absolute;
+  inset: 0;
+  background: rgba(6,8,15,0.7);
+  backdrop-filter: blur(4px);
+}
+
+.overlay-content {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+}
+
+.loader-spinner {
+  width: 48px;
+  height: 48px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 16px;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.loader-text {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  animation: pulse 2s ease infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+/* Empty state prompt */
+.empty-prompt {
+  position: absolute;
+  bottom: 120px;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  pointer-events: none;
+  transition: opacity 400ms ease;
+}
+
+.empty-prompt.hidden { opacity: 0; }
+
+.empty-prompt .big-icon {
+  font-size: 3rem;
+  margin-bottom: 12px;
+  opacity: 0.4;
+}
+
+.empty-prompt p {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+  max-width: 320px;
+}
+
+/* Viewport top bar */
+.viewport-topbar {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  gap: 8px;
+  z-index: 5;
+}
+
+.vp-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  background: rgba(22,27,34,0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition);
+}
+
+.vp-btn:hover {
+  background: rgba(28,35,51,0.9);
+  border-color: var(--text-muted);
+  color: var(--text-primary);
+}
+
+.vp-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Example chips */
+.example-chips {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 5;
+}
+
+.chip-label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-align: right;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.chip {
+  padding: 6px 14px;
+  border-radius: 20px;
+  background: rgba(22,27,34,0.85);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all var(--transition);
+  font-family: var(--font-sans);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.chip:hover {
+  background: rgba(28,35,51,0.9);
+  border-color: var(--accent);
+  color: var(--accent-light);
+  transform: translateX(-4px);
+}
+
+/* ============ Input Bar ============ */
+#input-bar {
+  height: 90px;
+  min-height: 90px;
+  background: linear-gradient(0deg, rgba(13,17,23,0.98) 0%, rgba(22,27,34,0.95) 100%);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 12px;
+  z-index: 10;
+}
+
+#input-bar textarea {
+  flex: 1;
+  height: 46px;
+  max-height: 46px;
+  padding: 12px 18px;
+  border-radius: 24px;
+  background: var(--bg-deep);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  font-size: 0.88rem;
+  font-family: var(--font-sans);
+  resize: none;
+  outline: none;
+  transition: all var(--transition);
+  line-height: 1.4;
+}
+
+#input-bar textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(76,110,245,0.1);
+}
+
+#input-bar textarea::placeholder {
+  color: var(--text-muted);
+}
+
+.btn-send {
+  width: 46px;
+  height: 46px;
+  min-width: 46px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition);
+  box-shadow: 0 4px 16px var(--accent-glow);
+}
+
+.btn-send:hover {
+  transform: scale(1.08);
+  box-shadow: 0 6px 24px var(--accent-glow);
+}
+
+.btn-send:active {
+  transform: scale(0.96);
+}
+
+.btn-send:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.btn-send svg {
+  width: 20px;
+  height: 20px;
+}
+
+.btn-clear {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition);
+  flex-shrink: 0;
+}
+
+.btn-clear:hover {
+  border-color: var(--text-muted);
+  color: var(--text-secondary);
+}
+
+.btn-clear svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ============ Toast ============ */
+.toast {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-120px);
+  padding: 12px 24px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  z-index: 1000;
+  transition: transform 300ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+.toast.error { border-color: var(--red); }
+.toast.success { border-color: var(--green); }
+.toast.info { border-color: var(--cyan); }
+
+.toast .toast-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+/* ============ Modal ============ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(8px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 300ms ease;
+}
+
+.modal-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  width: 460px;
+  max-width: 90vw;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+  transform: translateY(20px);
+  transition: transform 300ms ease;
+}
+
+.modal-overlay.open .modal { transform: translateY(0); }
+
+.modal h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.modal .desc {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.form-group select,
+.form-group input {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-deep);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  font-size: 0.88rem;
+  font-family: var(--font-mono);
+  outline: none;
+  transition: border-color var(--transition);
+}
+
+.form-group select:focus,
+.form-group input:focus {
+  border-color: var(--accent);
+}
+
+.form-group select { font-family: var(--font-sans); }
+
+.form-hint {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.form-hint a {
+  color: var(--accent-light);
+  text-decoration: none;
+}
+
+.form-hint a:hover { text-decoration: underline; }
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.btn {
+  padding: 10px 20px;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+  font-family: var(--font-sans);
+  border: none;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+  color: #fff;
+  box-shadow: 0 4px 12px var(--accent-glow);
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px var(--accent-glow);
+}
+
+.btn-secondary {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+}
+
+.btn-secondary:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+/* ============ Context Menu ============ */
+.context-menu {
+  position: fixed;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 6px 0;
+  z-index: 200;
+  min-width: 160px;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.5);
+  display: none;
+}
+
+.context-menu.show { display: block; }
+
+.context-menu-item {
+  padding: 8px 16px;
+  font-size: 0.82rem;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: all var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.context-menu-item:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+/* ============ Responsive ============ */
+@media (max-width: 768px) {
+  #sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    transform: translateX(-100%);
+    z-index: 50;
+  }
+
+  #sidebar.mobile-open { transform: translateX(0); }
+
+  #input-bar { padding: 0 12px; height: 80px; min-height: 80px; }
+
+  .example-chips { bottom: 80px; right: 8px; }
+
+  .chip { font-size: 0.7rem; padding: 5px 10px; }
+
+  .modal { padding: 24px; width: 95vw; }
+}
+
+/* ============ Scrollbar ============ */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* ============ Math display in viewport ============ */
+.math-label {
+  position: absolute;
+  pointer-events: none;
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.5);
+  font-family: var(--font-mono);
+  white-space: nowrap;
+}
+</style>
+</head>
+<body>
+
+<div id="app">
+  <!-- ============ Sidebar ============ -->
+  <aside id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <div class="icon-wrapper">
+          <svg viewBox="0 0 24 24">
+            <path d="M8 4h2v16H8zM14 4h2v16h-2zM4 8h2v8H4zM18 8h2v8h-2z"/>
+          </svg>
+        </div>
+        <div>
+          <h1>数学可视化<span class="sub">MATHEMATICS 3D LAB</span></h1>
+        </div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">可视化模块</div>
+      <div class="nav-item active" data-mode="geometry">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+        几何设计
+        <span class="badge">3D</span>
+      </div>
+      <div class="nav-item" data-mode="word-problem">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+        应用题解析
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="btn-api" id="btn-api-settings" title="配置 AI API Key">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        API 设置
+      </button>
+      <div class="api-status">
+        <span class="dot" id="api-dot"></span>
+        <span id="api-status-text">未配置 API Key</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============ Main Area ============ -->
+  <div id="main-area">
+    <!-- 3D Viewport -->
+    <div id="viewport">
+      <canvas id="three-canvas"></canvas>
+
+      <div class="viewport-overlay" id="viewport-overlay">
+        <div class="overlay-bg"></div>
+        <div class="overlay-content">
+          <div class="loader-spinner"></div>
+          <div class="loader-text">AI 正在生成可视化场景...</div>
+        </div>
+      </div>
+
+      <div class="empty-prompt" id="empty-prompt">
+        <div class="big-icon">🔮</div>
+        <p>在底部输入框中描述数学问题<br>AI 将自动生成 3D 可视化场景</p>
+      </div>
+
+      <!-- Top bar controls -->
+      <div class="viewport-topbar">
+        <button class="vp-btn" id="btn-reset-view" title="重置视角">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
+        </button>
+        <button class="vp-btn" id="btn-top-view" title="俯视图">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/></svg>
+        </button>
+        <button class="vp-btn" id="btn-front-view" title="前视图">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        </button>
+      </div>
+
+      <!-- Example quick chips -->
+      <div class="example-chips">
+        <div class="chip-label">📐 快速示例</div>
+        <button class="chip" data-example="cube">正方体体积</button>
+        <button class="chip" data-example="cylinder">圆柱体计算</button>
+        <button class="chip" data-example="sphere">球体表面积</button>
+        <button class="chip" data-example="cone">圆锥体积</button>
+        <button class="chip" data-example="water-tank">水池注水问题</button>
+        <button class="chip" data-example="parabola">抛物线 3D 曲面</button>
+      </div>
+    </div>
+
+    <!-- Input Bar -->
+    <div id="input-bar">
+      <button class="btn-clear" id="btn-clear-scene" title="清空场景">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+      </button>
+      <textarea
+        id="user-input"
+        placeholder="描述你想看到的数学场景，例如：一个底面半径3厘米、高5厘米的圆柱体，标注体积..."
+        rows="1"
+      ></textarea>
+      <button class="btn-send" id="btn-send" title="生成可视化 (Enter)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ API Modal ============ -->
+<div class="modal-overlay" id="api-modal-overlay">
+  <div class="modal">
+    <h3>⚙️ AI API 配置</h3>
+    <p class="desc">
+      使用智谱AI GLM-4-Flash 模型生成数学可视化场景<br>
+      注册即送 <strong>500万 tokens 免费额度</strong>，无需充值
+    </p>
+
+    <div class="form-group">
+      <label>AI 服务商</label>
+      <select id="api-provider">
+        <option value="zhipu">智谱AI (GLM-4-Flash) · 推荐</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>API Key</label>
+      <input type="password" id="api-key-input" placeholder="粘贴你的 API Key...">
+      <div class="form-hint">
+        还没有 Key？<a href="https://open.bigmodel.cn/" target="_blank" rel="noopener">去智谱AI注册 →</a>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-secondary" id="btn-modal-cancel">取消</button>
+      <button class="btn btn-primary" id="btn-modal-save">保存配置</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div class="toast" id="toast">
+  <span class="toast-icon" id="toast-icon"></span>
+  <span id="toast-msg"></span>
+</div>
+
+<!-- ============ Three.js CDN ============ -->
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+/* ================================================================
+   MATH VISUALIZATION - 数学可视化
+   Three.js 3D Scene + ZhipuAI GLM-4-Flash + Interactive Controls
+   ================================================================ */
+
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+// ============ DOM Refs ============
+const dom = {
+  viewport: document.getElementById('viewport'),
+  canvas: document.getElementById('three-canvas'),
+  overlay: document.getElementById('viewport-overlay'),
+  emptyPrompt: document.getElementById('empty-prompt'),
+  userInput: document.getElementById('user-input'),
+  btnSend: document.getElementById('btn-send'),
+  btnClear: document.getElementById('btn-clear-scene'),
+  btnResetView: document.getElementById('btn-reset-view'),
+  btnTopView: document.getElementById('btn-top-view'),
+  btnFrontView: document.getElementById('btn-front-view'),
+  btnApi: document.getElementById('btn-api-settings'),
+  apiModalOverlay: document.getElementById('api-modal-overlay'),
+  apiKeyInput: document.getElementById('api-key-input'),
+  apiProvider: document.getElementById('api-provider'),
+  btnModalSave: document.getElementById('btn-modal-save'),
+  btnModalCancel: document.getElementById('btn-modal-cancel'),
+  apiDot: document.getElementById('api-dot'),
+  apiStatusText: document.getElementById('api-status-text'),
+  navItems: document.querySelectorAll('.nav-item'),
+  chips: document.querySelectorAll('.chip'),
+  toast: document.getElementById('toast'),
+  toastIcon: document.getElementById('toast-icon'),
+  toastMsg: document.getElementById('toast-msg'),
+  sidebar: document.getElementById('sidebar'),
+};
+
+// ============ State ============
+let currentMode = 'geometry';
+let isGenerating = false;
+
+// ============ Toast ============
+let toastTimer;
+function showToast(msg, type = 'info') {
+  clearTimeout(toastTimer);
+  dom.toast.className = `toast ${type}`;
+  dom.toastMsg.textContent = msg;
+  const icons = { error: '❌', success: '✅', info: '💡' };
+  dom.toastIcon.textContent = icons[type] || '';
+  requestAnimationFrame(() => dom.toast.classList.add('show'));
+  toastTimer = setTimeout(() => dom.toast.classList.remove('show'), 3000);
+}
+
+// ============ API Key Management ============
+function getApiKey() {
+  return localStorage.getItem('mathvis_api_key') || '';
+}
+function setApiKey(key) {
+  localStorage.setItem('mathvis_api_key', key);
+  updateApiStatus();
+}
+function updateApiStatus() {
+  const hasKey = !!getApiKey();
+  dom.apiDot.className = `dot ${hasKey ? 'connected' : ''}`;
+  dom.apiStatusText.textContent = hasKey ? 'AI 已就绪' : '未配置 API Key';
+}
+updateApiStatus();
+
+// ============ Modal ============
+dom.btnApi.addEventListener('click', () => {
+  dom.apiKeyInput.value = getApiKey();
+  dom.apiModalOverlay.classList.add('open');
+  dom.apiKeyInput.focus();
+});
+dom.btnModalCancel.addEventListener('click', () => {
+  dom.apiModalOverlay.classList.remove('open');
+});
+dom.btnModalSave.addEventListener('click', () => {
+  const key = dom.apiKeyInput.value.trim();
+  if (!key) {
+    showToast('请输入 API Key', 'error');
+    return;
+  }
+  setApiKey(key);
+  dom.apiModalOverlay.classList.remove('open');
+  showToast('API Key 已保存 ✓', 'success');
+});
+dom.apiModalOverlay.addEventListener('click', (e) => {
+  if (e.target === dom.apiModalOverlay) {
+    dom.apiModalOverlay.classList.remove('open');
+  }
+});
+
+// ============ Navigation ============
+dom.navItems.forEach(item => {
+  item.addEventListener('click', () => {
+    dom.navItems.forEach(i => i.classList.remove('active'));
+    item.classList.add('active');
+    currentMode = item.dataset.mode;
+  });
+});
+
+// ============ Three.js Scene Setup ============
+const viewport = dom.viewport;
+const scene = new THREE.Scene();
+
+// Background gradient
+scene.background = new THREE.Color(0x0a0f1a);
+scene.fog = new THREE.Fog(0x0a0f1a, 15, 50);
+
+// Camera
+const camera = new THREE.PerspectiveCamera(
+  50, viewport.clientWidth / viewport.clientHeight, 0.1, 100
+);
+camera.position.set(8, 6, 10);
+camera.lookAt(0, 0, 0);
+
+// Renderer
+const renderer = new THREE.WebGLRenderer({
+  canvas: dom.canvas,
+  antialias: true,
+  alpha: true,
+});
+renderer.setSize(viewport.clientWidth, viewport.clientHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.2;
+
+// Lights
+const ambientLight = new THREE.AmbientLight(0x404060, 2);
+scene.add(ambientLight);
+
+const keyLight = new THREE.DirectionalLight(0xffffff, 4);
+keyLight.position.set(10, 15, 10);
+keyLight.castShadow = true;
+keyLight.shadow.mapSize.set(2048, 2048);
+keyLight.shadow.camera.near = 0.1;
+keyLight.shadow.camera.far = 50;
+keyLight.shadow.camera.left = -15;
+keyLight.shadow.camera.right = 15;
+keyLight.shadow.camera.top = 15;
+keyLight.shadow.camera.bottom = -15;
+keyLight.shadow.bias = -0.0001;
+scene.add(keyLight);
+
+const fillLight = new THREE.DirectionalLight(0x8899cc, 2);
+fillLight.position.set(-5, 3, -5);
+scene.add(fillLight);
+
+const rimLight = new THREE.DirectionalLight(0xaaccff, 1.5);
+rimLight.position.set(0, 2, 10);
+scene.add(rimLight);
+
+// Grid helper
+const gridHelper = new THREE.GridHelper(16, 16, 0x2a3040, 0x151b25);
+gridHelper.position.y = -5;
+scene.add(gridHelper);
+
+// Ground plane (subtle shadow receiver)
+const groundGeo = new THREE.PlaneGeometry(16, 16);
+const groundMat = new THREE.ShadowMaterial({ opacity: 0.25 });
+const ground = new THREE.Mesh(groundGeo, groundMat);
+ground.rotation.x = -Math.PI / 2;
+ground.position.y = -5;
+ground.receiveShadow = true;
+scene.add(ground);
+
+// Axes helper
+const axesHelper = new THREE.AxesHelper(6);
+scene.add(axesHelper);
+
+// OrbitControls
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.set(0, 0, 0);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+controls.minDistance = 3;
+controls.maxDistance = 25;
+controls.maxPolarAngle = Math.PI * 0.75;
+controls.update();
+
+// Track all user-added objects for cleanup
+let userObjects = [];
+
+function clearScene() {
+  userObjects.forEach(obj => {
+    if (obj) {
+      scene.remove(obj);
+      if (obj.geometry) obj.geometry.dispose();
+      if (obj.material) {
+        if (Array.isArray(obj.material)) {
+          obj.material.forEach(m => m.dispose());
+        } else {
+          obj.material.dispose();
+        }
+      }
+    }
+  });
+  userObjects = [];
+  dom.emptyPrompt.classList.remove('hidden');
+}
+
+function addUserObject(obj) {
+  scene.add(obj);
+  userObjects.push(obj);
+}
+
+// ============ Animation Loop ============
+function animate() {
+  requestAnimationFrame(animate);
+  controls.update();
+  renderer.render(scene, camera);
+}
+animate();
+
+// ============ Viewport Controls ============
+function resetView() {
+  camera.position.set(8, 6, 10);
+  controls.target.set(0, 0, 0);
+  controls.update();
+}
+function topView() {
+  camera.position.set(0, 12, 0.1);
+  controls.target.set(0, 0, 0);
+  controls.update();
+}
+function frontView() {
+  camera.position.set(0, 0, 12);
+  controls.target.set(0, 0, 0);
+  controls.update();
+}
+dom.btnResetView.addEventListener('click', resetView);
+dom.btnTopView.addEventListener('click', topView);
+dom.btnFrontView.addEventListener('click', frontView);
+dom.btnClear.addEventListener('click', clearScene);
+
+// ============ Resize Handler ============
+window.addEventListener('resize', () => {
+  const w = viewport.clientWidth;
+  const h = viewport.clientHeight;
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+  renderer.setSize(w, h);
+});
+
+// ============ Loading State ============
+function setLoading(loading) {
+  isGenerating = loading;
+  dom.btnSend.disabled = loading;
+  dom.overlay.classList.toggle('visible', loading);
+  dom.emptyPrompt.classList.toggle('hidden', loading);
+}
+
+// ============ AI Service (ZhipuAI) ============
+const API_ENDPOINT = 'https://open.bigmodel.cn/api/paas/v4/chat/completions';
+const MODEL_NAME = 'glm-4-flash';
+
+const SYSTEM_PROMPT = `你是一个专业的数学3D可视化工程师。你的任务是根据用户的数学问题描述，生成可直接执行的 Three.js JavaScript 代码来创建3D可视化场景。
+
+【环境说明】
+- 全局可用变量: scene, camera, renderer, controls, THREE, addUserObject()
+- scene 是已创建的 Three.js 场景，包含: 环境光(ambientLight)、主方向光(keyLight,带阴影)、补充光(fillLight)、轮廓光(rimLight)、网格地面(gridHelper,y=-5)、阴影接收面(ground,y=-5)、坐标轴(axesHelper)
+- addUserObject(mesh) 函数: 添加物体到场景并自动追踪，用于后续清理。例如: addUserObject(myMesh)
+- camera 初始位置(8,6,10)，lookAt(0,0,0)
+- 场景中心在原点(0,0,0)，网格地面在 y=-5
+
+【代码要求】
+1. 输出纯 JavaScript 代码，用 \`\`\`javascript 代码块包裹
+2. 所有几何体必须通过 addUserObject() 添加到场景
+3. 每个几何体使用 MeshStandardMaterial 或 MeshPhongMaterial，设置不同的颜色方便区分
+4. 适当添加边缘线(EdgesGeometry + LineBasicMaterial)让几何体轮廓清晰
+5. 为关键几何体设置 castShadow 和 receiveShadow
+6. 考虑添加尺寸标注（使用精灵文本Sprite或多段线）
+7. 代码需要能无条件直接执行，不要依赖未定义的变量
+8. 不要修改 camera 位置（由用户自由控制视角），但可以在代码注释中建议合适的观察角度
+9. 坐标系: 标准 Three.js Y轴向上, X轴向右, Z轴向前
+
+【常见数学场景模式】
+- 立体几何: BoxGeometry, SphereGeometry, CylinderGeometry, ConeGeometry, TorusGeometry
+- 截面展示: 使用 ClippingPlane 或半透明材质显示内部
+- 函数图像: 用 BufferGeometry 构建参数曲面
+- 应用题场景: 组合多个几何体模拟实际物体（水池、容器、管道等）
+- 对比展示: 多个几何体并排排列，使用 group 和 position 区分
+
+【输出格式】
+只输出代码块，不要输出任何解释文字。代码块必须用 \`\`\`javascript 包裹。`;
+
+function buildPrompt(userMessage) {
+  const modeHints = {
+    geometry: '【场景类型】几何设计\n请专注于立体几何的3D展示和参数标注。',
+    'word-problem': '【场景类型】应用题解析\n请用3D场景模拟实际应用问题，帮助理解数量关系。',
+  };
+  const hint = modeHints[currentMode] || '';
+  return `${hint}\n\n${userMessage}`;
+}
+
+async function callAI(userMessage) {
+  const apiKey = getApiKey();
+  if (!apiKey) {
+    showToast('请先配置 API Key（点击左侧"API 设置"）', 'error');
+    dom.btnApi.click();
+    return null;
+  }
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 45000);
+
+  try {
+    const response = await fetch(API_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: MODEL_NAME,
+        messages: [
+          { role: 'system', content: SYSTEM_PROMPT },
+          { role: 'user', content: buildPrompt(userMessage) },
+        ],
+        temperature: 0.3,
+        max_tokens: 4096,
+        top_p: 0.9,
+      }),
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      if (response.status === 401 || response.status === 403) {
+        throw new Error('API Key 无效或已过期，请重新配置');
+      }
+      if (response.status === 429) {
+        throw new Error('请求太频繁，请稍后再试');
+      }
+      throw new Error(err.error?.message || `API 请求失败 (${response.status})`);
+    }
+
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content;
+    if (!content) throw new Error('AI 未返回有效内容');
+
+    return content;
+  } catch (err) {
+    clearTimeout(timeoutId);
+    if (err.name === 'AbortError') {
+      throw new Error('AI 响应超时 (45秒)，请尝试简短描述');
+    }
+    throw err;
+  }
+}
+
+// ============ Code Runner ============
+function extractCode(text) {
+  // Try ```javascript or ```js code blocks first
+  const blockMatch = text.match(/```(?:javascript|js)\s*\n?([\s\S]*?)```/);
+  if (blockMatch) return blockMatch[1].trim();
+
+  // Try generic code blocks
+  const genericMatch = text.match(/```\s*\n?([\s\S]*?)```/);
+  if (genericMatch) return genericMatch[1].trim();
+
+  // Fallback: return raw text
+  return text.trim();
+}
+
+function executeCode(code) {
+  try {
+    const fn = new Function(
+      'scene', 'camera', 'renderer', 'controls', 'THREE', 'addUserObject',
+      code
+    );
+    fn(scene, camera, renderer, controls, THREE, addUserObject);
+    return true;
+  } catch (err) {
+    console.error('Code execution error:', err);
+    throw new Error(`代码执行错误: ${err.message}`);
+  }
+}
+
+// ============ Handle Generation ============
+async function handleGenerate(userMessage) {
+  if (isGenerating) return;
+  if (!userMessage.trim()) return;
+
+  setLoading(true);
+  try {
+    const aiResponse = await callAI(userMessage);
+    if (!aiResponse) {
+      setLoading(false);
+      return;
+    }
+
+    const code = extractCode(aiResponse);
+    if (!code) {
+      throw new Error('未能从 AI 响应中提取到可执行代码');
+    }
+
+    // Clear old scene first
+    clearScene();
+
+    // Execute generated code
+    executeCode(code);
+
+    showToast('场景生成成功！拖拽鼠标旋转查看 🖱️', 'success');
+  } catch (err) {
+    console.error('Generation error:', err);
+    showToast(err.message, 'error');
+    if (userObjects.length === 0) {
+      dom.emptyPrompt.classList.remove('hidden');
+    }
+  } finally {
+    setLoading(false);
+  }
+}
+
+// ============ User Input Handler ============
+dom.btnSend.addEventListener('click', () => {
+  const msg = dom.userInput.value.trim();
+  if (msg) handleGenerate(msg);
+});
+
+dom.userInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    const msg = dom.userInput.value.trim();
+    if (msg) handleGenerate(msg);
+  }
+});
+
+// ============ Built-in Examples ============
+const EXAMPLES = {
+  cube: {
+    prompt: '一个边长为4厘米的正方体，标注边长和体积公式 V=a³',
+    code: `// 正方体 - 边长4
+const size = 4;
+const cubeGeo = new THREE.BoxGeometry(size, size, size);
+const cubeMat = new THREE.MeshStandardMaterial({ color: 0x6c8cff, roughness: 0.3, metalness: 0.1 });
+const cube = new THREE.Mesh(cubeGeo, cubeMat);
+cube.castShadow = true;
+cube.receiveShadow = true;
+addUserObject(cube);
+
+// 边缘线
+const edgesGeo = new THREE.EdgesGeometry(cubeGeo);
+const edgesMat = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.5 });
+const edges = new THREE.LineSegments(edgesGeo, edgesMat);
+cube.add(edges);
+
+// 顶点小球
+const dotGeo = new THREE.SphereGeometry(0.15, 16, 16);
+const dotMat = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xffffff, emissiveIntensity: 0.8 });
+const corners = [
+  [2,2,2],[2,2,-2],[2,-2,2],[2,-2,-2],
+  [-2,2,2],[-2,2,-2],[-2,-2,2],[-2,-2,-2]
+];
+corners.forEach(([x,y,z]) => {
+  const dot = new THREE.Mesh(dotGeo, dotMat);
+  dot.position.set(x, y, z);
+  addUserObject(dot);
+});
+
+// 尺寸标注
+function makeLabel(text, x, y, z) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 128; canvas.height = 48;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#ffffff'; ctx.font = 'bold 18px Inter, sans-serif';
+  ctx.textAlign = 'center'; ctx.fillText(text, 64, 24);
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.minFilter = THREE.LinearFilter;
+  const spriteMat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false });
+  const sprite = new THREE.Sprite(spriteMat);
+  sprite.position.set(x, y, z);
+  sprite.scale.set(2, 0.75, 1);
+  addUserObject(sprite);
+}
+makeLabel('边长=4cm', 0, -3, 0);
+makeLabel('V = a³ = 64cm³', 0, 3.5, 0);`,
+  },
+
+  cylinder: {
+    prompt: '一个底面半径3厘米、高5厘米的圆柱体，计算并展示体积 V=πr²h',
+    code: `// 圆柱体 - 半径3, 高5
+const r = 3, h = 5;
+const cylGeo = new THREE.CylinderGeometry(r, r, h, 64);
+const cylMat = new THREE.MeshStandardMaterial({ color: 0x4ecdc4, roughness: 0.25, metalness: 0.15 });
+const cylinder = new THREE.Mesh(cylGeo, cylMat);
+cylinder.castShadow = true;
+cylinder.receiveShadow = true;
+addUserObject(cylinder);
+
+// 边缘
+const eGeo = new THREE.EdgesGeometry(cylGeo);
+const eMat = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.35 });
+cylinder.add(new THREE.LineSegments(eGeo, eMat));
+
+// 底面半径线
+const rPoints = [new THREE.Vector3(0, -h/2, 0), new THREE.Vector3(r, -h/2, 0)];
+const rLineGeo = new THREE.BufferGeometry().setFromPoints(rPoints);
+const rLine = new THREE.Line(rLineGeo, new THREE.LineBasicMaterial({ color: 0xff6b6b, linewidth: 2 }));
+rLine.position.y = 0;
+addUserObject(rLine);
+
+// 高度线
+const hPoints = [new THREE.Vector3(r+0.5, -h/2, 0), new THREE.Vector3(r+0.5, h/2, 0)];
+const hLineGeo = new THREE.BufferGeometry().setFromPoints(hPoints);
+const hLine = new THREE.Line(hLineGeo, new THREE.LineBasicMaterial({ color: 0xffd43b, linewidth: 2 }));
+addUserObject(hLine);
+
+// 标签
+function makeLabel(text, x, y, z) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 256; canvas.height = 64;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#ffffff'; ctx.font = 'bold 18px Inter, sans-serif';
+  ctx.textAlign = 'center'; ctx.fillText(text, 128, 32);
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.minFilter = THREE.LinearFilter;
+  const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, depthTest: false }));
+  sprite.position.set(x, y, z); sprite.scale.set(3, 0.75, 1);
+  addUserObject(sprite);
+}
+const vol = Math.PI * r * r * h;
+makeLabel('r=3cm', 2, -2.8, 0);
+makeLabel('h=5cm', r+1.5, 0, 0);
+makeLabel('V=πr²h = ' + vol.toFixed(1) + 'cm³', 0, h/2 + 0.8, 0);`,
+  },
+
+  sphere: {
+    prompt: '展示一个半径2.5厘米的球体，标注表面积公式 S=4πr² 和体积公式 V=4/3πr³',
+    code: `// 球体 - 半径2.5
+const r = 2.5;
+const sphereGeo = new THREE.SphereGeometry(r, 64, 48);
+const sphereMat = new THREE.MeshStandardMaterial({
+  color: 0xff922b, roughness: 0.2, metalness: 0.1,
+  transparent: true, opacity: 0.85
+});
+const sphere = new THREE.Mesh(sphereGeo, sphereMat);
+sphere.castShadow = true;
+sphere.receiveShadow = true;
+addUserObject(sphere);
+
+// 赤道线
+const ringGeo = new THREE.TorusGeometry(r, 0.04, 16, 100);
+const ringMat = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xffffff, emissiveIntensity: 0.5 });
+const ring = new THREE.Mesh(ringGeo, ringMat);
+ring.rotation.x = Math.PI / 2;
+addUserObject(ring);
+
+// 经线
+const ring2 = new THREE.Mesh(ringGeo, ringMat);
+addUserObject(ring2);
+
+// 半径线
+const pts = [new THREE.Vector3(0, 0, 0), new THREE.Vector3(r, 0, 0)];
+const line = new THREE.Line(
+  new THREE.BufferGeometry().setFromPoints(pts),
+  new THREE.LineBasicMaterial({ color: 0xffd43b })
+);
+addUserObject(line);
+
+// 标签
+function makeLabel(text, x, y, z) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 300; canvas.height = 64;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#ffffff'; ctx.font = 'bold 16px Inter, sans-serif';
+  ctx.textAlign = 'center'; ctx.fillText(text, 150, 32);
+  const tex = new THREE.CanvasTexture(canvas);
+  const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, depthTest: false }));
+  sprite.position.set(x, y, z); sprite.scale.set(3.5, 0.75, 1);
+  addUserObject(sprite);
+}
+makeLabel('r=2.5cm', 1.5, -0.4, 0);
+const sArea = 4 * Math.PI * r * r;
+const vol = (4/3) * Math.PI * r * r * r;
+makeLabel('S=4πr²=' + sArea.toFixed(1) + 'cm²', 0, r + 1, 0);
+makeLabel('V=4/3πr³=' + vol.toFixed(1) + 'cm³', 0, -r - 1, 0);`,
+  },
+
+  cone: {
+    prompt: '一个底面半径3厘米、高6厘米的圆锥体，展示体积公式 V=1/3πr²h',
+    code: `// 圆锥体 - 半径3, 高6
+const r = 3, h = 6;
+const coneGeo = new THREE.ConeGeometry(r, h, 64);
+const coneMat = new THREE.MeshStandardMaterial({ color: 0xcc5de8, roughness: 0.2, metalness: 0.1 });
+const cone = new THREE.Mesh(coneGeo, coneMat);
+cone.castShadow = true;
+cone.receiveShadow = true;
+addUserObject(cone);
+
+// 边缘
+const eGeo = new THREE.EdgesGeometry(coneGeo);
+const eMat = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.3 });
+cone.add(new THREE.LineSegments(eGeo, eMat));
+
+// 底面圆环
+const baseRingGeo = new THREE.TorusGeometry(r, 0.06, 16, 64);
+const baseRing = new THREE.Mesh(baseRingGeo, new THREE.MeshStandardMaterial({ color: 0xff6b6b, emissive: 0xff6b6b, emissiveIntensity: 0.3 }));
+baseRing.position.y = -h/2;
+baseRing.rotation.x = Math.PI / 2;
+addUserObject(baseRing);
+
+// 高度线
+const pts = [new THREE.Vector3(r+0.5, -h/2, 0), new THREE.Vector3(r+0.5, h/2, 0)];
+const hLine = new THREE.Line(
+  new THREE.BufferGeometry().setFromPoints(pts),
+  new THREE.LineBasicMaterial({ color: 0xffd43b })
+);
+addUserObject(hLine);
+
+// 标签
+function makeLabel(text, x, y, z) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 256; canvas.height = 56;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#ffffff'; ctx.font = 'bold 16px Inter, sans-serif';
+  ctx.textAlign = 'center'; ctx.fillText(text, 128, 28);
+  const tex = new THREE.CanvasTexture(canvas);
+  const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, depthTest: false }));
+  sprite.position.set(x, y, z); sprite.scale.set(3, 0.65, 1);
+  addUserObject(sprite);
+}
+const vol = (1/3) * Math.PI * r * r * h;
+makeLabel('r=3cm', 2, -3.2, 0);
+makeLabel('h=6cm', r+1.5, 0, 0);
+makeLabel('V=⅓πr²h=' + vol.toFixed(1) + 'cm³', 0, h/2 + 0.8, 0);`,
+  },
+
+  'water-tank': {
+    prompt: '一个长方体水池长10米宽5米高4米，展示注水过程，当水面高度为3米时，水的体积是多少',
+    code: `// 水池注水问题 - 长10宽5高4, 水面高3
+const L = 10, W = 5, H = 4, waterH = 3;
+
+// 水池（半透明容器）
+const tankGroup = new THREE.Group();
+addUserObject(tankGroup);
+
+// 水池底面
+const bottomGeo = new THREE.BoxGeometry(L, 0.2, W);
+const bottomMat = new THREE.MeshStandardMaterial({ color: 0x5c7c99, roughness: 0.5 });
+const bottom = new THREE.Mesh(bottomGeo, bottomMat);
+bottom.position.y = -H/2;
+bottom.receiveShadow = true;
+tankGroup.add(bottom);
+
+// 水池四壁（半透明墙）
+const wallMat = new THREE.MeshStandardMaterial({
+  color: 0x74c0fc, roughness: 0.2, metalness: 0.1,
+  transparent: true, opacity: 0.25
+});
+// 前壁
+const wallFront = new THREE.Mesh(new THREE.BoxGeometry(L, H, 0.15), wallMat);
+wallFront.position.set(0, 0, W/2);
+tankGroup.add(wallFront);
+// 后壁
+const wallBack = new THREE.Mesh(new THREE.BoxGeometry(L, H, 0.15), wallMat);
+wallBack.position.set(0, 0, -W/2);
+tankGroup.add(wallBack);
+// 左壁
+const wallLeft = new THREE.Mesh(new THREE.BoxGeometry(0.15, H, W), wallMat);
+wallLeft.position.set(-L/2, 0, 0);
+tankGroup.add(wallLeft);
+// 右壁
+const wallRight = new THREE.Mesh(new THREE.BoxGeometry(0.15, H, W), wallMat);
+wallRight.position.set(L/2, 0, 0);
+tankGroup.add(wallRight);
+
+// 水的体积
+const waterGeo = new THREE.BoxGeometry(L - 0.3, waterH, W - 0.3);
+const waterMat = new THREE.MeshStandardMaterial({
+  color: 0x228be6, roughness: 0.1, metalness: 0.2,
+  transparent: true, opacity: 0.7
+});
+const water = new THREE.Mesh(waterGeo, waterMat);
+water.position.y = -H/2 + waterH/2;
+water.castShadow = true;
+tankGroup.add(water);
+
+// 水面动画
+const waveGeo = new THREE.PlaneGeometry(L - 0.3, W - 0.3);
+const waveMat = new THREE.MeshStandardMaterial({
+  color: 0xa5d8ff, roughness: 0.05, metalness: 0.3,
+  transparent: true, opacity: 0.5, side: THREE.DoubleSide
+});
+const wave = new THREE.Mesh(waveGeo, waveMat);
+wave.rotation.x = -Math.PI / 2;
+wave.position.y = -H/2 + waterH;
+tankGroup.add(wave);
+
+// 水面高度标注线
+const hLinePts = [new THREE.Vector3(L/2+1, -H/2, 0), new THREE.Vector3(L/2+1, -H/2+waterH, 0)];
+const hLine = new THREE.Line(
+  new THREE.BufferGeometry().setFromPoints(hLinePts),
+  new THREE.LineBasicMaterial({ color: 0xffd43b })
+);
+addUserObject(hLine);
+
+// 标签
+function makeLabel(text, x, y, z) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 300; canvas.height = 56;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#ffffff'; ctx.font = 'bold 16px Inter, sans-serif';
+  ctx.textAlign = 'center'; ctx.fillText(text, 150, 28);
+  const tex = new THREE.CanvasTexture(canvas);
+  const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, depthTest: false }));
+  sprite.position.set(x, y, z); sprite.scale.set(3.5, 0.65, 1);
+  addUserObject(sprite);
+}
+const vol = L * W * waterH;
+makeLabel('水面高=3m', L/2+2, -H/2+1.5, 0);
+makeLabel('水的体积=' + L + '×' + W + '×' + waterH + '=' + vol + 'm³', 0, H/2+1, 0);
+makeLabel('长=10m', 0, -H/2-0.8, 0);`,
+  },
+
+  parabola: {
+    prompt: '展示函数 z = x² + y² 的 3D 曲面（旋转抛物面），在 -3 到 3 范围内',
+    code: `// 旋转抛物面 z = x² + y²
+const range = 3;
+const segments = 60;
+
+// 构建曲面
+const vertices = [];
+const colors = [];
+const indices = [];
+
+for (let i = 0; i <= segments; i++) {
+  const x = -range + (2 * range * i) / segments;
+  for (let j = 0; j <= segments; j++) {
+    const y = -range + (2 * range * j) / segments;
+    const z = (x * x + y * y) / 4; // 缩放让显示更好
+    vertices.push(x, z, y); // Three.js: (x, y_up, z)
+    // 颜色根据高度
+    const t = z / (range * range / 2);
+    colors.push(0.3 + t * 0.7, 0.3, 1 - t * 0.7);
+  }
+}
+
+// 索引
+for (let i = 0; i < segments; i++) {
+  for (let j = 0; j < segments; j++) {
+    const a = i * (segments + 1) + j;
+    const b = a + 1;
+    const c = a + (segments + 1);
+    const d = c + 1;
+    indices.push(a, b, d);
+    indices.push(a, d, c);
+  }
+}
+
+const surfGeo = new THREE.BufferGeometry();
+surfGeo.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+surfGeo.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+surfGeo.setIndex(indices);
+surfGeo.computeVertexNormals();
+
+const surfMat = new THREE.MeshStandardMaterial({
+  vertexColors: true,
+  roughness: 0.3,
+  metalness: 0.1,
+  side: THREE.DoubleSide,
+  transparent: true,
+  opacity: 0.85
+});
+const surface = new THREE.Mesh(surfGeo, surfMat);
+surface.castShadow = true;
+surface.receiveShadow = true;
+addUserObject(surface);
+
+// 线框覆盖
+const wireGeo = new THREE.WireframeGeometry(surfGeo);
+const wireMat = new THREE.LineBasicMaterial({ color: 0x444466, transparent: true, opacity: 0.2 });
+const wireframe = new THREE.LineSegments(wireGeo, wireMat);
+addUserObject(wireframe);
+
+// 底部参考平面
+const planeGeo = new THREE.PlaneGeometry(6, 6);
+const planeMat = new THREE.MeshStandardMaterial({
+  color: 0x222244, roughness: 0.8,
+  transparent: true, opacity: 0.3, side: THREE.DoubleSide
+});
+const plane = new THREE.Mesh(planeGeo, planeMat);
+plane.rotation.x = 0;
+plane.position.y = -0.05;
+addUserObject(plane);
+
+// 顶点标记
+const apexGeo = new THREE.SphereGeometry(0.12, 16, 16);
+const apex = new THREE.Mesh(apexGeo, new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xffffff, emissiveIntensity: 1 }));
+apex.position.set(0, 0, 0);
+addUserObject(apex);
+
+// 标签
+function makeLabel(text, x, y, z) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 256; canvas.height = 48;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#ffffff'; ctx.font = 'bold 16px Inter, sans-serif';
+  ctx.textAlign = 'center'; ctx.fillText(text, 128, 24);
+  const tex = new THREE.CanvasTexture(canvas);
+  const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, depthTest: false }));
+  sprite.position.set(x, y, z); sprite.scale.set(3, 0.6, 1);
+  addUserObject(sprite);
+}
+makeLabel('z = x² + y²', 0, -0.8, 3.5);`,
+  },
+};
+
+// ============ Chip Click Handlers ============
+dom.chips.forEach(chip => {
+  chip.addEventListener('click', () => {
+    const exampleName = chip.dataset.example;
+    const example = EXAMPLES[exampleName];
+    if (!example) return;
+
+    if (isGenerating) return;
+
+    // For built-in examples, execute code directly without API call
+    clearScene();
+    try {
+      executeCode(example.code);
+      showToast(`已加载示例: ${chip.textContent} 📐`, 'info');
+    } catch (err) {
+      showToast(`示例加载失败: ${err.message}`, 'error');
+    }
+  });
+});
+
+// ============ Keyboard Shortcuts ============
+window.addEventListener('keydown', (e) => {
+  if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
+  switch (e.key.toLowerCase()) {
+    case 'r': resetView(); break;
+    case 't': topView(); break;
+    case 'f': frontView(); break;
+    case 'c': clearScene(); break;
+    case '1': document.querySelector('[data-example="cube"]')?.click(); break;
+    case '2': document.querySelector('[data-example="cylinder"]')?.click(); break;
+    case '3': document.querySelector('[data-example="sphere"]')?.click(); break;
+    case '4': document.querySelector('[data-example="cone"]')?.click(); break;
+    case '5': document.querySelector('[data-example="water-tank"]')?.click(); break;
+    case '6': document.querySelector('[data-example="parabola"]')?.click(); break;
+  }
+});
+
+// ============ Init ============
+console.log('🔮 数学可视化已就绪');
+console.log('  快捷操作: R=重置视角 T=俯视 F=前视 C=清空 1-6=加载示例');
+console.log('  输入数学问题 → 回车生成 3D 可视化');
+console.log('  鼠标: 拖拽旋转 | 滚轮缩放 | 右键平移');
+</script>
+
+</body>
+</html>
