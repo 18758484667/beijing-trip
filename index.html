@@ -425,16 +425,16 @@
     #planMapInner { width: 100%; height: 220px; }
 
     /* 拖拽排序 */
-    .plan-slot { display: flex; align-items: center; padding: 12px 0; gap: 10px; cursor: pointer; border-bottom: 1px solid #F5F0E8; position: relative; user-select: none; -webkit-user-select: none; }
+    .plan-slot { display: flex; align-items: flex-start; padding: 10px 0; gap: 8px; cursor: pointer; border-bottom: 1px solid #F5F0E8; position: relative; user-select: none; -webkit-user-select: none; }
     .plan-slot:last-child { border-bottom: none; }
     .plan-slot:active { opacity: 0.7; }
     .plan-slot.dragging { opacity: 0.5; background: #FBF8F3; border-radius: 10px; padding: 12px 8px; }
     .plan-slot.drag-over { border-top: 2px solid var(--red); }
-    .plan-slot-drag { width: 24px; height: 36px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; cursor: grab; color: #CCC; font-size: 18px; opacity: 0; transition: opacity 0.15s; }
+    .plan-slot-drag { width: 20px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; cursor: grab; color: #CCC; font-size: 16px; opacity: 0; transition: opacity 0.15s; padding-top: 2px; }
     .plan-slot:hover .plan-slot-drag, .plan-slot:active .plan-slot-drag { opacity: 1; }
     .plan-slot-drag:active { cursor: grabbing; }
-    .plan-slot-dot { width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
-    .plan-slot-dot svg { width: 18px; height: 18px; stroke: #FFF; }
+    .plan-slot-dot { width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; margin-top: 1px; }
+    .plan-slot-dot svg { width: 14px; height: 14px; stroke: #FFF; }
     .plan-slot.morning .plan-slot-dot { background: linear-gradient(135deg, #E8A040, #F6C96E); }
     .plan-slot.noon .plan-slot-dot { background: linear-gradient(135deg, var(--red), var(--red-light)); }
     .plan-slot.afternoon .plan-slot-dot { background: linear-gradient(135deg, #2E9E5A, #5AC78B); }
@@ -443,13 +443,14 @@
     .plan-slot.transport .plan-slot-dot { background: linear-gradient(135deg, #5D5347, #8A7E70); }
     .plan-slot-custom .plan-slot-dot { background: #1ABC9C; }
     .plan-slot-info { flex: 1; min-width: 0; }
-    .plan-slot-name { font-size: 16px; font-weight: 600; display: block; color: var(--text); }
-    .plan-slot-detail { font-size: 14px; color: var(--text2); }
-    .plan-slot-remove { font-size: 20px; color: #CCC; cursor: pointer; padding: 4px; flex-shrink: 0; }
+    .plan-slot-name { font-size: 15px; font-weight: 600; display: block; color: var(--text); }
+    .plan-slot-detail { font-size: 13px; color: var(--text2); }
+    .plan-slot-remove { font-size: 18px; color: #CCC; cursor: pointer; padding: 2px 4px; flex-shrink: 0; }
     .plan-slot-remove:active { color: var(--red); }
-    .plan-slot-edit { font-size: 16px; color: #CCC; cursor: pointer; padding: 4px; flex-shrink: 0; }
+    .plan-slot-edit { font-size: 14px; color: #CCC; cursor: pointer; padding: 2px 4px; flex-shrink: 0; }
     .plan-slot-edit:active { color: var(--red); }
     .plan-slot-memo { font-size: 13px; color: var(--text3); margin-top: 2px; }
+    .plan-slot-time-row { font-size: 12px; color: #999; display: block; margin-bottom: 2px; line-height: 1.3; }
 
     .custom-picker-form { padding: 14px; }
     .custom-picker-form .input-group { margin-bottom: 10px; }
@@ -2442,14 +2443,17 @@ function renderDayDetail(dayIdx) {
     var cls = slot.slotType || 'afternoon';
     if (slot.custom) cls += ' plan-slot-custom';
     html += '<div class="plan-slot ' + cls + '" data-slot-index="' + idx + '" draggable="true" onclick="openSlotDetail(\'' + slot.id + '\',\'' + slot.type + '\',\'' + dayIdx + '\',\'' + idx + '\')">';
-    html += '<div class="plan-slot-time-col">';
-    html += '<span class="plan-slot-time">' + (slot.startTime || '--:--') + '</span>';
-    if (slot.endTime) html += '<span class="plan-slot-time-end">' + slot.endTime + '</span>';
-    if (slot.duration) html += '<span class="plan-slot-duration">' + slot.duration + '</span>';
-    html += '</div>';
     html += '<span class="plan-slot-drag">⠿</span>';
     html += '<div class="plan-slot-dot">' + getSlotIcon(slot.type) + '</div>';
     html += '<div class="plan-slot-info">';
+    // 时间行：移到名称上方，紧凑显示
+    var timeParts = [];
+    if (slot.startTime) timeParts.push(slot.startTime);
+    if (slot.endTime) timeParts.push('→' + slot.endTime);
+    var timeStr = timeParts.join(' ') || '';
+    if (slot.duration && timeStr) timeStr += ' · ' + slot.duration;
+    else if (slot.duration) timeStr = slot.duration;
+    if (timeStr) html += '<span class="plan-slot-time-row">' + timeStr + '</span>';
     html += '<span class="plan-slot-name">' + slot.name + '</span>';
     html += '<span class="plan-slot-detail">' + (slot.detail || '') + '</span>';
     if (slot.memo) html += '<span class="plan-slot-memo"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> ' + slot.memo + '</span>';
