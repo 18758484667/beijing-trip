@@ -11,8 +11,7 @@
     };
   </script>
   <script src="https://webapi.amap.com/maps?v=2.0&key=dffd44fa0a2f45b73bfa2cbe9ccd1ad5"></script>
-  <!-- Supabase SDK -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <!-- 云端同步使用 jsonblob.com (免费) -->
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     :root {
@@ -838,41 +837,77 @@
 
 <script>
 // ============================================================
-// Supabase 客户端初始化
+// 云端数据存储（jsonblob.com - 免费无需注册）
+// 所有行程数据实时存储在一个 JSON Blob 中，手机规划 → 家人刷新即见
 // ============================================================
-var SUPABASE_URL = 'https://mjsylaoqkurfdvxtmgan.supabase.co';
-var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1qc3lsYW9xa3VyZmR2eHRtZ2FuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExMjc5MDAsImV4cCI6MjA5NjcwMzkwMH0.bzzf97ETW3Gz4GkcMonJG-zYUvmhJjVa7lFrwruk_VE';
-var supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+var CLOUD_BLOB_URL = 'https://jsonblob.com/api/jsonBlob/019f110a-7f57-7791-be7b-b6a937133b88';
+var useCloud = true; // 设为 false 可强制仅使用 localStorage
+var cloudCache = null; // 缓存全量云端数据，减少请求
 
-// 数据存储：优先使用 Supabase，降级到 localStorage
-var useSupabase = true; // 设为 false 可强制使用 localStorage
-var SUPABASE_TABLE = 'trip_data';
-
-// 通用的 Supabase 读数据函数
+// 通用的云端读数据函数
 async function loadFromCloud(key) {
-  if (!useSupabase) return null;
+  if (!useCloud) return null;
   try {
-    var { data, error } = await supabase.from(SUPABASE_TABLE).select('data').eq('id', key).single();
-    if (error || !data) return null;
-    return data.data;
+    // 优先从缓存读取，避免频繁请求
+    if (!cloudCache) {
+      var resp = await fetch(CLOUD_BLOB_URL, { headers: { 'Accept': 'application/json' } });
+      if (!resp.ok) { cloudCache = null; return null; }
+      cloudCache = await resp.json();
+    }
+    return (cloudCache && cloudCache[key]) ? cloudCache[key] : null;
   } catch(e) {
-    console.warn('Supabase 读取失败，降级到本地存储:', e.message);
+    console.warn('云端读取失败，降级到本地存储:', e.message);
+    cloudCache = null;
     return null;
   }
 }
 
-// 通用的 Supabase 写数据函数
+// 通用的云端写数据函数（先读后写，保证数据完整性）
+var _cloudWriteLock = false;
+var _cloudWriteQueue = [];
 async function saveToCloud(key, value) {
-  if (!useSupabase) return false;
+  if (!useCloud) return false;
+  // 加入写队列，避免并发写冲突
+  _cloudWriteQueue.push({ key: key, value: value });
+  if (_cloudWriteLock) return false;
+  _cloudWriteLock = true;
   try {
-    var { error } = await supabase.from(SUPABASE_TABLE).upsert({ id: key, data: value, updated_at: new Date().toISOString() });
-    if (error) throw error;
+    while (_cloudWriteQueue.length > 0) {
+      var item = _cloudWriteQueue.shift();
+      // 确保有最新数据
+      if (!cloudCache) {
+        try {
+          var getResp = await fetch(CLOUD_BLOB_URL, { headers: { 'Accept': 'application/json' } });
+          if (getResp.ok) cloudCache = await getResp.json();
+        } catch(e) { cloudCache = {}; }
+      }
+      // 合并待写队列中同 key 的最新值
+      cloudCache[item.key] = item.value;
+      while (_cloudWriteQueue.length > 0 && _cloudWriteQueue[0].key === item.key) {
+        cloudCache[item.key] = _cloudWriteQueue.shift().value;
+      }
+    }
+    // 写回云端
+    var putResp = await fetch(CLOUD_BLOB_URL, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(cloudCache)
+    });
+    if (!putResp.ok) throw new Error('PUT failed: ' + putResp.status);
     return true;
   } catch(e) {
-    console.warn('Supabase 写入失败，降级到本地存储:', e.message);
+    console.warn('云端写入失败，降级到本地存储:', e.message);
+    cloudCache = null;
     return false;
+  } finally {
+    _cloudWriteLock = false;
+    // 如果队列中还有新任务，继续处理
+    if (_cloudWriteQueue.length > 0) { saveToCloud('_flush', null); }
   }
 }
+
+// 清除云端缓存（用于切换页面时重新拉取最新数据）
+function clearCloudCache() { cloudCache = null; }
 
 // ============================================================
 // 数据层：从文档提取的全部景点、美食、住宿
@@ -4559,7 +4594,7 @@ async function initApp() {
   setTimeout(initMap, 300);
   // 延迟查询天气（避免阻塞页面加载）
   setTimeout(function() { fetchWeatherForPlan(); }, 1000);
-  console.log('京城游记 H5 页面加载完成 - 共' + DATA.spots.length + '个景点（数据来源：Supabase + 本地）');
+  console.log('京城游记已就绪 - 共' + DATA.spots.length + '个景点 | 云端同步已启用 | 手机规划 → 家人刷新即见');
 }
 
 initApp();
