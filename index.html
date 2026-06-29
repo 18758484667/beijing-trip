@@ -409,7 +409,9 @@
     .plan-slot-time { display: block; font-size: 14px; font-weight: 700; color: var(--text); }
     .plan-slot-time-end { display: block; font-size: 11px; color: var(--text3); }
     .plan-slot-duration { display: block; font-size: 10px; color: var(--red); background: var(--red-bg); border-radius: 6px; padding: 1px 4px; margin-top: 2px; }
-    .plan-drive-hint { text-align: center; padding: 6px 0; font-size: 12px; color: #F57C00; background: #FFF8E1; border-radius: 8px; margin: 2px 0; }
+    .plan-drive-hint { text-align: center; padding: 4px 10px; font-size: 12px; color: #F57C00; background: #FFF8E1; border-radius: 8px; margin: 2px 0; line-height: 1.6; }
+    .plan-drive-hint .hint-subway { color: #1A8C1A; }
+    .plan-drive-hint .hint-taxi { color: #D4783A; }
 
 
     .plan-day-section { margin-bottom: 14px; }
@@ -2419,11 +2421,23 @@ function renderDayDetail(dayIdx) {
   html += '<div class="plan-day-body" id="planDayBody_' + dayIdx + '">';
 
   day.slots.forEach(function(slot, idx) {
-    // 在非第一个slot前插入驾车时间提示
+    // 在非第一个slot前插入交通提示
     if (idx > 0) {
       var prevSlot = day.slots[idx - 1];
-      if (prevSlot.lat && prevSlot.lng && slot.lat && slot.lng && prevSlot._driveMinutes != null && prevSlot._driveMinutes >= 0) {
-        html += '<div class="plan-drive-hint">🚗 驾车约' + prevSlot._driveMinutes + '分钟</div>';
+      if (prevSlot.lat && prevSlot.lng && slot.lat && slot.lng) {
+        var hintParts = [];
+        // 地铁信息
+        if (slot._transit && slot._transit.minutes > 0) {
+          hintParts.push('<span class="hint-subway">🚇 地铁约' + slot._transit.minutes + '分钟' + (slot._transit.fare ? ' ¥' + Math.round(slot._transit.fare) : '') + '</span>');
+        }
+        // 驾车/打车信息
+        if (slot._driveMinutes != null && slot._driveMinutes >= 0) {
+          var taxiPrice = estimateTaxiPrice(slot._driveDistance);
+          hintParts.push('<span class="hint-taxi">🚕 打车约' + slot._driveMinutes + '分钟 ' + taxiPrice + '</span>');
+        }
+        if (hintParts.length > 0) {
+          html += '<div class="plan-drive-hint">' + hintParts.join(' &nbsp;|&nbsp; ') + '</div>';
+        }
       }
     }
 
@@ -3207,28 +3221,28 @@ function autoCalcDriveFromPrev() {
   if (editingSlotIdx <= 0 || !day) { showToast('没有上一个地点'); return; }
   var prev = day.slots[editingSlotIdx - 1];
   var curr = day.slots[editingSlotIdx];
-  calcDriveTime(prev, curr, function(minutes) {
-    if (minutes >= 0) {
+  calcDriveInfo(prev, curr, function(info) {
+    if (info.minutes >= 0) {
       // 根据上一个slot的结束时间推算当前开始时间
       if (prev.endTime) {
         var prevEnd = parseTimeToMinutes(prev.endTime);
-        var newStart = formatMinutesToTime(prevEnd + minutes);
+        var newStart = formatMinutesToTime(prevEnd + info.minutes);
         document.getElementById('slotEditStart').value = newStart;
-        showToast('驾车约' + minutes + '分钟，开始时间已设为 ' + newStart);
+        showToast('驾车约' + info.minutes + '分钟，开始时间已设为 ' + newStart);
       } else {
-        showToast('驾车约' + minutes + '分钟（请设置上一个地点的结束时间）');
+        showToast('驾车约' + info.minutes + '分钟（请设置上一个地点的结束时间）');
       }
     }
   });
 }
 
-// 计算两点间驾车时间（使用高德驾车API）
-function calcDriveTime(fromSlot, toSlot, callback) {
-  if (!fromSlot || !toSlot) { callback(-1); return; }
+// 计算两点间驾车信息（时间+距离，使用高德驾车API）
+function calcDriveInfo(fromSlot, toSlot, callback) {
+  if (!fromSlot || !toSlot) { callback({ minutes: -1, distance: 0 }); return; }
   var lat1 = fromSlot.lat, lng1 = fromSlot.lng;
   var lat2 = toSlot.lat, lng2 = toSlot.lng;
-  if (!lat1 || !lng1 || !lat2 || !lng2) { callback(-1); return; }
-  if (typeof AMap === 'undefined') { callback(-1); return; }
+  if (!lat1 || !lng1 || !lat2 || !lng2) { callback({ minutes: -1, distance: 0 }); return; }
+  if (typeof AMap === 'undefined') { callback({ minutes: -1, distance: 0 }); return; }
   try {
     var driving = new AMap.Driving({ policy: AMap.DrivingPolicy.LEAST_TIME });
     driving.search(
@@ -3236,12 +3250,53 @@ function calcDriveTime(fromSlot, toSlot, callback) {
       new AMap.LngLat(lng2, lat2),
       function(status, result) {
         if (status === 'complete' && result.routes && result.routes.length > 0) {
-          var minutes = Math.ceil(result.routes[0].time / 60);
-          callback(minutes);
-        } else { callback(-1); }
+          var route = result.routes[0];
+          var minutes = Math.ceil(route.time / 60);
+          var distance = route.distance; // 米
+          callback({ minutes: minutes, distance: distance });
+        } else { callback({ minutes: -1, distance: 0 }); }
       }
     );
-  } catch(e) { callback(-1); }
+  } catch(e) { callback({ minutes: -1, distance: 0 }); }
+}
+
+// 计算两点间地铁最快路线（使用高德公交API）
+function calcTransitInfo(fromSlot, toSlot, callback) {
+  if (!fromSlot || !toSlot) { callback(null); return; }
+  var lat1 = fromSlot.lat, lng1 = fromSlot.lng;
+  var lat2 = toSlot.lat, lng2 = toSlot.lng;
+  if (!lat1 || !lng1 || !lat2 || !lng2) { callback(null); return; }
+  if (typeof AMap === 'undefined') { callback(null); return; }
+  try {
+    AMap.plugin(['AMap.Transfer'], function() {
+      var transfer = new AMap.Transfer({
+        city: '北京',
+        policy: AMap.TransferPolicy.LEAST_TIME
+      });
+      transfer.search(
+        new AMap.LngLat(lng1, lat1),
+        new AMap.LngLat(lng2, lat2),
+        function(status, result) {
+          if (status === 'complete' && result.plans && result.plans.length > 0) {
+            var plan = result.plans[0];
+            var minutes = Math.ceil(plan.time / 60);
+            // 取所有分段中计价方式得出的总费用（元）
+            var fare = parseFloat(plan.fee) || 0;
+            callback({ minutes: minutes, fare: fare });
+          } else { callback(null); }
+        }
+      );
+    });
+  } catch(e) { callback(null); }
+}
+
+// 估算打车费用（基于驾车距离，北京标准）
+function estimateTaxiPrice(distanceMeters) {
+  if (distanceMeters <= 0) return '--';
+  var km = distanceMeters / 1000;
+  if (km <= 3) return '13元';
+  var price = 13 + (km - 3) * 2.3;
+  return '约' + Math.round(price) + '元';
 }
 
 // 自动推算当天后续行程时间（异步递归）
@@ -3258,16 +3313,21 @@ function scheduleNext(plan, dayIdx, i) {
   var prev = day.slots[i - 1];
   var curr = day.slots[i];
   if (prev.lat && prev.lng && curr.lat && curr.lng) {
-    calcDriveTime(prev, curr, function(minutes) {
-      curr._driveMinutes = minutes;
-      if (minutes >= 0) {
+    calcDriveInfo(prev, curr, function(info) {
+      curr._driveMinutes = info.minutes;
+      curr._driveDistance = info.distance;
+      if (info.minutes >= 0) {
         if (prev.endTime && !curr.startTime) {
-          curr.startTime = formatMinutesToTime(parseTimeToMinutes(prev.endTime) + minutes);
+          curr.startTime = formatMinutesToTime(parseTimeToMinutes(prev.endTime) + info.minutes);
         } else if (!curr.startTime && prev.startTime && prev.duration) {
-          curr.startTime = formatMinutesToTime(parseTimeToMinutes(prev.startTime) + parseDuration(prev.duration) + minutes);
+          curr.startTime = formatMinutesToTime(parseTimeToMinutes(prev.startTime) + parseDuration(prev.duration) + info.minutes);
         }
       }
-      scheduleNext(plan, dayIdx, i + 1);
+      // 异步计算地铁信息
+      calcTransitInfo(prev, curr, function(transit) {
+        curr._transit = transit;
+        scheduleNext(plan, dayIdx, i + 1);
+      });
     });
   } else {
     // 坐标不全就跳过，继续下一个
