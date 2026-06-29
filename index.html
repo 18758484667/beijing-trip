@@ -3675,7 +3675,7 @@ function attachDragListeners(dayIdx) {
   var body = document.getElementById('planDayBody_' + dayIdx);
   if (!body) return;
 
-  var slots = body.querySelectorAll('.plan-slot');
+  var slots = body.querySelectorAll('.timeline-item');
   slots.forEach(function(slot, idx) {
     slot.addEventListener('dragstart', function(e) {
       if (currentMode === 'view') { e.preventDefault(); return; }
