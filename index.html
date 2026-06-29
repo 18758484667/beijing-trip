@@ -435,6 +435,34 @@
     #planMapContainer.show { height: 220px; }
     #planMapInner { width: 100%; height: 220px; }
 
+    /* 时间轴 */
+    .timeline { position: relative; padding-left: 28px; }
+    .timeline::before { content: ''; position: absolute; left: 11px; top: 8px; bottom: 8px; width: 2px; background: linear-gradient(to bottom, var(--red-bg), var(--red-light), var(--red-bg)); border-radius: 1px; }
+    .timeline-item { position: relative; margin-bottom: 8px; padding: 10px 12px; background: #FFF; border-radius: 10px; border: 1px solid #F0EBE0; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+    .timeline-item:last-child { margin-bottom: 0; }
+    .timeline-dot { position: absolute; left: -22px; top: 14px; width: 12px; height: 12px; border-radius: 50%; border: 2px solid #FFF; box-shadow: 0 1px 3px rgba(0,0,0,0.15); z-index: 1; }
+    .timeline-dot.morning { background: linear-gradient(135deg, #E8A040, #F6C96E); }
+    .timeline-dot.noon { background: linear-gradient(135deg, var(--red), var(--red-light)); }
+    .timeline-dot.afternoon { background: linear-gradient(135deg, #2E9E5A, #5AC78B); }
+    .timeline-dot.evening { background: linear-gradient(135deg, #7B3FA0, #A06BC8); }
+    .timeline-dot.hotel { background: linear-gradient(135deg, #2E6E9E, #5A9EC8); }
+    .timeline-dot.transport { background: linear-gradient(135deg, #5D5347, #8A7E70); }
+    .timeline-dot.other { background: #1ABC9C; }
+    .timeline-time { font-size: 12px; color: #999; margin-bottom: 2px; }
+    .tl-header { display: flex; align-items: center; gap: 6px; }
+    .tl-icon { width: 18px; height: 18px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+    .tl-icon svg { width: 11px; height: 11px; stroke: #FFF; }
+    .tl-icon.morning { background: linear-gradient(135deg, #E8A040, #F6C96E); }
+    .tl-icon.noon { background: linear-gradient(135deg, var(--red), var(--red-light)); }
+    .tl-icon.afternoon { background: linear-gradient(135deg, #2E9E5A, #5AC78B); }
+    .tl-icon.hotel { background: linear-gradient(135deg, #2E6E9E, #5A9EC8); }
+    .tl-icon.transport { background: linear-gradient(135deg, #5D5347, #8A7E70); }
+    .tl-icon.other { background: #1ABC9C; }
+    .tl-name { font-size: 15px; font-weight: 600; color: var(--text); flex: 1; }
+    .tl-actions { display: flex; gap: 6px; flex-shrink: 0; }
+    .tl-action { font-size: 14px; color: #CCC; cursor: pointer; padding: 2px; }
+    .tl-action:active { color: var(--red); }
+
     /* 拖拽排序 */
     .plan-slot { display: flex; align-items: flex-start; padding: 8px 0; gap: 6px; cursor: pointer; border-bottom: 1px solid #F5F0E8; position: relative; user-select: none; -webkit-user-select: none; }
     .plan-slot:last-child { border-bottom: none; }
@@ -721,6 +749,15 @@
       <div class="input-group">
         <span class="input-label">名称 *</span>
         <input type="text" class="input-field" id="customItemName" placeholder="请输入项目名称" oninput="onCustomNameInput()" />
+      </div>
+      <!-- 时间字段 -->
+      <div class="input-group" style="display:flex;gap:8px;">
+        <div style="flex:1;"><span class="input-label">开始时间</span><input type="time" class="input-field" id="customItemStart" /></div>
+        <div style="flex:1;"><span class="input-label">结束时间</span><input type="time" class="input-field" id="customItemEnd" /></div>
+      </div>
+      <div class="input-group">
+        <span class="input-label">预估耗时（可选）</span>
+        <input type="text" class="input-field" id="customItemDuration" placeholder="如：2小时 / 1.5h" />
       </div>
       <!-- 非交通字段：地址+定位 -->
       <div id="customGeoFields">
@@ -2440,15 +2477,14 @@ function renderDayDetail(dayIdx) {
 
   var slotLabels = { morning:'上午', noon:'中午', afternoon:'下午' };
 
-  html += '<div class="plan-day-body" id="planDayBody_' + dayIdx + '">';
+  html += '<div class="timeline" id="planDayBody_' + dayIdx + '">';
 
   day.slots.forEach(function(slot, idx) {
-    // 在非第一个slot前插入交通提示
+    // 交通提示行
     if (idx > 0) {
       var prevSlot = day.slots[idx - 1];
       if (prevSlot.lat && prevSlot.lng && slot.lat && slot.lng) {
         var hintParts = [];
-        // 地铁信息
         if (slot._transit && slot._transit.minutes > 0) {
           var metroHtml = '';
           if (slot._transit.metro) {
@@ -2458,37 +2494,35 @@ function renderDayDetail(dayIdx) {
           }
           hintParts.push('<span class="hint-subway">🚇 ' + metroHtml + '约' + slot._transit.minutes + '分钟' + (slot._transit.fare ? ' ¥' + Math.round(slot._transit.fare) : '') + '</span>');
         }
-        // 驾车/打车信息
         if (slot._driveMinutes != null && slot._driveMinutes >= 0) {
           var taxiPrice = estimateTaxiPrice(slot._driveDistance);
           hintParts.push('<span class="hint-taxi">🚕 打车约' + slot._driveMinutes + '分钟 ' + taxiPrice + '</span>');
         }
         if (hintParts.length > 0) {
-          html += '<div class="plan-drive-hint">' + hintParts.join(' &nbsp;|&nbsp; ') + '</div>';
+          html += '<div class="plan-drive-hint" style="margin-left:-28px;">' + hintParts.join(' &nbsp;|&nbsp; ') + '</div>';
         }
       }
     }
 
     var cls = slot.slotType || 'afternoon';
-    if (slot.custom) cls += ' plan-slot-custom';
-    html += '<div class="plan-slot ' + cls + '" data-slot-index="' + idx + '" draggable="true" onclick="openSlotDetail(\'' + slot.id + '\',\'' + slot.type + '\',\'' + dayIdx + '\',\'' + idx + '\')">';
-    html += '<span class="plan-slot-drag">⠿</span>';
-    html += '<div class="plan-slot-dot">' + getSlotIcon(slot.type) + '</div>';
-    html += '<div class="plan-slot-info">';
-    // 时间行：移到名称上方，紧凑显示
+    html += '<div class="timeline-item" data-slot-index="' + idx + '" draggable="true" onclick="openSlotDetail(\'' + slot.id + '\',\'' + slot.type + '\',\'' + dayIdx + '\',\'' + idx + '\')">';
+    html += '<div class="timeline-dot ' + cls + '"></div>';
     var timeParts = [];
     if (slot.startTime) timeParts.push(slot.startTime);
     if (slot.endTime) timeParts.push('→' + slot.endTime);
-    var timeStr = timeParts.join(' ') || '';
-    if (slot.duration && timeStr) timeStr += ' · ' + slot.duration;
-    else if (slot.duration) timeStr = slot.duration;
-    if (timeStr) html += '<span class="plan-slot-time-row">' + timeStr + '</span>';
-    html += '<span class="plan-slot-name">' + slot.name + '</span>';
-    html += '<span class="plan-slot-detail">' + (slot.detail || '') + '</span>';
-    if (slot.memo) html += '<span class="plan-slot-memo"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> ' + slot.memo + '</span>';
+    var timeStr = timeParts.join(' ');
+    if (!timeStr && slot.duration) timeStr = slot.duration;
+    if (timeStr) html += '<div class="timeline-time">' + timeStr + '</div>';
+    html += '<div class="tl-header">';
+    html += '<div class="tl-icon ' + cls + '">' + getSlotIcon(slot.type) + '</div>';
+    html += '<span class="tl-name">' + slot.name + '</span>';
+    html += '<div class="tl-actions">';
+    html += '<span class="tl-action" onclick="event.stopPropagation();openSlotEdit(' + dayIdx + ',' + idx + ')"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></span>';
+    html += '<span class="tl-action" onclick="event.stopPropagation();removeSlot(' + dayIdx + ',' + idx + ')"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span>';
     html += '</div>';
-    html += '<span class="plan-slot-edit" onclick="event.stopPropagation();openSlotEdit(' + dayIdx + ',' + idx + ')"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></span>';
-    html += '<span class="plan-slot-remove" onclick="event.stopPropagation();removeSlot(' + dayIdx + ',' + idx + ')">×</span>';
+    html += '</div>';
+    if (slot.detail) html += '<div style="font-size:13px;color:#888;margin-top:2px;padding-left:24px;">' + slot.detail + '</div>';
+    if (slot.memo) html += '<div style="font-size:12px;color:#aaa;margin-top:2px;padding-left:24px;">📝 ' + slot.memo + '</div>';
     html += '</div>';
   });
 
@@ -2942,6 +2976,9 @@ function showCustomPicker(mode) {
   _customLng = null;
   document.getElementById('customItemName').value = '';
   document.getElementById('customItemAddr').value = '';
+  document.getElementById('customItemStart').value = '';
+  document.getElementById('customItemEnd').value = '';
+  document.getElementById('customItemDuration').value = '';
   document.getElementById('customItemMemo').value = '';
   document.getElementById('geoStatus').innerHTML = '';
   // 重置交通字段
@@ -3084,6 +3121,9 @@ function confirmCustomItem() {
   var slotType = activeSlot ? activeSlot.dataset.slot : (type === 'hotel' ? 'hotel' : (type === 'transport' ? 'transport' : 'afternoon'));
 
   var memo = document.getElementById('customItemMemo').value.trim();
+  var startTime = document.getElementById('customItemStart').value || '';
+  var endTime = document.getElementById('customItemEnd').value || '';
+  var duration = document.getElementById('customItemDuration').value.trim();
   var lat = _customLat;
   var lng = _customLng;
 
@@ -3126,9 +3166,9 @@ function confirmCustomItem() {
     lat: lat,
     lng: lng,
     custom: true,
-    startTime: '',
-    endTime: '',
-    duration: ''
+    startTime: startTime,
+    endTime: endTime,
+    duration: duration
   });
 
   currentDayDetailIndex = dayIdx;
