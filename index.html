@@ -2494,14 +2494,17 @@ function renderDayDetail(dayIdx) {
           hintParts.push('<span class="hint-taxi">🚕 打车约' + slot._driveMinutes + '分钟 ' + taxiPrice + '</span>');
         }
         if (hintParts.length > 0) {
-          html += '<div class="plan-drive-hint" style="margin-left:-28px;">' + hintParts.join(' &nbsp;|&nbsp; ') + '</div>';
+          html += '<div class="plan-drive-hint" id="hint_' + dayIdx + '_' + idx + '" style="margin-left:-28px;">' + hintParts.join(' &nbsp;|&nbsp; ') + '</div>';
+        } else {
+          // 预留空提示容器，供异步数据回填
+          html += '<div class="plan-drive-hint" id="hint_' + dayIdx + '_' + idx + '" style="margin-left:-28px;display:none;"></div>';
         }
       }
     }
 
-    var cls = slot.slotType || 'afternoon';
+    var typeCls = slot.type || 'other';
     html += '<div class="timeline-item" data-slot-index="' + idx + '" draggable="true" onclick="openSlotDetail(\'' + slot.id + '\',\'' + slot.type + '\',\'' + dayIdx + '\',\'' + idx + '\')">';
-    html += '<div class="timeline-dot ' + cls + '">' + getSlotIcon(slot.type) + '</div>';
+    html += '<div class="timeline-dot ' + typeCls + '">' + getSlotIcon(slot.type) + '</div>';
     var timeParts = [];
     if (slot.startTime) timeParts.push(slot.startTime);
     if (slot.endTime) timeParts.push('→' + slot.endTime);
@@ -2523,6 +2526,36 @@ function renderDayDetail(dayIdx) {
   html += '</div></div>';
   container.innerHTML = html;
   attachDragListeners(dayIdx);
+
+  // 异步计算并回填交通提示
+  setTimeout(function() {
+    day.slots.forEach(function(slot, idx) {
+      if (idx === 0 || !slot.lat || !slot.lng) return;
+      var prev = day.slots[idx - 1];
+      if (!prev.lat || !prev.lng) return;
+      var hintId = 'hint_' + dayIdx + '_' + idx;
+      var hintEl = document.getElementById(hintId);
+      if (!hintEl) return;
+      calcDriveInfo(prev, slot, function(info) {
+        if (info.minutes >= 0 && hintEl) {
+          var taxiPrice = estimateTaxiPrice(info.distance);
+          hintEl.innerHTML = (hintEl.innerHTML ? hintEl.innerHTML + ' &nbsp;|&nbsp; ' : '') + '<span class="hint-taxi">🚕 打车约' + info.minutes + '分钟 ' + taxiPrice + '</span>';
+          hintEl.style.display = '';
+        }
+      });
+      calcTransitInfo(prev, slot, function(transit) {
+        if (transit && transit.minutes > 0 && hintEl) {
+          var mh = '';
+          if (transit.metro) {
+            transit.metro.split('→').forEach(function(line) { mh += '<span class="metro-line">' + line.trim() + '</span>'; });
+          }
+          var th = '<span class="hint-subway">🚇 ' + mh + '约' + transit.minutes + '分钟' + (transit.fare ? ' ¥' + Math.round(transit.fare) : '') + '</span>';
+          hintEl.innerHTML = th + (hintEl.innerHTML ? ' &nbsp;|&nbsp; ' + hintEl.innerHTML : '');
+          hintEl.style.display = '';
+        }
+      });
+    });
+  }, 100);
 }
 
 // --- 日详情页地图 ---
