@@ -810,9 +810,9 @@
 
   <!-- ===== Slot编辑弹窗 ===== -->
   <div class="modal-mask" id="slotEditMask" onclick="closeSlotEdit()"></div>
-  <div class="modal" id="slotEditModal" style="max-height:85vh;padding:0;">
-    <div class="modal-header" style="padding:16px;"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px;"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg> 编辑项目</div>
-    <div class="custom-picker-form">
+  <div class="modal" id="slotEditModal" style="max-height:85vh;padding:0;display:flex;flex-direction:column;">
+    <div class="modal-header" style="padding:16px;flex-shrink:0;"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px;"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg> 编辑项目</div>
+    <div class="custom-picker-form" style="overflow-y:auto;flex:1;padding:0 16px;">
       <div class="input-group">
         <span class="input-label">名称</span>
         <input type="text" class="input-field" id="slotEditName" placeholder="项目名称" />
@@ -851,7 +851,7 @@
         </div>
       </div>
     </div>
-    <div class="modal-actions" style="padding:16px;">
+    <div class="modal-actions" style="padding:16px;flex-shrink:0;border-top:1px solid #F5F0E8;">
       <button class="modal-btn modal-btn-cancel" onclick="closeSlotEdit()">取消</button>
       <button class="modal-btn modal-btn-confirm" onclick="saveSlotEdit()">保存</button>
     </div>
