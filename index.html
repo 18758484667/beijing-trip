@@ -757,8 +757,6 @@
           <span class="type-option active" data-slot="morning"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:2px;"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/></svg> 上午</span>
           <span class="type-option" data-slot="noon"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:2px;"><circle cx="12" cy="12" r="5"/><path d="M12 1v2"/><path d="M12 21v2"/><path d="M4.22 4.22l1.42 1.42"/><path d="M18.36 18.36l1.42 1.42"/></svg> 中午</span>
           <span class="type-option" data-slot="afternoon"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:2px;"><path d="M17 18a5 5 0 0 0-10 0"/><line x1="12" y1="9" x2="12" y2="3"/><line x1="4.22" y1="10.22" x2="5.64" y2="11.64"/><line x1="1" y1="18" x2="3" y2="18"/><line x1="21" y1="18" x2="23" y2="18"/><line x1="18.36" y1="11.64" x2="19.78" y2="10.22"/></svg> 下午</span>
-          <span class="type-option" data-slot="evening"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:2px;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg> 晚上</span>
-          <span class="type-option" data-slot="hotel"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:2px;"><path d="M3 21h18"/><path d="M3 7v14"/><path d="M21 7v14"/><path d="M6 11h4v4H6z"/><path d="M14 11h4v4h-4z"/><path d="M9 3h6v4H9z"/></svg> 住宿</span>
         </div>
       </div>
     </div>
@@ -807,9 +805,7 @@
           <span class="type-option" data-slot="morning"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:2px;"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/></svg> 上午</span>
           <span class="type-option" data-slot="noon"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:2px;"><circle cx="12" cy="12" r="5"/><path d="M12 1v2"/><path d="M12 21v2"/></svg> 中午</span>
           <span class="type-option" data-slot="afternoon"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:2px;"><path d="M17 18a5 5 0 0 0-10 0"/><line x1="12" y1="9" x2="12" y2="3"/></svg> 下午</span>
-          <span class="type-option" data-slot="evening"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:2px;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg> 晚上</span>
-          <span class="type-option" data-slot="hotel"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:2px;"><path d="M3 21h18"/><path d="M3 7v14"/><path d="M21 7v14"/><path d="M6 11h4v4H6z"/><path d="M14 11h4v4h-4z"/><path d="M9 3h6v4H9z"/></svg> 住宿</span>
-          <span class="type-option" data-slot="transport"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:2px;"><path d="M22 12l-4-4H6l-4 4"/><path d="M2 12h20"/></svg> 交通</span>
+        </div>
         </div>
       </div>
     </div>
@@ -2430,7 +2426,7 @@ function renderDayDetail(dayIdx) {
   var html = '';
   html += '<div class="plan-day-section">';
 
-  var slotLabels = { morning:'上午', noon:'中午', afternoon:'下午', evening:'晚上', hotel:'住宿', transport:'交通' };
+  var slotLabels = { morning:'上午', noon:'中午', afternoon:'下午' };
 
   html += '<div class="plan-day-body" id="planDayBody_' + dayIdx + '">';
 
@@ -2862,7 +2858,7 @@ function confirmPicker() {
         }
       }
       // 默认时间段->时间映射
-      var defaultTimes = { morning:'08:00', noon:'12:00', afternoon:'14:00', evening:'18:00', hotel:'20:00', transport:'08:00' };
+      var defaultTimes = { morning:'08:00', noon:'12:00', afternoon:'14:00' };
       if (!newStartTime) newStartTime = defaultTimes[slotType] || '09:00';
       plan.days[dayIdx].slots.push({
         type: currentPickerType === 'spot' ? 'spot' : (currentPickerType === 'food' ? 'food' : (currentPickerType === 'hotel' ? 'hotel' : 'transport')),
