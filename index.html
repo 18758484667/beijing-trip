@@ -460,8 +460,9 @@
     .plan-slot { display: flex; align-items: flex-start; padding: 8px 0; gap: 6px; cursor: pointer; border-bottom: 1px solid #F5F0E8; position: relative; user-select: none; -webkit-user-select: none; }
     .plan-slot:last-child { border-bottom: none; }
     .plan-slot:active { opacity: 0.7; }
-    .plan-slot.dragging { opacity: 0.5; background: #FBF8F3; border-radius: 10px; padding: 12px 8px; }
-    .plan-slot.drag-over { border-top: 2px solid var(--red); }
+    .timeline-item { transition: transform 0.15s ease, opacity 0.15s ease; }
+    .timeline-item.dragging { opacity: 0.4; transform: scale(0.97); background: #F8F4F0; border-radius: 10px; }
+    .timeline-item.drag-over { border-top: 3px solid var(--red); padding-top: 10px; margin-top: -3px; }
     .plan-slot-drag { width: 20px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; cursor: grab; color: #CCC; font-size: 16px; opacity: 0; transition: opacity 0.15s; padding-top: 2px; }
     .plan-slot:hover .plan-slot-drag, .plan-slot:active .plan-slot-drag { opacity: 1; }
     .plan-slot-drag:active { cursor: grabbing; }
@@ -3668,85 +3669,162 @@ function drawPlanMap(dayIdx) {
   }
 }
 
-// 拖拽排序
+// 拖拽排序（平滑版）
 var dragData = null;
+var dragOverIdx = -1;
 
 function attachDragListeners(dayIdx) {
   var body = document.getElementById('planDayBody_' + dayIdx);
   if (!body) return;
 
-  var slots = body.querySelectorAll('.timeline-item');
+  function getSlots() { return body.querySelectorAll('.timeline-item'); }
+
+  // 桌面端拖拽
+  var slots = getSlots();
   slots.forEach(function(slot, idx) {
+    slot.setAttribute('draggable', 'true');
+
     slot.addEventListener('dragstart', function(e) {
       if (currentMode === 'view') { e.preventDefault(); return; }
       dragData = { dayIdx: dayIdx, fromIdx: idx };
-      slot.classList.add('dragging');
+      setTimeout(function() { slot.classList.add('dragging'); }, 0);
       e.dataTransfer.effectAllowed = 'move';
-      e.dataTransfer.setData('text/plain', idx);
+      e.dataTransfer.setData('text/plain', '');
     });
 
     slot.addEventListener('dragend', function(e) {
       slot.classList.remove('dragging');
-      slots.forEach(function(s) { s.classList.remove('drag-over'); });
+      getSlots().forEach(function(s) {
+        s.classList.remove('drag-over');
+        s.style.transform = '';
+      });
       dragData = null;
+      dragOverIdx = -1;
     });
 
     slot.addEventListener('dragover', function(e) {
       e.preventDefault();
       e.dataTransfer.dropEffect = 'move';
-      slot.classList.add('drag-over');
+      if (dragOverIdx !== idx) {
+        getSlots().forEach(function(s) { s.classList.remove('drag-over'); });
+        slot.classList.add('drag-over');
+        dragOverIdx = idx;
+      }
     });
 
-    slot.addEventListener('dragleave', function(e) {
-      slot.classList.remove('drag-over');
+    slot.addEventListener('dragleave', function() {
+      // 使用document级的dragover来管理，这里只做延迟清理
     });
 
     slot.addEventListener('drop', function(e) {
       e.preventDefault();
       slot.classList.remove('drag-over');
       if (!dragData || dragData.fromIdx === idx) return;
-
-      var plan = getPlanSync();
-      var day = plan.days[dragData.dayIdx];
-      var moved = day.slots.splice(dragData.fromIdx, 1)[0];
-      day.slots.splice(idx, 0, moved);
-      currentDayDetailIndex = dragData.dayIdx;
-      savePlan(plan);
+      performSwap(dayIdx, dragData.fromIdx, idx);
+      dragData = null;
+      dragOverIdx = -1;
     });
+  });
 
-    // Touch support
-    var touchStartY = 0;
+  // 移动端长按滑动排序
+  var touchData = null;
+  var touchActive = false;
+  var longPressTimer = null;
+
+  slots.forEach(function(slot, idx) {
     slot.addEventListener('touchstart', function(e) {
       if (currentMode === 'view') return;
-      touchStartY = e.touches[0].clientY;
-      dragData = { dayIdx: dayIdx, fromIdx: idx };
+      var touch = e.touches[0];
+      touchData = {
+        dayIdx: dayIdx,
+        idx: idx,
+        startX: touch.clientX,
+        startY: touch.clientY,
+        currentY: touch.clientY,
+        el: slot
+      };
+      touchActive = false;
+      // 长按500ms激活拖拽
+      clearTimeout(longPressTimer);
+      longPressTimer = setTimeout(function() {
+        touchActive = true;
+        if (touchData) {
+          touchData.el.classList.add('dragging');
+          navigator.vibrate && navigator.vibrate(15);
+        }
+      }, 500);
     }, {passive: true});
 
     slot.addEventListener('touchmove', function(e) {
-      if (!dragData) return;
-      slot.classList.add('dragging');
-    }, {passive: true});
+      if (!touchData) return;
+      var touch = e.touches[0];
+      touchData.currentY = touch.clientY;
+      var dx = Math.abs(touch.clientX - touchData.startX);
+      var dy = Math.abs(touch.clientY - touchData.startY);
 
-    slot.addEventListener('touchend', function(e) {
-      if (!dragData) return;
-      slot.classList.remove('dragging');
-      var touchEndY = e.changedTouches[0].clientY;
-      var diff = touchEndY - touchStartY;
+      // 移动超过10px还没激活则取消（当作滚动）
+      if (!touchActive && (dx > 10 || dy > 10)) {
+        clearTimeout(longPressTimer);
+        return;
+      }
+      if (!touchActive) return;
 
-      if (Math.abs(diff) > 40) {
-        var plan = getPlanSync();
-        var targetDay = plan.days[dragData.dayIdx];
-        var newIdx = diff > 0 ? Math.min(idx + 1, targetDay.slots.length - 1) : Math.max(idx - 1, 0);
-        if (newIdx !== idx) {
-          var moved = targetDay.slots.splice(dragData.fromIdx, 1)[0];
-          targetDay.slots.splice(newIdx, 0, moved);
-          currentDayDetailIndex = dragData.dayIdx;
-          savePlan(plan);
+      e.preventDefault();
+      // 跟随手指移动
+      var offset = touch.clientY - touchData.startY;
+      slot.style.transform = 'translateY(' + offset + 'px)';
+
+      // 悬停检测
+      var slots = getSlots();
+      var overIdx = -1;
+      var targetIdx = -1;
+      for (var i = 0; i < slots.length; i++) {
+        var rect = slots[i].getBoundingClientRect();
+        var mid = rect.top + rect.height / 2;
+        if (touch.clientY >= rect.top && touch.clientY <= rect.bottom) {
+          overIdx = i;
+          targetIdx = touch.clientY > mid ? i : i;
+          if (touch.clientY > mid && i < slots.length - 1) targetIdx = i + 1;
+          break;
         }
       }
-      dragData = null;
+      if (overIdx >= 0 && dragOverIdx !== overIdx) {
+        slots.forEach(function(s) { s.classList.remove('drag-over'); });
+        if (overIdx !== touchData.idx) {
+          slots[overIdx].classList.add('drag-over');
+        }
+        dragOverIdx = overIdx;
+      }
+    }, {passive: false});
+
+    slot.addEventListener('touchend', function(e) {
+      clearTimeout(longPressTimer);
+      if (!touchData) return;
+      slot.style.transform = '';
+      slot.classList.remove('dragging');
+      getSlots().forEach(function(s) { s.classList.remove('drag-over'); });
+
+      if (touchActive && dragOverIdx >= 0 && dragOverIdx !== touchData.idx) {
+        var newIdx = dragOverIdx > touchData.idx ? dragOverIdx : dragOverIdx;
+        if (newIdx > touchData.idx) newIdx--;
+        if (newIdx >= 0 && newIdx !== touchData.idx) {
+          performSwap(dayIdx, touchData.idx, newIdx);
+        }
+      }
+      touchData = null;
+      touchActive = false;
+      dragOverIdx = -1;
     });
   });
+}
+
+function performSwap(dayIdx, fromIdx, toIdx) {
+  var plan = getPlanSync();
+  var day = plan.days[dayIdx];
+  var moved = day.slots.splice(fromIdx, 1)[0];
+  day.slots.splice(toIdx, 0, moved);
+  currentDayDetailIndex = dayIdx;
+  savePlan(plan);
 }
 
 // ============================================================
