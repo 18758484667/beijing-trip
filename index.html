@@ -5,6 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>京城游记 - 全家北京之旅攻略助手</title>
   <!-- 高德地图 JS API 2.0 + 安全密钥 -->
+  <script>
+    // 抑制高德地图SDK内部通信错误
+    window.addEventListener('unhandledrejection', function(e) {
+      if (e.reason && e.reason.message && e.reason.message.indexOf('A listener indicated an asynchronous response') >= 0) {
+        e.preventDefault();
+      }
+    });
+  </script>
   <script type="text/javascript">
     window._AMapSecurityConfig = {
       securityJsCode: "a3c5e8f2b7d14c6a9e0f8d2b5c4a7e1f"
