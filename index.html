@@ -72,7 +72,6 @@
     body.view-mode .plan-list-actions { display: none !important; }
     body.view-mode .plan-btn-clear { display: none !important; }
     body.view-mode .shop-tag { pointer-events: none; opacity: 0.7; }
-    body.view-mode .plan-slot-detail { display: none !important; }
 
     #mapContainer { width: 100%; height: 55vh; min-height: 320px; background: #F0EAE0; border-radius: 0 0 16px 16px; overflow: hidden; }
     .food-map-container { width: 100%; height: 38vh; min-height: 240px; background: #F0EAE0; overflow: hidden; }
@@ -370,7 +369,7 @@
     .plan-date-bar { padding: 14px 16px; background: var(--card-bg); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
     .plan-date-item { flex: 1; display: flex; flex-direction: column; gap: 4px; }
     .plan-date-label { font-size: 12px; color: var(--text3); font-weight: 500; }
-    .plan-date-input { width: 100%; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-size: 15px; font-family: inherit; color: var(--text); background: #FBF8F3; outline: none; appearance: none; -webkit-appearance: none; transition: border-color 0.2s; }
+    .plan-date-input { width: 100%; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-size: 15px; font-family: inherit; color: var(--text); background: #FBF8F3; outline: none; -webkit-appearance: none; transition: border-color 0.2s; }
     .plan-date-input:focus { border-color: var(--red); background: var(--card-bg); }
     .plan-date-arrow { color: var(--text3); font-size: 18px; flex-shrink: 0; padding-top: 18px; }
     .plan-date-info { padding: 6px 16px 12px; font-size: 13px; color: var(--red); background: var(--card-bg); border-bottom: 1px solid var(--border); }
@@ -718,10 +717,6 @@
           <input type="text" class="input-field" id="customItemAddr" placeholder="请输入地址，如：东城区前门大街XX号" oninput="onCustomAddrInput()" />
           <div class="geo-status" id="geoStatus"></div>
         </div>
-        <div class="input-group" style="display:flex;gap:8px;">
-          <div style="flex:1;"><span class="input-label">经度（自动获取）</span><input type="text" class="input-field" id="customItemLng" placeholder="自动" readonly /></div>
-          <div style="flex:1;"><span class="input-label">纬度（自动获取）</span><input type="text" class="input-field" id="customItemLat" placeholder="自动" readonly /></div>
-        </div>
       </div>
       <!-- 交通专用字段 -->
       <div id="customTransportFields" style="display:none;">
@@ -740,8 +735,8 @@
           <input type="text" class="input-field" id="customTransportNo" placeholder="如：CA1838、G58" />
         </div>
         <div class="input-group" style="display:flex;gap:8px;">
-          <div style="flex:1;"><span class="input-label">出发时间</span><input type="time" class="input-field" id="customTransportDepTime" /></div>
-          <div style="flex:1;"><span class="input-label">到达时间</span><input type="time" class="input-field" id="customTransportArrTime" /></div>
+          <div style="flex:1;"><span class="input-label">出发时间</span><input type="text" class="input-field" id="customTransportDepTime" placeholder="如：07:20" /></div>
+          <div style="flex:1;"><span class="input-label">到达时间</span><input type="text" class="input-field" id="customTransportArrTime" placeholder="如：09:35" /></div>
         </div>
         <div class="input-group" style="display:flex;gap:8px;">
           <div style="flex:1;"><span class="input-label">出发地</span><input type="text" class="input-field" id="customTransportFrom" placeholder="如：宁波栎社" /></div>
@@ -763,6 +758,7 @@
           <span class="type-option" data-slot="noon"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:2px;"><circle cx="12" cy="12" r="5"/><path d="M12 1v2"/><path d="M12 21v2"/><path d="M4.22 4.22l1.42 1.42"/><path d="M18.36 18.36l1.42 1.42"/></svg> 中午</span>
           <span class="type-option" data-slot="afternoon"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:2px;"><path d="M17 18a5 5 0 0 0-10 0"/><line x1="12" y1="9" x2="12" y2="3"/><line x1="4.22" y1="10.22" x2="5.64" y2="11.64"/><line x1="1" y1="18" x2="3" y2="18"/><line x1="21" y1="18" x2="23" y2="18"/><line x1="18.36" y1="11.64" x2="19.78" y2="10.22"/></svg> 下午</span>
           <span class="type-option" data-slot="evening"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:2px;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg> 晚上</span>
+          <span class="type-option" data-slot="hotel"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:2px;"><path d="M3 21h18"/><path d="M3 7v14"/><path d="M21 7v14"/><path d="M6 11h4v4H6z"/><path d="M14 11h4v4h-4z"/><path d="M9 3h6v4H9z"/></svg> 住宿</span>
         </div>
       </div>
     </div>
@@ -812,6 +808,8 @@
           <span class="type-option" data-slot="noon"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:2px;"><circle cx="12" cy="12" r="5"/><path d="M12 1v2"/><path d="M12 21v2"/></svg> 中午</span>
           <span class="type-option" data-slot="afternoon"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:2px;"><path d="M17 18a5 5 0 0 0-10 0"/><line x1="12" y1="9" x2="12" y2="3"/></svg> 下午</span>
           <span class="type-option" data-slot="evening"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:2px;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg> 晚上</span>
+          <span class="type-option" data-slot="hotel"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:2px;"><path d="M3 21h18"/><path d="M3 7v14"/><path d="M21 7v14"/><path d="M6 11h4v4H6z"/><path d="M14 11h4v4h-4z"/><path d="M9 3h6v4H9z"/></svg> 住宿</span>
+          <span class="type-option" data-slot="transport"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:2px;"><path d="M22 12l-4-4H6l-4 4"/><path d="M2 12h20"/></svg> 交通</span>
         </div>
       </div>
     </div>
@@ -836,42 +834,41 @@
 
 <script>
 // ============================================================
-// Supabase 云端数据存储
-// 手机规划行程 → 数据实时写入 Supabase → 家人刷新即见
+// Supabase 客户端初始化
 // ============================================================
 var SUPABASE_URL = 'https://mjsylaoqkurfdvxtmgan.supabase.co';
 var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1qc3lsYW9xa3VyZmR2eHRtZ2FuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExMjc5MDAsImV4cCI6MjA5NjcwMzkwMH0.bzzf97ETW3Gz4GkcMonJG-zYUvmhJjVa7lFrwruk_VE';
 var supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-var useCloud = true; // 设为 false 可强制仅使用 localStorage
 
-// 通用读数据：从 Supabase 读取
+// 数据存储：优先使用 Supabase，降级到 localStorage
+var useSupabase = true; // 设为 false 可强制使用 localStorage
+var SUPABASE_TABLE = 'trip_data';
+
+// 通用的 Supabase 读数据函数
 async function loadFromCloud(key) {
-  if (!useCloud) return null;
+  if (!useSupabase) return null;
   try {
-    var { data, error } = await supabase.from('trip_data').select('data').eq('id', key).single();
+    var { data, error } = await supabase.from(SUPABASE_TABLE).select('data').eq('id', key).single();
     if (error || !data) return null;
     return data.data;
   } catch(e) {
-    console.warn('云端读取失败，降级到本地:', e.message);
+    console.warn('Supabase 读取失败，降级到本地存储:', e.message);
     return null;
   }
 }
 
-// 通用写数据：写入 Supabase
+// 通用的 Supabase 写数据函数
 async function saveToCloud(key, value) {
-  if (!useCloud) return false;
+  if (!useSupabase) return false;
   try {
-    var { error } = await supabase.from('trip_data').upsert({ id: key, data: value, updated_at: new Date().toISOString() });
+    var { error } = await supabase.from(SUPABASE_TABLE).upsert({ id: key, data: value, updated_at: new Date().toISOString() });
     if (error) throw error;
     return true;
   } catch(e) {
-    console.warn('云端写入失败，降级到本地:', e.message);
+    console.warn('Supabase 写入失败，降级到本地存储:', e.message);
     return false;
   }
 }
-
-// 清除云端缓存（用于切换页面时重新拉取最新数据）
-function clearCloudCache() { cloudCache = null; }
 
 // ============================================================
 // 数据层：从文档提取的全部景点、美食、住宿
@@ -2433,7 +2430,7 @@ function renderDayDetail(dayIdx) {
   var html = '';
   html += '<div class="plan-day-section">';
 
-  var slotLabels = { morning:'上午', noon:'中午', afternoon:'下午', evening:'晚上' };
+  var slotLabels = { morning:'上午', noon:'中午', afternoon:'下午', evening:'晚上', hotel:'住宿', transport:'交通' };
 
   html += '<div class="plan-day-body" id="planDayBody_' + dayIdx + '">';
 
@@ -2894,6 +2891,8 @@ function confirmPicker() {
 
 // ========== 自定义选择器（住宿/自定义） ==========
 var customPickerMode = 'hotel'; // 'hotel' | 'custom'
+var _customLat = null;
+var _customLng = null;
 var geoTimer = null;
 
 function showCustomPicker(mode) {
@@ -2910,10 +2909,10 @@ function showCustomPicker(mode) {
   document.getElementById('customPickerHeader').innerHTML = header;
 
   // 重置表单
+  _customLat = null;
+  _customLng = null;
   document.getElementById('customItemName').value = '';
   document.getElementById('customItemAddr').value = '';
-  document.getElementById('customItemLng').value = '';
-  document.getElementById('customItemLat').value = '';
   document.getElementById('customItemMemo').value = '';
   document.getElementById('geoStatus').innerHTML = '';
   // 重置交通字段
@@ -2941,9 +2940,9 @@ function showCustomPicker(mode) {
   var slotOpts = document.querySelectorAll('#customSlotSelect .type-option');
   slotOpts.forEach(function(opt) {
     opt.classList.remove('active');
-    if (mode === 'transport' && opt.dataset.slot === 'morning') opt.classList.add('active');
+    if (mode === 'hotel' && opt.dataset.slot === 'hotel') opt.classList.add('active');
+    else if (mode === 'transport' && opt.dataset.slot === 'morning') opt.classList.add('active');
     else if (mode === 'custom' && opt.dataset.slot === 'afternoon') opt.classList.add('active');
-    else if (mode !== 'transport' && mode !== 'custom' && opt.dataset.slot === 'morning') opt.classList.add('active');
   });
 
   // 绑定类型选择事件（含交通字段切换）
@@ -3025,10 +3024,7 @@ function geoCodeAddress(address) {
   statusEl.innerHTML = '<span class="geo-loading"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> 正在查找位置...</span>';
 
   if (typeof AMap === 'undefined' || !AMap.Geocoder) {
-    // 高德地图未加载，尝试使用简单方式
-    statusEl.innerHTML = '<span class="geo-error"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> 地图未加载，可手动输入坐标</span>';
-    document.getElementById('customItemLng').readOnly = false;
-    document.getElementById('customItemLat').readOnly = false;
+    statusEl.innerHTML = '<span class="geo-error"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> 地图未加载</span>';
     return;
   }
 
@@ -3036,15 +3032,11 @@ function geoCodeAddress(address) {
   geocoder.getLocation(address, function(status, result) {
     if (status === 'complete' && result.info === 'OK') {
       var geocode = result.geocodes[0];
-      var lng = geocode.location.lng.toFixed(6);
-      var lat = geocode.location.lat.toFixed(6);
-      document.getElementById('customItemLng').value = lng;
-      document.getElementById('customItemLat').value = lat;
+      _customLng = parseFloat(geocode.location.lng.toFixed(6));
+      _customLat = parseFloat(geocode.location.lat.toFixed(6));
       statusEl.innerHTML = '<span class="geo-success"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#FFF" stroke-width="2" style="vertical-align:middle;"><polyline points="20 6 9 17 4 12"/></svg> 已定位：' + geocode.formattedAddress + '</span>';
     } else {
-      statusEl.innerHTML = '<span class="geo-error"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> 未找到位置，请手动输入坐标</span>';
-      document.getElementById('customItemLng').readOnly = false;
-      document.getElementById('customItemLat').readOnly = false;
+      statusEl.innerHTML = '<span class="geo-error"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> 未找到位置</span>';
     }
   });
 }
@@ -3060,11 +3052,11 @@ function confirmCustomItem() {
 
   // 获取选中的时间段
   var activeSlot = document.querySelector('#customSlotSelect .type-option.active');
-  var slotType = activeSlot ? activeSlot.dataset.slot : (type === 'transport' ? 'morning' : 'afternoon');
+  var slotType = activeSlot ? activeSlot.dataset.slot : (type === 'hotel' ? 'hotel' : (type === 'transport' ? 'transport' : 'afternoon'));
 
   var memo = document.getElementById('customItemMemo').value.trim();
-  var lat = parseFloat(document.getElementById('customItemLat').value) || null;
-  var lng = parseFloat(document.getElementById('customItemLng').value) || null;
+  var lat = _customLat;
+  var lng = _customLng;
 
   // 交通类型：收集航班/火车信息生成 detail
   var detail = '';
@@ -4558,7 +4550,7 @@ async function initApp() {
   setTimeout(initMap, 300);
   // 延迟查询天气（避免阻塞页面加载）
   setTimeout(function() { fetchWeatherForPlan(); }, 1000);
-  console.log('京城游记已就绪 - 共' + DATA.spots.length + '个景点 | Supabase云端同步 | 手机规划 → 家人刷新即见');
+  console.log('京城游记 H5 页面加载完成 - 共' + DATA.spots.length + '个景点（数据来源：Supabase + 本地）');
 }
 
 initApp();
