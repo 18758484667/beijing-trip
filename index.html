@@ -347,6 +347,14 @@
     .toolbox-entry-title { display: block; font-size: 17px; font-weight: 700; color: var(--text); }
     .toolbox-entry-desc { display: block; font-size: 13px; color: var(--text3); margin-top: 2px; }
 
+    /* 更多菜单弹出 */
+    .more-menu { position: fixed; bottom: 68px; right: 12px; background: var(--card-bg); border-radius: var(--radius-md); box-shadow: 0 4px 20px rgba(45,42,38,0.18); z-index: 1100; display: none; min-width: 160px; border: 1px solid var(--border); overflow: hidden; }
+    .more-menu.show { display: block; }
+    .more-menu-item { display: flex; align-items: center; gap: 10px; padding: 14px 16px; cursor: pointer; font-size: 15px; color: var(--text); transition: background 0.15s; }
+    .more-menu-item:active { background: #F5F0E8; }
+    .more-menu-item:not(:last-child) { border-bottom: 1px solid #F5F0E8; }
+    .more-menu-icon { display: flex; align-items: center; justify-content: center; width: 20px; height: 20px; flex-shrink: 0; color: var(--text2); }
+
     .modal-mask { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(45,42,38,0.4); z-index: 1000; display: none; }
     .modal-mask.show { display: block; }
     .modal { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card-bg); border-radius: 20px 20px 0 0; z-index: 1001; padding: 20px; transform: translateY(100%); transition: transform 0.35s cubic-bezier(.4,0,.2,1); max-height: 85vh; overflow-y: auto; }
@@ -495,6 +503,12 @@
     .custom-picker-form .type-option.active { border-color: var(--red); background: var(--red-bg); color: var(--red); font-weight: 600; }
     .custom-picker-form .type-option:active { transform: scale(0.96); }
     .custom-picker-form .geo-status { font-size: 13px; margin-top: 3px; }
+    .custom-picker-form .geo-loading { color: var(--text3); }
+    .custom-picker-form .geo-success { color: #2E9E5A; }
+    .custom-picker-form .geo-error { color: var(--red); }
+    .btn-geo { display: inline-flex; align-items: center; gap: 4px; padding: 0 14px; border: 1.5px solid var(--red); border-radius: var(--radius-sm); font-size: 14px; font-weight: 500; color: var(--red); background: var(--red-bg); cursor: pointer; white-space: nowrap; transition: all 0.15s; }
+    .btn-geo:active { background: var(--red); color: #FFF; }
+    .btn-geo:disabled { opacity: 0.5; pointer-events: none; }
 
     .plan-empty { text-align: center; padding: 30px 16px; color: var(--text3); }
     .plan-empty-icon { font-size: 36px; display: block; margin-bottom: 8px; opacity: 0.4; color: var(--text3); }
@@ -745,9 +759,9 @@
         <input type="text" class="input-field" id="customItemName" placeholder="请输入项目名称" oninput="onCustomNameInput()" />
       </div>
       <!-- 时间字段 -->
-      <div class="input-group" style="display:flex;gap:8px;">
-        <div style="flex:1;"><span class="input-label">开始时间</span><input type="time" class="input-field" id="customItemStart" /></div>
-        <div style="flex:1;"><span class="input-label">结束时间</span><input type="time" class="input-field" id="customItemEnd" /></div>
+      <div class="input-group">
+        <span class="input-label">开始时间</span>
+        <input type="time" class="input-field" id="customItemStart" />
       </div>
       <div class="input-group">
         <span class="input-label">预估耗时（可选）</span>
@@ -756,8 +770,14 @@
       <!-- 非交通字段：地址+定位 -->
       <div id="customGeoFields">
         <div class="input-group">
-          <span class="input-label">地址（用于自动定位，可选）</span>
-          <input type="text" class="input-field" id="customItemAddr" placeholder="请输入地址，如：东城区前门大街XX号" oninput="onCustomAddrInput()" />
+          <span class="input-label">地址</span>
+          <div style="display:flex;gap:6px;">
+            <input type="text" class="input-field" id="customItemAddr" placeholder="输入地点名，如：故宫" oninput="onCustomAddrInput()" style="flex:1;" />
+            <button type="button" class="btn-geo" onclick="autoFetchAddress()" title="根据名称自动获取地址">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 2a8 8 0 0 0-8 8c0 5.4 8 12 8 12s8-6.6 8-12a8 8 0 0 0-8-8z"/></svg>
+              自动获取
+            </button>
+          </div>
           <div class="geo-status" id="geoStatus"></div>
         </div>
       </div>
@@ -865,9 +885,17 @@
     <div class="tab-item" data-page="page-food" onclick="switchTab('page-food',this)"><span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg></span><span>美食</span></div>
     <div class="tab-item" data-page="page-transport" onclick="switchTab('page-transport',this)"><span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="6" width="22" height="12" rx="2"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/><line x1="8" y1="6" x2="16" y2="6"/></svg></span><span>交通</span></div>
     <div class="tab-item" data-page="page-toolbox" id="tabToolbox" onclick="switchTab('page-toolbox',this)"><span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></span><span>工具箱</span></div>
-    <div class="tab-item-mode" id="modeToggle" onclick="toggleMode()">
-      <span class="mode-icon" id="modeIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
-      <span id="modeLabel">规划中</span>
+    <div class="tab-item-mode" id="modeToggle" onclick="toggleMoreMenu()">
+      <span class="mode-icon" id="modeIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg></span>
+      <span id="modeLabel">更多</span>
+    </div>
+  </div>
+
+  <!-- ===== 更多菜单 ===== -->
+  <div class="more-menu" id="moreMenu">
+    <div class="more-menu-item" id="moreMenuItem" onclick="toggleMode()">
+      <span class="more-menu-icon" id="moreMenuIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+      <span class="more-menu-text" id="moreMenuText">规划中模式</span>
     </div>
   </div>
 
@@ -1097,27 +1125,66 @@ var DATA = {
       tips:[{icon:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#E74C3C" stroke-width="2"><path d="M2 21c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2s2.5 2 5 2 2.5-2 5-2 2.5 2 2.5 2"/></svg>',text:'划船建议避开中午高峰期早上9点或下午4点'},{icon:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--red)" stroke-width="2"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6M9 11h6"/></svg>',text:'九龙壁是中国仅存三座之一'}],
       intro:'北海公园是中国现存最古老、最完整的皇家园林之一，始建于辽代，距今已有近千年历史。"让我们荡起双桨"这首脍炙人口的歌曲正是以北海为背景创作的。园内白塔矗立于琼华岛之巅，九龙壁是中国仅存的三座九龙壁之一，五龙亭伸入湖中，湖面碧波荡漾，划船泛舟是经典体验。', dining:'园内有小吃', rest:'湖边景色美适合歇脚', tags:['园林','划船','轻松'], area:'其他' },
 
-    { id:'qianmendajie', name:'前门大街/大栅栏', subtitle:'老字号一条街', price:'免费', duration:'3-4小时', time:'全天开放', closedDay:'无', address:'东城区前门大街', reservation:'无需预约', lat:39.8970, lng:116.3980, icon:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--red)" stroke-width="2"><path d="M8 2h8M4 7h16M7 7v10a3 3 0 0 0 3 3h4a3 3 0 0 0 3-3V7M12 20v2"/></svg>',
-      transport:'🚇 2号线前门站B口 / 7号线珠市口站，出站步行即到 | 🚕 打车到前门大街北口',
-      route:['前门箭楼 → 前门大街 → 鲜鱼口美食街 → 大栅栏 → 杨梅竹斜街 → 三里河公园'],
-      tips:[{icon:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#E74C3C" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>',text:'稻香村认准三禾标志别在景区一楼买'},{icon:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#E74C3C" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',text:'主街小吃贵又一般拐进胡同更有味道'}],
-      intro:'前门大街是北京最著名的商业街之一，北起正阳门箭楼，南至珠市口，全长约845米。明清时期这里是皇帝出城的必经之路，也是老北京最繁华的商业中心。如今的前门大街保留了大量老字号，如同仁堂、瑞蚨祥、内联升等。大栅栏更是老字号云集之地，鲜鱼口美食街汇聚了各种京味小吃，是逛街购物品尝美食的绝佳去处。', dining:'都一处烧麦、全聚德起源店、锦芳小吃', rest:'三里河公园像江南水乡适合休息', tags:['免费','逛街','美食','夜景'], area:'其他' },
+    { id:'qianmendajie', name:'前门大街/大栅栏', subtitle:'百年商街·逛吃一条龙·中轴线起点', price:'免费', duration:'半天', time:'全天开放', closedDay:'无', address:'东城区前门大街', reservation:'无需预约', lat:39.8970, lng:116.3980, icon:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--red)" stroke-width="2"><path d="M8 2h8M4 7h16M7 7v10a3 3 0 0 0 3 3h4a3 3 0 0 0 3-3V7M12 20v2"/></svg>',
+      transport:'🚇 2号线前门站I口出（正阳桥遗址） · B口/C口（前门大街） / 7号线珠市口站 | 🚕 打车到前门大街北口',
+      route:[
+        '前门站I口 → 正阳桥遗址考古方舱（免费，古代排水智慧）',
+        '→ 北京坊PageOne书店（3层落地窗拍正阳门机位）',
+        '→ 前门大街：红星二锅头博物馆、六必居博物馆、中国帽冠博物馆',
+        '→ 🍦 吴裕泰茉莉花茶冰淇淋（必尝）→ 吴裕泰对面三禾稻香村',
+        '→ 大栅栏主街：瑞蚨祥/内联升/同仁堂/纸上声音书店（全场3-5折）',
+        '→ 🎭 广德楼/三庆园听德云社相声',
+        '→ 门框胡同：门框卤煮/爆肚冯/北平食府',
+        '→ 鲜鱼口：锦芳小吃（驴打滚2-3元）',
+        '→ 杨梅竹斜街：Soloist Coffee、兔儿爷商店、乾坤空间'
+      ],
+      tips:[
+        {icon:'🦆',text:'烤鸭别去全聚德，去四季民福（前门有两家）'},
+        {icon:'🥘',text:'涮羊肉别去东来顺，去京晟铜锅涮肉'},
+        {icon:'🍦',text:'吴裕泰茉莉花茶冰淇淋必尝！别吃豆汁冰淇淋'},
+        {icon:'🥮',text:'稻香村认准"三禾"标志，别在景区一楼买'},
+        {icon:'🚃',text:'可坐"前门1号"铛铛车代步，50元/人'},
+        {icon:'📖',text:'纸上声音书店全场正版3-5折，真正买书的地方'}
+      ],
+      intro:'前门大街是北京中轴线上的百年商街，北起正阳门箭楼，南至珠市口。这里有逛有吃，大栅栏老字号一字排开（瑞蚨祥、内联升、同仁堂），门框胡同藏着最地道的卤煮炒肝爆肚，鲜鱼口锦芳小吃的驴打滚2-3元一份。前门站I口出就是正阳桥遗址考古方舱免费看。别忘了吴裕泰茉莉花茶冰淇淋，以及去对面三禾稻香村买伴手礼！',
+      dining:'四季民福烤鸭、河沿肉饼、北平食府、紫光园、门框卤煮、锦芳小吃', rest:'北京坊MUJI酒店4层露台、Soloist Coffee、三里河公园',
+      tags:['免费','逛街','美食','老字号','中轴线'], area:'前门-大栅栏' },
+
+    { id:'beijingfang', name:'北京坊', subtitle:'前门旁格调街区·拍中轴线绝佳机位', price:'免费', duration:'2-3小时', time:'10:00-22:00', closedDay:'无', address:'西城区廊房头条', reservation:'无需预约', lat:39.8985, lng:116.3960, icon:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--red)" stroke-width="2"><rect x="3" y="7" width="18" height="13" rx="1"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/><line x1="3" y1="12" x2="21" y2="12"/></svg>',
+      transport:'🚇 2号线前门站C口，步行3分钟 | 🚕 打车到北京坊东入口',
+      route:[
+        'PageOne书店（3层落地窗正对正阳门箭楼，免费拍大片）',
+        '→ MUJI Hotel 4层露台（俯瞰天安门方向，老人休息拍照）',
+        '→ W2栋B2层（可能有免费画展，常换常新）',
+        '→ 河沿肉饼（我最爱的肉饼店，现在天天排队）',
+        '→ 北京坊街区闲逛，折扣季MUJI值得逛'
+      ],
+      tips:[
+        {icon:'📸',text:'PageOne三层落地窗是最佳正阳门机位'},
+        {icon:'🏨',text:'MUJI Hotel 4层露台免费，可以拍到天安门方向'},
+        {icon:'🎨',text:'W2栋B2常有免费展览，值得一看'},
+        {icon:'🥟',text:'河沿肉饼强烈推荐，猪肉大葱绝了'}
+      ],
+      intro:'北京坊是前门大街西侧的高品质商业街区，以PageOne书店和MUJI Hotel为核心。PageOne三层落地窗正对正阳门箭楼，是拍北京中轴线的绝佳机位，免费且人少。MUJI Hotel 4层露台可以远眺天安门方向，很适合带老人休息拍照。河沿肉饼是从不排队吃到天天排队的神店。折扣季MUJI超大空间可买度很高。',
+      dining:'河沿肉饼、北平食府', rest:'PageOne书店、MUJI Hotel露台', tags:['免费','拍照','文艺','书店'], area:'前门-大栅栏' },
   ],
 
   // ---- 美食数据 ----
   food: {
-    warning:'南锣鼓巷、王府井小吃街主打游客，价格贵味道一般。推荐去牛街吃清真美食，或者前门大街、护国寺小吃。',
+    warning:'⚠️ 避雷：烤鸭别去全聚德→去四季民福；涮羊肉别去东来顺→去京晟；别吃豆汁冰淇淋→吴裕泰茶味更好；别买路边驴打滚→去锦芳只要2-3元。前门大栅栏、门框胡同、牛街才是本地人爱去的美食街。',
     dishes: [
       { id:'kaoya', icon:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="var(--red)" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/></svg>', name:'北京烤鸭', desc:'来北京必吃！皮脆肉嫩，配薄饼葱丝酱料', photos:[
         'images/Beijing_roast_duck_Peking_duck_2026-06-10T08-25-02.jpg',
         'images/Beijing_roast_duck_Peking_duck_2026-06-10T08-25-02.jpg',
         'images/Beijing_roast_duck_Peking_duck_2026-06-10T08-25-02.jpg'
       ],photoCaptions:{0:'片皮烤鸭',1:'卷饼蘸酱',2:'整只上桌'}, shops:[
-        {name:'四季民福烤鸭店', addr:'南池子大街11号（故宫东门旁）', price:'约150元/人', time:'10:30-22:00', phone:'010-65267331', website:'https://www.sijiminfu.com', recommend:'烤鸭、鸭架汤、芥末鸭掌', lat:39.9090, lng:116.4150, photos:['images/Beijing_Peking_duck_restaurant_2026-06-16T05-54-50.png']},
+        {name:'四季民福烤鸭店（故宫店）', addr:'南池子大街11号（故宫东门旁）', price:'约150元/人', time:'10:30-22:00', phone:'010-65267331', website:'https://www.sijiminfu.com', recommend:'烤鸭、鸭架汤、芥末鸭掌', lat:39.9090, lng:116.4150, photos:['images/Beijing_Peking_duck_restaurant_2026-06-16T05-54-50.png']},
+        {name:'四季民福烤鸭店（前门店）', addr:'前门大街附近（有两家分店）', price:'约150元/人', time:'10:30-22:00', recommend:'烤鸭、鸭架汤、芥末鸭掌', lat:39.8970, lng:116.4000, photos:['images/Beijing_Peking_duck_restaurant_2026-06-16T05-54-50.png']},
         {name:'全聚德（起源店）', addr:'前门大街32号', price:'约200元/人', time:'11:00-14:00 / 17:00-21:00', phone:'010-65112418', recommend:'挂炉烤鸭、火燎鸭心、芥末鸭掌', lat:39.8970, lng:116.4000, photos:['images/Beijing_Peking_duck_restaurant_2026-06-16T05-54-50.png']},
         {name:'大董烤鸭', addr:'南新仓大厦1-2层', price:'约300元/人', time:'11:00-22:00', phone:'010-65824003', recommend:'酥不腻烤鸭、董氏烧海参', lat:39.9200, lng:116.4500, photos:['images/Beijing_Peking_duck_restaurant_2026-06-16T05-54-50.png']},
         {name:'利群烤鸭', addr:'北翔凤胡同11号', price:'约120元/人', time:'10:00-21:00', phone:'010-65135553', recommend:'果木烤鸭、盐水鸭肝', lat:39.9050, lng:116.4100, photos:['images/Beijing_Peking_duck_restaurant_2026-06-16T05-54-50.png']},
-        {name:'大鸭梨烤鸭', addr:'朝阳区慈云寺北里1号楼', price:'约80元/人', time:'10:30-22:00', phone:'010-85981718', recommend:'烤鸭、宫保鸡丁、酸菜鱼', lat:39.9200, lng:116.4600, photos:['images/Beijing_Peking_duck_restaurant_2026-06-16T05-54-50.png']}
+        {name:'大鸭梨烤鸭', addr:'朝阳区慈云寺北里1号楼', price:'约80元/人', time:'10:30-22:00', phone:'010-85981718', recommend:'烤鸭、宫保鸡丁、酸菜鱼', lat:39.9200, lng:116.4600, photos:['images/Beijing_Peking_duck_restaurant_2026-06-16T05-54-50.png']},
+        {name:'紫光园（前门店）', addr:'前门大街附近', price:'约80元/人', time:'10:30-22:00', recommend:'烤鸭、奶皮子酸奶、北京家常菜', lat:39.8970, lng:116.3990, photos:['images/Beijing_Peking_duck_restaurant_2026-06-16T05-54-50.png']}
       ]},
       { id:'shuanrou', icon:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="var(--red)" stroke-width="2"><circle cx="12" cy="10" r="7"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>', name:'铜锅涮肉', desc:'老北京铜锅清汤，手切鲜羊肉蘸麻酱', photos:[
         'images/Beijing_copper_pot_hotpot_mutt_2026-06-10T08-26-39.jpg',
@@ -1126,7 +1193,8 @@ var DATA = {
         {name:'南门涮肉', addr:'安定门东大街56号', price:'约100元/人', time:'11:00-22:00', phone:'010-64017030', recommend:'手切鲜羊肉、麻酱烧饼、百叶', lat:39.8820, lng:116.4080, photos:['images/Beijing_traditional_copper_pot_2026-06-16T05-54-51.png']},
         {name:'聚宝源（牛街）', addr:'牛街西里商业1号楼', price:'约110元/人', time:'09:00-22:00', phone:'010-63520556', recommend:'手切鲜羊肉、烧饼、羊尾油', lat:39.8930, lng:116.3720, photos:['images/Beijing_traditional_copper_pot_2026-06-16T05-54-51.png']},
         {name:'满恒记', addr:'平安里西大街甲14号', price:'约90元/人', time:'11:00-22:00', phone:'010-66517572', recommend:'手切鲜羊肉、糖饼、麻酱', lat:39.9300, lng:116.3600, photos:['images/Beijing_traditional_copper_pot_2026-06-16T05-54-51.png']},
-        {name:'东来顺', addr:'东安市场北门', price:'约130元/人', time:'11:00-14:00 / 17:00-21:00', phone:'010-65241036', recommend:'手切鲜羊肉、它似蜜、奶油炸糕', lat:39.9100, lng:116.4200, photos:['images/Beijing_traditional_copper_pot_2026-06-16T05-54-51.png']}
+        {name:'东来顺', addr:'东安市场北门', price:'约130元/人', time:'11:00-14:00 / 17:00-21:00', phone:'010-65241036', recommend:'手切鲜羊肉、它似蜜、奶油炸糕', lat:39.9100, lng:116.4200, photos:['images/Beijing_traditional_copper_pot_2026-06-16T05-54-51.png']},
+        {name:'京晟铜锅涮肉', addr:'前门附近', price:'约90元/人', time:'11:00-22:00', recommend:'手切鲜羊肉、糖蒜、烧饼', lat:39.8970, lng:116.4010, photos:['images/Beijing_traditional_copper_pot_2026-06-16T05-54-51.png']}
       ]},
       { id:'kaorou', icon:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="var(--red)" stroke-width="2"><path d="M17 18a5 5 0 0 0-10 0"/><line x1="12" y1="9" x2="12" y2="3"/><line x1="4.22" y1="10.22" x2="5.64" y2="11.64"/><line x1="1" y1="18" x2="3" y2="18"/><line x1="21" y1="18" x2="23" y2="18"/><line x1="18.36" y1="11.64" x2="19.78" y2="10.22"/></svg>', name:'炙子烤肉', desc:'铁板烤肉，老北京冬季最爱', photos:[
         'images/Beijing_copper_pot_hotpot_mutt_2026-06-10T08-26-39.jpg',
@@ -1166,14 +1234,15 @@ var DATA = {
       ],photoCaptions:{0:'老北京炸酱面',1:'菜码丰富'}, shops:[
         {name:'海碗居', addr:'甘家口大厦B1层', price:'约45元/人', time:'11:00-21:30', phone:'010-88370973', recommend:'炸酱面、炸灌肠、麻豆腐', lat:39.9400, lng:116.3700, photos:['images/Beijing_Zhajiangmian_noodle_re_2026-06-16T05-54-55.png']},
         {name:'方砖厂69号炸酱面', addr:'方砖厂胡同69号', price:'约30元/人', time:'10:30-20:00', phone:'010-64054168', recommend:'老北京炸酱面、炸酱面套餐', lat:39.9350, lng:116.3950, photos:['images/Beijing_Zhajiangmian_noodle_re_2026-06-16T05-54-55.png']},
-        {name:'河沿肉饼', addr:'东城区东安门大街43号', price:'约35元/人', time:'11:00-21:00', phone:'010-65241955', recommend:'猪肉大葱肉饼、牛肉饼、疙瘩汤', lat:39.9120, lng:116.4080}
+        {name:'河沿肉饼（北京坊）', addr:'北京坊街区内', price:'约35元/人', time:'11:00-21:00', phone:'010-65241955', recommend:'猪肉大葱肉饼、牛肉饼、疙瘩汤', lat:39.8990, lng:116.3960}
       ]},
       { id:'luzhu', icon:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="var(--red)" stroke-width="2"><circle cx="12" cy="10" r="7"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>', name:'卤煮火烧', desc:'经典北京美食火烧炖猪肠猪肺', photos:[
         'images/Beijing_Luzhu_huoshao__traditi_2026-06-10T08-27-35.jpg',
         'images/Beijing_Luzhu_huoshao__traditi_2026-06-10T08-27-35.jpg'
       ],photoCaptions:{0:'卤煮火烧',1:'老店招牌'}, shops:[
         {name:'门框胡同百年卤煮', addr:'门框胡同19号（前门附近）', price:'约35元/人', time:'11:00-22:00', phone:'010-63033116', recommend:'卤煮火烧、炸灌肠、麻豆腐', lat:39.9350, lng:116.4000},
-        {name:'陈记卤煮小肠', addr:'取灯胡同3号', price:'约30元/人', time:'10:00-21:00', phone:'010-67010859', recommend:'卤煮火烧、炸酱面', lat:39.9300, lng:116.3950}
+        {name:'陈记卤煮小肠', addr:'取灯胡同3号', price:'约30元/人', time:'10:00-21:00', phone:'010-67010859', recommend:'卤煮火烧、炸酱面', lat:39.9300, lng:116.3950},
+        {name:'北平食府（门框胡同）', addr:'门框胡同内', price:'约70元/人', time:'11:00-22:00', recommend:'私房菜、京味家常菜、卤煮', lat:39.8970, lng:116.4000}
       ]},
       { id:'chaogan', icon:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="var(--red)" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v7M12 15v7M4.93 4.93l4.24 4.24M14.83 14.83l4.24 4.24M2 12h7M15 12h7"/></svg>', name:'炒肝', desc:'猪大肠猪肝制成传统小吃', photos:[
         'images/Beijing_Chaogan__traditional_C_2026-06-10T08-27-36.jpg',
@@ -1181,6 +1250,8 @@ var DATA = {
       ],photoCaptions:{0:'老北京炒肝',1:'姚记招牌'}, shops:[
         {name:'天兴居', addr:'鲜鱼口街95号', price:'约25元/人', time:'06:30-20:30', phone:'010-67019291', recommend:'炒肝、包子、炸酱面', lat:39.8950, lng:116.4000},
         {name:'姚记炒肝', addr:'鼓楼东大街311号', price:'约30元/人', time:'06:00-21:00', phone:'010-84031525', recommend:'炒肝、卤煮、炸酱面', lat:39.9450, lng:116.3950},
+        {name:'同义轩炒肝（门框胡同）', addr:'门框胡同内', price:'约25元/人', time:'06:30-14:00', recommend:'炒肝、包子', lat:39.8970, lng:116.4010},
+        {name:'爆肚冯（门框胡同）', addr:'门框胡同内', price:'约40元/人', time:'11:00-21:00', recommend:'爆肚、肚仁、麻酱烧饼', lat:39.8970, lng:116.4010},
         {name:'尹三豆汁', addr:'东城区天坛北门光明楼中街1号', price:'约10元/人', time:'06:00-12:00', phone:'010-67020904', recommend:'豆汁、焦圈、咸菜', lat:39.8830, lng:116.4100}
       ]}
     ],
@@ -1192,7 +1263,7 @@ var DATA = {
         {name:'全聚德起源店', addr:'前门大街32号', price:'约200元/人', time:'11:00-14:00 / 17:00-21:00', phone:'010-65112418', recommend:'挂炉烤鸭、火燎鸭心', lat:39.8970, lng:116.4000},
         {name:'都一处烧麦', addr:'前门大街38号', price:'约60元/人', time:'10:00-21:00', phone:'010-67021559', recommend:'三鲜烧麦、猪肉大葱烧麦', lat:39.8970, lng:116.4000},
         {name:'一条龙涮肉', addr:'前门大街27号', price:'约100元/人', time:'11:00-14:00 / 17:00-21:30', phone:'010-63037446', recommend:'手切鲜羊肉、麻酱烧饼', lat:39.8960, lng:116.3990},
-        {name:'锦芳小吃', addr:'鲜鱼口街81号', price:'约30元/人', time:'06:30-20:00', phone:'010-67021559', recommend:'奶油炸糕、驴打滚、面茶', lat:39.8950, lng:116.4010}
+        {name:'锦芳小吃', addr:'鲜鱼口街81号', price:'约30元/人', time:'06:30-20:00', phone:'010-67021559', recommend:'驴打滚(2-3元)、艾窝窝、奶油炸糕', lat:39.8950, lng:116.4010}
       ]},
       { id:'niujie', name:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--red)" stroke-width="2" style="vertical-align:middle;margin-right:4px;"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg>牛街', desc:'北京最著名的清真美食街，回族聚居区，有上千年历史。白记年糕、洪记包子、聚宝源涮肉都在这里，排队也要来！', addr:'北京市西城区牛街', photos:[
         'images/Beijing_Niujie_Muslim_food_str_2026-06-10T08-27-04.jpg',
@@ -1234,7 +1305,7 @@ var DATA = {
         {name:'铃木食堂', addr:'杨梅竹斜街10-14号', price:'约80元/人', time:'11:30-15:00 / 17:30-22:00', phone:'010-63135409', recommend:'日式牛肉饭、杏仁豆腐、日式炸鸡', lat:39.8950, lng:116.3970},
         {name:'模范书局', addr:'杨梅竹斜街31号', price:'约40元/人', time:'10:00-19:00', phone:'010-63033321', recommend:'咖啡、看书、民国建筑拍照', lat:39.8950, lng:116.3980},
         {name:'壹勺子糖', addr:'杨梅竹斜街55号', price:'约50元/人', time:'12:00-21:00', phone:'010-83105690', recommend:'手作甜品、法式可丽饼、下午茶', lat:39.8940, lng:116.3980},
-        {name:'锦芳小吃', addr:'鲜鱼口街81号', price:'约30元/人', time:'06:30-20:00', phone:'010-67021559', recommend:'奶油炸糕、驴打滚、面茶', lat:39.8950, lng:116.4010}
+        {name:'锦芳小吃', addr:'鲜鱼口街81号', price:'约30元/人', time:'06:30-20:00', phone:'010-67021559', recommend:'驴打滚(2-3元)、艾窝窝、奶油炸糕', lat:39.8950, lng:116.4010}
       ]},
       { id:'shichahai', name:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--red)" stroke-width="2" style="vertical-align:middle;margin-right:4px;"><path d="M2 12h20M12 2v20"/><path d="M5 5l14 14M19 5L5 19"/></svg>什刹海 · 后海', desc:'坐落在老北京核心区，银锭桥连接前海后海，周边胡同围绕。有百年老字号和景观餐厅，可以边吃饭边看湖景，吃完还能划船遛胡同。', addr:'北京市西城区什刹海/后海沿岸', photos:[
         'images/Beijing_Shichahai_Houhai_lake__2026-06-16T05-36-56.png'
@@ -1427,14 +1498,14 @@ var DATA = {
 // ============================================================
 // 模式切换
 // ============================================================
-var currentMode = 'plan'; // 'plan' | 'view'
+var currentMode = 'view'; // 'plan' | 'view'
 
 async function getMode() {
   try {
     var cloud = await loadFromCloud('mode');
-    if (cloud) return cloud.mode || 'plan';
+    if (cloud) return cloud.mode || 'view';
   } catch(e) {}
-  try { return localStorage.getItem('beijing_trip_mode') || 'plan'; } catch(e) { return 'plan'; }
+  try { return localStorage.getItem('beijing_trip_mode') || 'view'; } catch(e) { return 'view'; }
 }
 
 async function setMode(mode) {
@@ -1445,33 +1516,27 @@ async function setMode(mode) {
 }
 
 function applyMode(mode) {
-  var icon = document.getElementById('modeIcon');
-  var label = document.getElementById('modeLabel');
-  var toggle = document.getElementById('modeToggle');
+  var menuIcon = document.getElementById('moreMenuIcon');
+  var menuText = document.getElementById('moreMenuText');
   if (mode === 'view') {
     document.body.classList.add('view-mode');
-    // 查看模式下隐藏日期选择器
     var dateBar = document.getElementById('planDateBar');
     var dateInfo = document.getElementById('planDateInfo');
     if (dateBar) dateBar.style.display = 'none';
     if (dateInfo) dateInfo.style.display = 'none';
-    icon.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>';
-    label.textContent = '仅查看';
-    toggle.classList.add('viewing');
+    if (menuIcon) menuIcon.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
+    if (menuText) menuText.textContent = '规划中模式';
     document.getElementById('tabPlanLabel').textContent = '行程';
   } else {
     document.body.classList.remove('view-mode');
-    // 规划模式下显示日期选择器
     var dateBar = document.getElementById('planDateBar');
     var dateInfo = document.getElementById('planDateInfo');
     if (dateBar) dateBar.style.display = '';
     if (dateInfo) dateInfo.style.display = '';
-    icon.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>';
-    label.textContent = '规划中';
-    toggle.classList.remove('viewing');
+    if (menuIcon) menuIcon.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>';
+    if (menuText) menuText.textContent = '仅查看模式';
     document.getElementById('tabPlanLabel').textContent = '规划';
   }
-  // 如果当前在规划页，重新渲染以反映模式变化
   var planPage = document.getElementById('page-plan');
   if (planPage.classList.contains('active')) {
     renderPlanList();
@@ -1486,7 +1551,25 @@ function toggleMode() {
   var newMode = currentMode === 'plan' ? 'view' : 'plan';
   setMode(newMode);
   showToast(newMode === 'view' ? '已切换为查看模式，家人只能查看行程' : '已切换为规划模式，可以编辑行程');
+  closeMoreMenu();
 }
+
+function toggleMoreMenu() {
+  var menu = document.getElementById('moreMenu');
+  menu.classList.toggle('show');
+}
+
+function closeMoreMenu() {
+  document.getElementById('moreMenu').classList.remove('show');
+}
+
+document.addEventListener('click', function(e) {
+  var menu = document.getElementById('moreMenu');
+  var toggle = document.getElementById('modeToggle');
+  if (menu.classList.contains('show') && !menu.contains(e.target) && !toggle.contains(e.target)) {
+    menu.classList.remove('show');
+  }
+});
 
 // ============================================================
 // Tab切换
@@ -3004,7 +3087,6 @@ function showCustomPicker(mode) {
   document.getElementById('customItemName').value = '';
   document.getElementById('customItemAddr').value = '';
   document.getElementById('customItemStart').value = '';
-  document.getElementById('customItemEnd').value = '';
   document.getElementById('customItemDuration').value = '';
   document.getElementById('customItemMemo').value = '';
   document.getElementById('geoStatus').innerHTML = '';
@@ -3134,6 +3216,31 @@ function geoCodeAddress(address) {
   });
 }
 
+function autoFetchAddress() {
+  var name = document.getElementById('customItemName').value.trim() || '';
+  var addr = document.getElementById('customItemAddr').value.trim() || '';
+  var query = addr || name;
+  if (!query) { showToast('请先输入地点名称'); return; }
+  var statusEl = document.getElementById('geoStatus');
+  statusEl.innerHTML = '<span style="color:var(--text3);font-size:13px;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> 正在获取地址...</span>';
+  if (typeof AMap === 'undefined' || !AMap.Geocoder) {
+    statusEl.innerHTML = '<span style="color:var(--red);font-size:13px;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> 地图未加载</span>';
+    return;
+  }
+  var geocoder = new AMap.Geocoder({ city: '北京' });
+  geocoder.getLocation(query + ' 北京', function(status, result) {
+    if (status === 'complete' && result.info === 'OK') {
+      var geocode = result.geocodes[0];
+      _customLng = parseFloat(geocode.location.lng.toFixed(6));
+      _customLat = parseFloat(geocode.location.lat.toFixed(6));
+      document.getElementById('customItemAddr').value = geocode.formattedAddress;
+      statusEl.innerHTML = '<span style="color:#2E9E5A;font-size:13px;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;"><polyline points="20 6 9 17 4 12"/></svg> 已获取：' + geocode.formattedAddress + '</span>';
+    } else {
+      statusEl.innerHTML = '<span style="color:var(--red);font-size:13px;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> 未找到位置</span>';
+    }
+  });
+}
+
 function confirmCustomItem() {
   if (currentMode === 'view') { showToast('当前为查看模式，无法编辑行程'); return; }
   var name = document.getElementById('customItemName').value.trim();
@@ -3149,7 +3256,6 @@ function confirmCustomItem() {
 
   var memo = document.getElementById('customItemMemo').value.trim();
   var startTime = document.getElementById('customItemStart').value || '';
-  var endTime = document.getElementById('customItemEnd').value || '';
   var duration = document.getElementById('customItemDuration').value.trim();
   var lat = _customLat;
   var lng = _customLng;
@@ -3194,7 +3300,6 @@ function confirmCustomItem() {
     lng: lng,
     custom: true,
     startTime: startTime,
-    endTime: endTime,
     duration: duration
   });
 
