@@ -1588,6 +1588,11 @@ function switchTab(pageId, el) {
   document.getElementById('detailPage').classList.remove('show');
   document.getElementById('dayDetailPage').classList.remove('show');
   document.getElementById('toolSubPage').classList.remove('show');
+  // 关闭所有弹窗/模态层，防止漏到其他页面
+  closePicker();
+  closeDaySlotPicker();
+  closeCustomPicker();
+  closeSlotEdit();
   document.getElementById(pageId).classList.add('active');
   el.classList.add('active');
   if (pageId === 'page-spots') { setTimeout(initMap, 100); }
