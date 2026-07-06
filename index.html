@@ -3831,7 +3831,11 @@ function attachDragListeners(dayIdx) {
   var body = document.getElementById('planDayBody_' + dayIdx);
   if (!body) return;
 
-  function getSlots() { return body.querySelectorAll('.timeline-item'); }
+  function getSlots() {
+    if (!body || !body.isConnected) return [];
+    return body.querySelectorAll('.timeline-item');
+  }
+
 
   // 桌面端拖拽
   var slots = getSlots();
