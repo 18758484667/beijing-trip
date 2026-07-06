@@ -1261,6 +1261,14 @@ var DATA = {
       { id:'laobeijinggaodian', icon:'🧁', name:'京八件/老北京糕点', desc:'稻香村京八件（杏仁酥、自来红）、义利老北京奶油蛋糕、传统中式糕点', photos:[], shops:[
         {name:'稻香村（三禾）前门店', addr:'前门大街59号（吴裕泰对面）', price:'约50元/盒', time:'08:30-21:00', recommend:'京八件礼盒、牛舌饼、枣花酥', lat:39.8970, lng:116.3990},
         {name:'百年义利', addr:'北京多家连锁', price:'约20-50元', time:'08:00-21:00', recommend:'老北京奶油蛋糕、果子面包、威化饼干', lat:39.9200, lng:116.4000}
+      ]},
+      { id:'zaocan', icon:'🥟', name:'早餐/早点', desc:'酒店周边步行可达的早餐店，炒肝包子豆腐脑豆浆油饼，老北京的一天从一顿地道早点开始☀️', photos:[], shops:[
+        {name:'天兴居（鲜鱼口）', addr:'鲜鱼口街95号·步行约8分钟', price:'约25元/人', time:'06:30-20:30', recommend:'炒肝+包子（绝配）', lat:39.8950, lng:116.4000},
+        {name:'锦芳小吃（鲜鱼口）', addr:'鲜鱼口街81号·步行约8分钟', price:'约15元/人', time:'06:30-20:00', recommend:'豆汁焦圈、面茶、驴打滚', lat:39.8950, lng:116.4010},
+        {name:'护国寺小吃（崇文门店）', addr:'崇文门外大街·步行约5分钟', price:'约20元/人', time:'06:00-21:00', recommend:'豆腐脑、糖油饼、豌豆黄、奶油炸糕', lat:39.8980, lng:116.4180},
+        {name:'庆丰包子铺（崇文门店）', addr:'崇文门外大街·步行约6分钟', price:'约20元/人', time:'06:00-21:00', recommend:'猪肉大葱包子、炒肝、小米粥', lat:39.8985, lng:116.4170},
+        {name:'紫光园（前门店）', addr:'前门大街附近·步行约10分钟', price:'约30元/人', time:'06:30-10:00（早餐）', recommend:'牛肉包子、豆腐脑、炸糕', lat:39.8970, lng:116.3990},
+        {name:'尹三豆汁（天坛北门）', addr:'东城区天坛北门·步行约12分钟', price:'约10元/人', time:'06:00-12:00', recommend:'豆汁+焦圈+咸菜（老北京经典）', lat:39.8830, lng:116.4100}
       ]}
     ],
     streets: [
@@ -1368,6 +1376,7 @@ var DATA = {
 
   // ---- 住宿数据 ----
   hotels: [
+    { id:'hotel_tongpai', name:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#E74C3C" stroke-width="2"><path d="M3 21h18M3 7v14M21 7v14M6 11h4v4H6zM14 11h4v4h-4zM9 3h6v4H9z"/></svg> 新世界同派酒店', desc:'崇文门祈年大街8号·你的住宿点🏠 步行到前门10分钟·地铁2/5号线崇文门站', icon:'', recScore:5, area:'崇文门', lat:39.896, lng:116.414, examples:[] },
     { id:'hotel_1x', name:'1号线沿线（西单/王府井）', desc:'逛故宫天安门国博最方便，交通四通八达', area:'市中心', icon:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#E74C3C" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><line x1="4" y1="12" x2="20" y2="12"/></svg>', recScore:5,
       examples:['王府井希尔顿','西单大悦城酒店','东方君悦'] },
     { id:'hotel_4x', name:'4号线沿线（西单/西四）', desc:'去颐和园圆明园北大清华更近', area:'海淀方向', icon:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#E74C3C" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><line x1="4" y1="12" x2="20" y2="12"/></svg>', recScore:4,
