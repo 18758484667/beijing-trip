@@ -94,9 +94,11 @@
     .map-fallback-title { font-size: 16px; font-weight: 700; color: #8a6d4a; }
     .map-fallback-desc { font-size: 13px; color: #a09890; margin-top: 6px; line-height: 1.7; }
     .map-fallback-btn { margin-top: 16px; background: var(--red); color: #fff; border: none; border-radius: 20px; padding: 9px 28px; font-size: 14px; font-weight: 600; cursor: pointer; }
-    /* 美化底部景点面板滚动条（细线、不抢眼） */
-    .panel-list::-webkit-scrollbar { width: 5px; }
-    .panel-list::-webkit-scrollbar-thumb { background: rgba(180,160,130,0.35); border-radius: 3px; }
+    /* 美化底部景点面板滚动条：暖色调协调，兼容 webkit + Firefox */
+    .panel-list { scrollbar-width: thin; scrollbar-color: rgba(192,108,90,0.5) transparent; }
+    .panel-list::-webkit-scrollbar { width: 6px; height: 6px; }
+    .panel-list::-webkit-scrollbar-thumb { background: rgba(192,108,90,0.5); border-radius: 3px; }
+    .panel-list::-webkit-scrollbar-thumb:hover { background: rgba(192,108,90,0.75); }
     .panel-list::-webkit-scrollbar-track { background: transparent; }
 
     .spot-panel { position: fixed; bottom: 56px; left: 0; right: 0; background: var(--card-bg); border-radius: 20px 20px 0 0; z-index: 100; max-height: 45vh; display: flex; flex-direction: column; transition: transform 0.35s cubic-bezier(.4,0,.2,1); box-shadow: 0 -4px 24px rgba(180,160,130,0.12); }
@@ -154,6 +156,10 @@
     .hero-name { font-size: 28px; font-weight: 700; color: #FFF; display: block; line-height: 1.2; text-shadow: 0 1px 4px rgba(0,0,0,0.2); }
     .hero-subtitle { font-size: 15px; color: rgba(255,255,255,0.85); margin-top: 6px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
     .hero-tag { font-size: 12px; color: #FFF; background: rgba(255,255,255,0.2); padding: 3px 10px; border-radius: 12px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.15); }
+    /* 美食/街区缩略图加载失败兜底（统一暖色主题，不再用菜品 SVG 兜底） */
+    .food-thumb-fallback { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #FFF2EF 0%, #FFF9EC 100%); font-size: 34px; line-height: 1; }
+    /* 详情页头部图片加载/缺失时的兜底（红金主题） */
+    .hero-fallback { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #D4403A, #D4A54A); color: #FFF; font-size: 64px; }
     /* 浮动加入按钮 */
     .hero-add-btn { position: absolute; bottom: 12px; right: 16px; width: 52px; height: 52px; border-radius: 50%; background: linear-gradient(135deg, var(--red), var(--red-light)); z-index: 3; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 18px rgba(212,64,58,0.40); transition: transform 0.15s; }
     .hero-add-btn:active { transform: scale(0.9); }
@@ -1189,12 +1195,30 @@ var DATA = {
         'images/Beijing_roast_duck_Peking_duck_2026-06-10T08-25-02.jpg',
         'images/Beijing_roast_duck_Peking_duck_2026-06-10T08-25-02.jpg'
       ],photoCaptions:{0:'片皮烤鸭',1:'卷饼蘸酱',2:'整只上桌'}, shops:[
-        {name:'四季民福烤鸭店（故宫店）', addr:'南池子大街11号（故宫东门旁）', price:'约150元/人', time:'10:30-22:00', phone:'010-65267331', website:'https://www.sijiminfu.com', recommend:'烤鸭、鸭架汤、芥末鸭掌', lat:39.9090, lng:116.4150, photos:['images/Beijing_Peking_duck_restaurant_2026-06-16T05-54-50.png']},
-        {name:'四季民福烤鸭店（前门店）', addr:'前门大街附近（有两家分店）', price:'约150元/人', time:'10:30-22:00', recommend:'烤鸭、鸭架汤、芥末鸭掌', lat:39.8970, lng:116.4000, photos:['images/Beijing_Peking_duck_restaurant_2026-06-16T05-54-50.png']},
-        {name:'全聚德（起源店）', addr:'前门大街32号', price:'约200元/人', time:'11:00-14:00 / 17:00-21:00', phone:'010-65112418', recommend:'挂炉烤鸭、火燎鸭心、芥末鸭掌', lat:39.8970, lng:116.4000, photos:['images/Beijing_Peking_duck_restaurant_2026-06-16T05-54-50.png']},
-        {name:'大董烤鸭', addr:'南新仓大厦1-2层', price:'约300元/人', time:'11:00-22:00', phone:'010-65824003', recommend:'酥不腻烤鸭、董氏烧海参', lat:39.9200, lng:116.4500, photos:['images/Beijing_Peking_duck_restaurant_2026-06-16T05-54-50.png']},
-        {name:'利群烤鸭', addr:'北翔凤胡同11号', price:'约120元/人', time:'10:00-21:00', phone:'010-65135553', recommend:'果木烤鸭、盐水鸭肝', lat:39.9050, lng:116.4100, photos:['images/Beijing_Peking_duck_restaurant_2026-06-16T05-54-50.png']},
-        {name:'大鸭梨烤鸭', addr:'朝阳区慈云寺北里1号楼', price:'约80元/人', time:'10:30-22:00', phone:'010-85981718', recommend:'烤鸭、宫保鸡丁、酸菜鱼', lat:39.9200, lng:116.4600, photos:['images/Beijing_Peking_duck_restaurant_2026-06-16T05-54-50.png']},
+        // 四季民福（三环内门店）
+        {name:'四季民福烤鸭店（故宫店）', addr:'东城区南池子大街11号', price:'约150元/人', time:'10:30-22:00', phone:'010-65267331', recommend:'烤鸭、鸭架汤、芥末鸭掌', lat:39.9145, lng:116.4029, photos:['images/Beijing_Peking_duck_restaurant_2026-06-16T05-54-50.png']},
+        {name:'四季民福烤鸭店（前门店）', addr:'西城区前门大栅栏街18号', price:'约150元/人', time:'10:30-22:00', recommend:'烤鸭、鸭架汤、芥末鸭掌', lat:39.8970, lng:116.4000, photos:['images/Beijing_Peking_duck_restaurant_2026-06-16T05-54-50.png']},
+        {name:'四季民福烤鸭店（灯市口店）', addr:'东城区灯市口西街32号东华饭店1楼', price:'约150元/人', time:'9:00-22:30', phone:'010-65267331', recommend:'烤鸭、贝勒烤肉、小鸭酥', lat:39.9150, lng:116.4120, photos:['images/Beijing_Peking_duck_restaurant_2026-06-16T05-54-50.png']},
+        {name:'四季民福烤鸭店（东安门店）', addr:'东城区东安门大街53号', price:'约150元/人', time:'10:30-22:00', recommend:'烤鸭、鸭架汤', lat:39.9140, lng:116.4080, photos:['images/Beijing_Peking_duck_restaurant_2026-06-16T05-54-50.png']},
+        {name:'四季民福烤鸭店（东四十条店）', addr:'东城区东四十条甲22号南新仓商务大厦', price:'约150元/人', time:'11:00-22:00', recommend:'烤鸭、宫保虾球', lat:39.9280, lng:116.4350, photos:['images/Beijing_Peking_duck_restaurant_2026-06-16T05-54-50.png']},
+        {name:'四季民福烤鸭店（西单华威店）', addr:'西城区西单北大街130号华威大厦8层', price:'约150元/人', time:'10:30-22:00', recommend:'烤鸭、酥皮虾', lat:39.9120, lng:116.3750, photos:['images/Beijing_Peking_duck_restaurant_2026-06-16T05-54-50.png']},
+        {name:'四季民福烤鸭店（呼家楼店）', addr:'朝阳区向军南里二巷5号', price:'约150元/人', time:'10:30-22:00', recommend:'烤鸭、麻酱菠菜', lat:39.9200, lng:116.4580, photos:['images/Beijing_Peking_duck_restaurant_2026-06-16T05-54-50.png']},
+        {name:'四季民福烤鸭店（安德路店）', addr:'东城区安德路甲10号', price:'约150元/人', time:'10:30-22:00', recommend:'烤鸭、老北京小吃', lat:39.9550, lng:116.3950, photos:['images/Beijing_Peking_duck_restaurant_2026-06-16T05-54-50.png']},
+        // 全聚德（三环内门店）
+        {name:'全聚德（起源店/前门店）', addr:'前门大街32号', price:'约200元/人', time:'11:00-14:00 / 17:00-21:00', phone:'010-65112418', recommend:'挂炉烤鸭、火燎鸭心、芥末鸭掌', lat:39.8970, lng:116.4000, photos:['images/Beijing_Peking_duck_restaurant_2026-06-16T05-54-50.png']},
+        {name:'全聚德（天安门店）', addr:'东城区东交民巷44号', price:'约200元/人', time:'11:00-14:00 / 17:00-21:00', recommend:'挂炉烤鸭', lat:39.9040, lng:116.4030, photos:['images/Beijing_Peking_duck_restaurant_2026-06-16T05-54-50.png']},
+        {name:'全聚德（和平门店）', addr:'西城区前门西大街14号楼', price:'约200元/人', time:'11:00-14:00 / 17:00-21:00', phone:'010-63023062', recommend:'挂炉烤鸭', lat:39.8990, lng:116.3880, photos:['images/Beijing_Peking_duck_restaurant_2026-06-16T05-54-50.png']},
+        {name:'全聚德（双井店）', addr:'朝阳区广渠门外大街8号优士阁C座5层', price:'约200元/人', time:'11:00-14:00 / 17:00-21:00', recommend:'挂炉烤鸭', lat:39.8930, lng:116.4580, photos:['images/Beijing_Peking_duck_restaurant_2026-06-16T05-54-50.png']},
+        {name:'全聚德（奥运村店）', addr:'朝阳区慧忠北里309号天创世缘', price:'约200元/人', time:'11:00-14:00 / 17:00-21:00', recommend:'挂炉烤鸭', lat:39.9950, lng:116.4070, photos:['images/Beijing_Peking_duck_restaurant_2026-06-16T05-54-50.png']},
+        {name:'全聚德（玉泉路店）', addr:'海淀区复兴路44号', price:'约200元/人', time:'11:00-14:00 / 17:00-21:00', recommend:'挂炉烤鸭', lat:39.9080, lng:116.2650, photos:['images/Beijing_Peking_duck_restaurant_2026-06-16T05-54-50.png']},
+        {name:'全聚德（方庄店）', addr:'丰台区方庄蒲方路18号', price:'约200元/人', time:'11:00-14:00 / 17:00-21:00', recommend:'挂炉烤鸭', lat:39.8630, lng:116.4260, photos:['images/Beijing_Peking_duck_restaurant_2026-06-16T05-54-50.png']},
+        // 其他烤鸭品牌
+        {name:'大董烤鸭（南新仓店）', addr:'东城区南新仓大厦1-2层', price:'约300元/人', time:'11:00-22:00', phone:'010-65824003', recommend:'酥不腻烤鸭、董氏烧海参', lat:39.9200, lng:116.4500, photos:['images/Beijing_Peking_duck_restaurant_2026-06-16T05-54-50.png']},
+        {name:'利群烤鸭', addr:'东城区北翔凤胡同11号', price:'约120元/人', time:'10:00-21:00', phone:'010-65135553', recommend:'果木烤鸭、盐水鸭肝', lat:39.9050, lng:116.4100, photos:['images/Beijing_Peking_duck_restaurant_2026-06-16T05-54-50.png']},
+        {name:'大鸭梨烤鸭（慈云寺店）', addr:'朝阳区慈云寺北里1号楼', price:'约80元/人', time:'10:30-22:00', phone:'010-85981718', recommend:'烤鸭、宫保鸡丁、酸菜鱼', lat:39.9200, lng:116.4600, photos:['images/Beijing_Peking_duck_restaurant_2026-06-16T05-54-50.png']},
+        {name:'大鸭梨烤鸭（光彩店）', addr:'丰台区光彩路与榴乡路交叉口', price:'约80元/人', time:'10:30-22:00', recommend:'烤鸭、家常菜', lat:39.8500, lng:116.4200, photos:['images/Beijing_Peking_duck_restaurant_2026-06-16T05-54-50.png']},
+        {name:'大鸭梨烤鸭（亚运村店）', addr:'朝阳区安慧北里安园5号楼', price:'约80元/人', time:'10:30-22:00', recommend:'烤鸭、京味家常菜', lat:39.9900, lng:116.4100, photos:['images/Beijing_Peking_duck_restaurant_2026-06-16T05-54-50.png']},
+        {name:'大鸭梨烤鸭（右安门店）', addr:'丰台区右安门外开阳里五区6号', price:'约80元/人', time:'10:30-22:00', recommend:'烤鸭、川菜', lat:39.8700, lng:116.3700, photos:['images/Beijing_Peking_duck_restaurant_2026-06-16T05-54-50.png']},
         {name:'紫光园（前门店）', addr:'前门大街附近', price:'约80元/人', time:'10:30-22:00', recommend:'烤鸭、奶皮子酸奶、北京家常菜', lat:39.8970, lng:116.3990, photos:['images/Beijing_Peking_duck_restaurant_2026-06-16T05-54-50.png']}
       ]},
       { id:'shuanrou', icon:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="var(--red)" stroke-width="2"><circle cx="12" cy="10" r="7"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>', name:'铜锅涮肉', desc:'老北京铜锅清汤，手切鲜羊肉蘸麻酱', photos:[
@@ -1212,7 +1236,11 @@ var DATA = {
         {name:'南门涮肉（首都机场店）', addr:'首都机场附近', price:'约100元/人', time:'11:00-22:00', recommend:'手切鲜羊肉、麻酱小料、赶飞机前吃', lat:40.0800, lng:116.6030, photos:['images/Beijing_traditional_copper_pot_2026-06-16T05-54-51.png']},
         {name:'聚宝源（牛街）', addr:'牛街西里商业1号楼', price:'约110元/人', time:'09:00-22:00', phone:'010-63520556', recommend:'手切鲜羊肉、烧饼、羊尾油', lat:39.8930, lng:116.3720, photos:['images/Beijing_traditional_copper_pot_2026-06-16T05-54-51.png']},
         {name:'满恒记', addr:'平安里西大街甲14号', price:'约90元/人', time:'11:00-22:00', phone:'010-66517572', recommend:'手切鲜羊肉、糖饼、麻酱', lat:39.9300, lng:116.3600, photos:['images/Beijing_traditional_copper_pot_2026-06-16T05-54-51.png']},
-        {name:'东来顺', addr:'东安市场北门', price:'约130元/人', time:'11:00-14:00 / 17:00-21:00', phone:'010-65241036', recommend:'手切鲜羊肉、它似蜜、奶油炸糕', lat:39.9100, lng:116.4200, photos:['images/Beijing_traditional_copper_pot_2026-06-16T05-54-51.png']},
+        {name:'东来顺（王府井店）', addr:'东城区东安市场北门', price:'约130元/人', time:'11:00-14:00 / 17:00-21:00', phone:'010-65241036', recommend:'手切鲜羊肉、它似蜜、奶油炸糕', lat:39.9100, lng:116.4200, photos:['images/Beijing_traditional_copper_pot_2026-06-16T05-54-51.png']},
+        {name:'东来顺（前门店）', addr:'西城区前门大街大栅栏', price:'约130元/人', time:'11:00-14:00 / 17:00-21:00', recommend:'手切鲜羊肉、铜锅涮肉', lat:39.8970, lng:116.3980, photos:['images/Beijing_traditional_copper_pot_2026-06-16T05-54-51.png']},
+        {name:'东来顺（双井店）', addr:'朝阳区东三环中路18号', price:'约130元/人', time:'11:00-14:00 / 17:00-21:00', phone:'010-58538999', recommend:'手切鲜羊肉、烤羊排', lat:39.8950, lng:116.4610, photos:['images/Beijing_traditional_copper_pot_2026-06-16T05-54-51.png']},
+        {name:'东来顺（西直门店）', addr:'西城区西直门内南大街2号成铭大厦D座3层', price:'约130元/人', time:'11:00-22:00', phone:'010-51901777', recommend:'手切鲜羊肉', lat:39.9420, lng:116.3570, photos:['images/Beijing_traditional_copper_pot_2026-06-16T05-54-51.png']},
+        {name:'东来顺（新奥店）', addr:'朝阳区湖景东路9号新奥购物中心', price:'约130元/人', time:'11:00-22:00', recommend:'手切鲜羊肉', lat:39.9950, lng:116.3950, photos:['images/Beijing_traditional_copper_pot_2026-06-16T05-54-51.png']},
         {name:'京晟铜锅涮肉', addr:'前门附近', price:'约90元/人', time:'11:00-22:00', recommend:'手切鲜羊肉、糖蒜、烧饼', lat:39.8970, lng:116.4010, photos:['images/Beijing_traditional_copper_pot_2026-06-16T05-54-51.png']}
       ]},
       { id:'kaorou', icon:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="var(--red)" stroke-width="2"><path d="M17 18a5 5 0 0 0-10 0"/><line x1="12" y1="9" x2="12" y2="3"/><line x1="4.22" y1="10.22" x2="5.64" y2="11.64"/><line x1="1" y1="18" x2="3" y2="18"/><line x1="21" y1="18" x2="23" y2="18"/><line x1="18.36" y1="11.64" x2="19.78" y2="10.22"/></svg>', name:'炙子烤肉', desc:'铁板烤肉，老北京冬季最爱', photos:[
@@ -1251,7 +1279,10 @@ var DATA = {
         'images/Beijing_Zhajiangmian_noodles___2026-06-10T08-27-09.jpg',
         'images/Beijing_Zhajiangmian_noodles___2026-06-10T08-27-09.jpg'
       ],photoCaptions:{0:'老北京炸酱面',1:'菜码丰富'}, shops:[
-        {name:'海碗居', addr:'甘家口大厦B1层', price:'约45元/人', time:'11:00-21:30', phone:'010-88370973', recommend:'炸酱面、炸灌肠、麻豆腐', lat:39.9400, lng:116.3700, photos:['images/Beijing_Zhajiangmian_noodle_re_2026-06-16T05-54-55.png']},
+        {name:'海碗居（甘家口店）', addr:'海淀区甘家口大厦B1层', price:'约45元/人', time:'11:00-21:30', phone:'010-88370973', recommend:'炸酱面、炸灌肠、麻豆腐', lat:39.9400, lng:116.3700, photos:['images/Beijing_Zhajiangmian_noodle_re_2026-06-16T05-54-55.png']},
+        {name:'海碗居（增光路总店）', addr:'海淀区增光路11号', price:'约55元/人', time:'11:00-23:00', phone:'010-88374993', recommend:'炸酱面、干炸丸子、豆汁焦圈', lat:39.9300, lng:116.3400, photos:['images/Beijing_Zhajiangmian_noodle_re_2026-06-16T05-54-55.png']},
+        {name:'海碗居（牡丹园店）', addr:'海淀区花园路2号', price:'约55元/人', time:'11:00-21:30', recommend:'炸酱面、京味家常菜', lat:39.9750, lng:116.3750, photos:['images/Beijing_Zhajiangmian_noodle_re_2026-06-16T05-54-55.png']},
+        {name:'海碗居（蓝色港湾店）', addr:'朝阳区朝阳公园路6号蓝色港湾1F', price:'约75元/人', time:'11:00-22:00', phone:'010-59056753', recommend:'炸酱面、京味菜', lat:39.9500, lng:116.4750, photos:['images/Beijing_Zhajiangmian_noodle_re_2026-06-16T05-54-55.png']},
         {name:'方砖厂69号炸酱面（方砖厂胡同总店）', addr:'东城区方砖厂胡同1号（原69号，近南锣鼓巷）', price:'约30元/人', time:'10:30-20:00', phone:'010-64054168', recommend:'老北京炸酱面、黑猪肉丁炸酱、免费续面+腊八蒜', lat:39.9350, lng:116.3950, photos:['images/Beijing_Zhajiangmian_noodle_re_2026-06-16T05-54-55.png']},
         {name:'方砖厂69号炸酱面（前门大街店）', addr:'东城区前门大街45号', price:'约35元/人', time:'10:30-21:00', recommend:'老北京炸酱面、乾隆白菜、酸梅汤', lat:39.8970, lng:116.4000, photos:['images/Beijing_Zhajiangmian_noodle_re_2026-06-16T05-54-55.png']},
         {name:'方砖厂69号炸酱面（南小街店）', addr:'东城区朝阳门内南小街387号（近王府井天主教堂）', price:'约30元/人', time:'10:30-20:30', recommend:'老北京炸酱面、菜码丰富', lat:39.9150, lng:116.4250, photos:['images/Beijing_Zhajiangmian_noodle_re_2026-06-16T05-54-55.png']},
@@ -2100,7 +2131,7 @@ function showFoodDetail(dishId) {
     '<div class="detail-back-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#FFF" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg></div>' +
     '<span class="detail-back-label">返回</span></div>';
   html += '<div class="detail-hero">' +
-    (heroImg ? '<img src="'+heroImg+'" alt="'+dish.name+'" />' : '<div style="height:100%;background:#D5D5D5;"></div>') +
+    (heroImg ? '<img src="'+heroImg+'" alt="'+dish.name+'" onerror="heroImgError(this,\'🍽️\')" />' : '<div class="hero-fallback">🍽️</div>') +
     '<div class="hero-info">' +
       '<span class="hero-name">' + dish.icon + ' ' + dish.name + '</span>' +
       '<span class="hero-subtitle">' + (dish.desc ? dish.desc.substring(0,40) + '...' : '') + '</span>' +
@@ -2169,7 +2200,7 @@ function showStreetDetail(streetId) {
     '<div class="detail-back-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#FFF" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg></div>' +
     '<span class="detail-back-label">返回</span></div>';
   html += '<div class="detail-hero">' +
-    (heroImg ? '<img src="'+heroImg+'" alt="'+plainName+'" />' : '<div style="height:100%;background:linear-gradient(135deg,' + (isMall ? '#F39C12,#E67E22' : '#E74C3C,#C0392B') + ');display:flex;align-items:center;justify-content:center;color:#FFF;font-size:40px;">' + (isMall ? '🏬' : '🍜') + '</div>') +
+    (heroImg ? '<img src="'+heroImg+'" alt="'+plainName+'" onerror="heroImgError(this,\'' + (isMall ? '🏬' : '🍜') + '\')" />' : '<div class="hero-fallback">' + (isMall ? '🏬' : '🍜') + '</div>') +
     '<div class="hero-info">' +
       '<span class="hero-name">' + plainName + (isMall ? ' 🏬' : '') + '</span>' +
       '<span class="hero-subtitle"><span class="hero-tag">' + (isMall ? '商场餐饮' : '美食街') + '</span></span>' +
@@ -4234,8 +4265,16 @@ function toggleWarning() {
 function foodImgError(img) {
   var icon = decodeURIComponent(img.getAttribute('data-icon') || '');
   var ph = document.createElement('div');
-  ph.className = 'dish-thumb-placeholder';
-  ph.innerHTML = icon || '🍜';
+  ph.className = 'food-thumb-fallback';
+  ph.innerHTML = icon || '🍽️';
+  if (img.parentNode) img.parentNode.replaceChild(ph, img);
+}
+
+// 详情页 hero 图加载失败兜底（保持主题渐变 + 食物 emoji，避免灰底/裂图）
+function heroImgError(img, emoji) {
+  var ph = document.createElement('div');
+  ph.className = 'hero-fallback';
+  ph.innerHTML = emoji || '🍽️';
   if (img.parentNode) img.parentNode.replaceChild(ph, img);
 }
 
@@ -4246,7 +4285,7 @@ function renderFood() {
     var dishesOnly = DATA.food.dishes.filter(function(d) { return d.id !== 'jiudianzhoubian' && d.id !== 'zaocan'; });
     document.getElementById('foodContent').innerHTML = dishesOnly.map(function(d) {
       var hasPhotos = d.photos && d.photos.length > 0;
-      var thumb = d.photos && d.photos[0] ? '<div class="dish-thumb"><img src="'+d.photos[0]+'" alt="'+d.name+'" loading="lazy" onerror="foodImgError(this)" data-icon="'+encodeURIComponent(d.icon)+'" /></div>' : '<div class="dish-thumb"><div class="dish-thumb-placeholder">'+d.icon+'</div></div>';
+      var thumb = d.photos && d.photos[0] ? '<div class="dish-thumb"><img src="'+d.photos[0]+'" alt="'+d.name+'" loading="lazy" onerror="foodImgError(this)" data-icon="🍽️" /></div>' : '<div class="dish-thumb"><div class="dish-thumb-placeholder">'+d.icon+'</div></div>';
       return '<div class="dish-card" onclick="'+(hasPhotos ? 'showFoodDetail(\''+d.id+'\')' : '')+'">' + thumb +
         '<div class="dish-card-body"><span class="dish-name">' + d.name + '</span><span class="dish-desc">' + d.desc + '</span>' +
         '<div class="dish-shops"><span class="shops-label">推荐店铺</span><div class="shop-tags">' + d.shops.map(function(s) { return '<span class="shop-tag" onclick="event.stopPropagation();addFoodShopToPlan(\''+d.id+'_'+s.name.replace(/[^a-zA-Z0-9一-龥]/g,'_')+'\')">' + s.name + '</span>'; }).join('') + '</div></div></div></div>';
@@ -4257,7 +4296,8 @@ function renderFood() {
       var shopCount = s.shops ? s.shops.length : 0;
       var shopPreview = s.shops ? s.shops.slice(0, 3).map(function(sh){ return sh.name; }).join('、') : '';
       var onclick = 'onclick="showStreetDetail(\''+s.id+'\')"';
-      var thumb = s.photos && s.photos[0] ? '<div class="street-thumb"><img src="'+s.photos[0]+'" alt="'+s.name+'" loading="lazy" onerror="foodImgError(this)" data-icon="'+encodeURIComponent('🏪')+'" /></div>' : '<div class="street-thumb"><div class="street-thumb-placeholder"><svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="#CCC" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div></div>';
+      var plainNameS = s.name.replace(/<svg[^>]*>[\s\S]*?<\/svg>/g, '').replace(/[\u{1F000}-\u{1FFFF}]/gu, '').trim();
+      var thumb = s.photos && s.photos[0] ? '<div class="street-thumb"><img src="'+s.photos[0]+'" alt="'+plainNameS+'" loading="lazy" onerror="foodImgError(this)" data-icon="🏪" /></div>' : '<div class="street-thumb"><div class="street-thumb-placeholder"><svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="#CCC" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div></div>';
       return '<div class="street-card" ' + onclick + ' style="cursor:pointer;">' + thumb +
         '<div class="street-card-body">' +
         '<div class="street-header">' +
