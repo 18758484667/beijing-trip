@@ -33,6 +33,7 @@
       --card-shadow-hover: 0 6px 24px rgba(180,160,130,0.15);
       --radius-sm: 10px; --radius-md: 14px; --radius-lg: 20px;
     }
+    html, body { overflow-x: hidden; }
     body {
       font-family: -apple-system, BlinkMacangFont, 'PingFang SC', 'Helvetica Neue', sans-serif;
       background: #FBF8F3; color: var(--text); font-size: 16px; line-height: 1.6;
@@ -86,6 +87,17 @@
     .food-map-marker { width: 32px; height: 32px; border-radius: 50%; background: var(--red); color: #FFF; display: flex; align-items: center; justify-content: center; font-size: 14px; box-shadow: 0 2px 8px rgba(212,64,58,0.35); border: 2px solid #FFF; cursor: pointer; transition: transform 0.15s; }
     .food-map-marker:active { transform: scale(1.2); }
     .food-map-marker-mall { background: #F39C12; box-shadow: 0 2px 6px rgba(243,156,18,0.5); }
+
+    /* 地图加载失败兜底 */
+    .map-fallback { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 0 32px; }
+    .map-fallback-icon { font-size: 40px; margin-bottom: 10px; }
+    .map-fallback-title { font-size: 16px; font-weight: 700; color: #8a6d4a; }
+    .map-fallback-desc { font-size: 13px; color: #a09890; margin-top: 6px; line-height: 1.7; }
+    .map-fallback-btn { margin-top: 16px; background: var(--red); color: #fff; border: none; border-radius: 20px; padding: 9px 28px; font-size: 14px; font-weight: 600; cursor: pointer; }
+    /* 美化底部景点面板滚动条（细线、不抢眼） */
+    .panel-list::-webkit-scrollbar { width: 5px; }
+    .panel-list::-webkit-scrollbar-thumb { background: rgba(180,160,130,0.35); border-radius: 3px; }
+    .panel-list::-webkit-scrollbar-track { background: transparent; }
 
     .spot-panel { position: fixed; bottom: 56px; left: 0; right: 0; background: var(--card-bg); border-radius: 20px 20px 0 0; z-index: 100; max-height: 45vh; display: flex; flex-direction: column; transition: transform 0.35s cubic-bezier(.4,0,.2,1); box-shadow: 0 -4px 24px rgba(180,160,130,0.12); }
     .spot-panel.collapsed { transform: translateY(calc(100% - 48px)); }
@@ -217,7 +229,7 @@
     .info-contact-item:active { background: #FBF8F3; }
 
     .food-tabs { display: flex; background: #F0EAE0; border-radius: 12px; padding: 3px; margin-bottom: 16px; gap: 3px; }
-    .food-tab { flex: 1; text-align: center; padding: 11px; border-radius: 10px; font-size: 15px; color: var(--text2); cursor: pointer; font-weight: 500; transition: all 0.25s; }
+    .food-tab { flex: 1; text-align: center; padding: 10px 6px; border-radius: 10px; font-size: 13px; color: var(--text2); cursor: pointer; font-weight: 500; transition: all 0.25s; white-space: nowrap; }
     .food-tab.active { background: var(--card-bg); color: var(--red); font-weight: 600; box-shadow: 0 2px 8px rgba(180,160,130,0.12); }
     /* 交通页快捷页签（横向滚动） */
     .transport-tabs { display: flex; background: #F0EAE0; border-radius: 12px; padding: 4px; margin-bottom: 16px; gap: 2px; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; scrollbar-width: none; position: sticky; top: 0; z-index: 10; }
@@ -600,6 +612,7 @@
       <div class="food-tabs">
         <div class="food-tab active" onclick="switchFoodTab('dishes',this)"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:2px;"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/></svg> 特色美食</div>
         <div class="food-tab" onclick="switchFoodTab('streets',this)"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:2px;"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> 美食街区</div>
+        <div class="food-tab" onclick="switchFoodTab('dailyDining',this)"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:2px;"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg> 每日餐饮指南</div>
       </div>
       <div class="warning-card" onclick="toggleWarning()">
         <div class="warning-header">
@@ -868,7 +881,6 @@
           <span class="type-option" data-slot="morning"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:2px;"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/></svg> 上午</span>
           <span class="type-option" data-slot="noon"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:2px;"><circle cx="12" cy="12" r="5"/><path d="M12 1v2"/><path d="M12 21v2"/></svg> 中午</span>
           <span class="type-option" data-slot="afternoon"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:2px;"><path d="M17 18a5 5 0 0 0-10 0"/><line x1="12" y1="9" x2="12" y2="3"/></svg> 下午</span>
-        </div>
         </div>
       </div>
     </div>
@@ -1189,7 +1201,15 @@ var DATA = {
         'images/Beijing_copper_pot_hotpot_mutt_2026-06-10T08-26-39.jpg',
         'images/Beijing_copper_pot_hotpot_mutt_2026-06-10T08-26-39.jpg'
       ],photoCaptions:{0:'炭火铜锅涮肉',1:'手切鲜羊肉'}, shops:[
-        {name:'南门涮肉', addr:'安定门东大街56号', price:'约100元/人', time:'11:00-22:00', phone:'010-64017030', recommend:'手切鲜羊肉、麻酱烧饼、百叶', lat:39.8820, lng:116.4080, photos:['images/Beijing_traditional_copper_pot_2026-06-16T05-54-51.png']},
+        {name:'南门涮肉（天坛总店）', addr:'东城区永定门东街东里13号楼（天坛南门）', price:'约100元/人', time:'11:00-22:00', phone:'010-67058023', recommend:'手切鲜羊肉、麻酱烧饼、百叶、鲅鱼丸', lat:39.8785, lng:116.4080, photos:['images/Beijing_traditional_copper_pot_2026-06-16T05-54-51.png']},
+        {name:'南门涮肉（东单店）', addr:'东城区东单北大街附近', price:'约100元/人', time:'11:00-22:00', recommend:'手切鲜羊肉、麻酱烧饼、糖蒜', lat:39.9090, lng:116.4180, photos:['images/Beijing_traditional_copper_pot_2026-06-16T05-54-51.png']},
+        {name:'南门涮肉（后海店）', addr:'西城区后海/鼓楼一带', price:'约100元/人', time:'11:00-22:00', recommend:'手切鲜羊肉、鲜百叶、湖景座', lat:39.9380, lng:116.3890, photos:['images/Beijing_traditional_copper_pot_2026-06-16T05-54-51.png']},
+        {name:'南门涮肉（国贸商城店）', addr:'朝阳区建国门外大街国贸商城', price:'约110元/人', time:'11:00-22:00', recommend:'手切鲜羊肉、麻酱小料、环境好', lat:39.9085, lng:116.4590, photos:['images/Beijing_traditional_copper_pot_2026-06-16T05-54-51.png']},
+        {name:'南门涮肉（朝阳路店）', addr:'朝阳区朝阳路', price:'约100元/人', time:'11:00-22:00', recommend:'手切鲜羊肉、羊上脑、麻酱烧饼', lat:39.9230, lng:116.4900, photos:['images/Beijing_traditional_copper_pot_2026-06-16T05-54-51.png']},
+        {name:'南门涮肉（通州店）', addr:'通州区', price:'约100元/人', time:'11:00-22:00', recommend:'手切鲜羊肉、麻酱烧饼', lat:39.9090, lng:116.6580, photos:['images/Beijing_traditional_copper_pot_2026-06-16T05-54-51.png']},
+        {name:'南门涮肉（河边店）', addr:'朝阳区亮马河/三里屯一带', price:'约100元/人', time:'11:00-22:00', recommend:'手切鲜羊肉、鲜百叶、临河景', lat:39.9450, lng:116.4550, photos:['images/Beijing_traditional_copper_pot_2026-06-16T05-54-51.png']},
+        {name:'南门涮肉（北洼路店）', addr:'海淀区北洼路', price:'约100元/人', time:'11:00-22:00', recommend:'手切鲜羊肉、麻酱烧饼、糖蒜', lat:39.9380, lng:116.2950, photos:['images/Beijing_traditional_copper_pot_2026-06-16T05-54-51.png']},
+        {name:'南门涮肉（首都机场店）', addr:'首都机场附近', price:'约100元/人', time:'11:00-22:00', recommend:'手切鲜羊肉、麻酱小料、赶飞机前吃', lat:40.0800, lng:116.6030, photos:['images/Beijing_traditional_copper_pot_2026-06-16T05-54-51.png']},
         {name:'聚宝源（牛街）', addr:'牛街西里商业1号楼', price:'约110元/人', time:'09:00-22:00', phone:'010-63520556', recommend:'手切鲜羊肉、烧饼、羊尾油', lat:39.8930, lng:116.3720, photos:['images/Beijing_traditional_copper_pot_2026-06-16T05-54-51.png']},
         {name:'满恒记', addr:'平安里西大街甲14号', price:'约90元/人', time:'11:00-22:00', phone:'010-66517572', recommend:'手切鲜羊肉、糖饼、麻酱', lat:39.9300, lng:116.3600, photos:['images/Beijing_traditional_copper_pot_2026-06-16T05-54-51.png']},
         {name:'东来顺', addr:'东安市场北门', price:'约130元/人', time:'11:00-14:00 / 17:00-21:00', phone:'010-65241036', recommend:'手切鲜羊肉、它似蜜、奶油炸糕', lat:39.9100, lng:116.4200, photos:['images/Beijing_traditional_copper_pot_2026-06-16T05-54-51.png']},
@@ -1232,7 +1252,10 @@ var DATA = {
         'images/Beijing_Zhajiangmian_noodles___2026-06-10T08-27-09.jpg'
       ],photoCaptions:{0:'老北京炸酱面',1:'菜码丰富'}, shops:[
         {name:'海碗居', addr:'甘家口大厦B1层', price:'约45元/人', time:'11:00-21:30', phone:'010-88370973', recommend:'炸酱面、炸灌肠、麻豆腐', lat:39.9400, lng:116.3700, photos:['images/Beijing_Zhajiangmian_noodle_re_2026-06-16T05-54-55.png']},
-        {name:'方砖厂69号炸酱面', addr:'方砖厂胡同69号', price:'约30元/人', time:'10:30-20:00', phone:'010-64054168', recommend:'老北京炸酱面、炸酱面套餐', lat:39.9350, lng:116.3950, photos:['images/Beijing_Zhajiangmian_noodle_re_2026-06-16T05-54-55.png']},
+        {name:'方砖厂69号炸酱面（方砖厂胡同总店）', addr:'东城区方砖厂胡同1号（原69号，近南锣鼓巷）', price:'约30元/人', time:'10:30-20:00', phone:'010-64054168', recommend:'老北京炸酱面、黑猪肉丁炸酱、免费续面+腊八蒜', lat:39.9350, lng:116.3950, photos:['images/Beijing_Zhajiangmian_noodle_re_2026-06-16T05-54-55.png']},
+        {name:'方砖厂69号炸酱面（前门大街店）', addr:'东城区前门大街45号', price:'约35元/人', time:'10:30-21:00', recommend:'老北京炸酱面、乾隆白菜、酸梅汤', lat:39.8970, lng:116.4000, photos:['images/Beijing_Zhajiangmian_noodle_re_2026-06-16T05-54-55.png']},
+        {name:'方砖厂69号炸酱面（南小街店）', addr:'东城区朝阳门内南小街387号（近王府井天主教堂）', price:'约30元/人', time:'10:30-20:30', recommend:'老北京炸酱面、菜码丰富', lat:39.9150, lng:116.4250, photos:['images/Beijing_Zhajiangmian_noodle_re_2026-06-16T05-54-55.png']},
+        {name:'方砖厂69号炸酱面（王府井食品商场店）', addr:'东城区王府井大街食品商场内', price:'约40元/人', time:'10:30-21:00', recommend:'老北京炸酱面、烤鸭卷、奶皮子酸奶', lat:39.9140, lng:116.4120, photos:['images/Beijing_Zhajiangmian_noodle_re_2026-06-16T05-54-55.png']},
         {name:'河沿肉饼（北京坊）', addr:'北京坊街区内', price:'约35元/人', time:'11:00-21:00', phone:'010-65241955', recommend:'猪肉大葱肉饼、牛肉饼、疙瘩汤', lat:39.8990, lng:116.3960}
       ]},
       { id:'luzhu', icon:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="var(--red)" stroke-width="2"><circle cx="12" cy="10" r="7"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>', name:'卤煮火烧', desc:'经典北京美食火烧炖猪肠猪肺', photos:[
@@ -1276,8 +1299,44 @@ var DATA = {
         {name:'烤肉刘（午/晚餐）', addr:'阡儿胡同内·酒店西侧', price:'约80元/人', time:'11:00-22:00', recommend:'炙子烤肉、烤牛舌、羊肉酸菜（旁边京天红买炸糕）', lat:39.8890, lng:116.3820},
         {name:'牛街（午/晚餐·地铁可达）', addr:'牛街·地铁7号线菜市口站', price:'约50-120元/人', time:'全天', recommend:'洪记牛肉粒炸糕、月盛斋酱牛肉、聚宝源涮肉', lat:39.8890, lng:116.3630},
         {name:'前门大街/大栅栏（全天）', addr:'前门大街·步行约20分钟', price:'约30-200元/人', time:'全天', recommend:'便宜坊焖炉烤鸭、都一处烧麦、全聚德外卖', lat:39.8970, lng:116.3980}
-      ]}
-    ],
+      ],
+      nearby:[
+        { area:'🏯 故宫 · 天安门 · 前门片区', desc:'故宫、天安门、景山逛完，前门大街、北京坊、王府井就近觅食，老字号与网红店任选。',
+          shops:[
+            {name:'四季民福烤鸭店（故宫店）', addr:'南池子大街11号（故宫东门旁）', price:'约150元/人', time:'10:30-22:00', recommend:'烤鸭、鸭架汤、芥末鸭掌', lat:39.9090, lng:116.4150},
+            {name:'利群烤鸭', addr:'北翔凤胡同11号', price:'约120元/人', time:'10:00-21:00', recommend:'果木烤鸭、盐水鸭肝', lat:39.9050, lng:116.4100},
+            {name:'都一处烧麦（前门）', addr:'前门大街38号', price:'约60元/人', time:'10:00-21:00', recommend:'三鲜烧麦、猪肉大葱烧麦', lat:39.8970, lng:116.4000},
+            {name:'方砖厂69号炸酱面', addr:'前门鲜鱼口胡同', price:'约40元/人', time:'10:30-21:00', recommend:'老北京炸酱面、面码十足', lat:39.8950, lng:116.4010},
+            {name:'河沿肉饼（北京坊）', addr:'西城区廊房头条北京坊', price:'约80元/人', time:'11:00-21:30', recommend:'猪肉大葱肉饼、爆汁', lat:39.8985, lng:116.3960},
+            {name:'APM美食广场（王府井）', addr:'王府井大街138号B1', price:'约25-60元/人', time:'10:00-22:00', recommend:'麻辣香锅、水饺、日式简餐', lat:39.9140, lng:116.4120}
+          ]},
+        { area:'🌊 什刹海 · 胡同片区', desc:'逛完什刹海、鼓楼、恭王府、南锣鼓巷，胡同里处处是地道小吃和湖景老字号。',
+          shops:[
+            {name:'烤肉季（银锭桥）', addr:'前海东沿14号（银锭桥畔）', price:'约120元/人', time:'10:30-22:00', recommend:'烤羊肉、芫爆散丹、银锭桥景', lat:39.9370, lng:116.3890},
+            {name:'庆云楼', addr:'后海北沿22号', price:'约150元/人', time:'11:00-14:00 / 17:00-22:00', recommend:'油焖大虾、糟熘鱼片、湖景座', lat:39.9400, lng:116.3860},
+            {name:'孔乙己酒楼', addr:'后海南沿12号', price:'约100元/人', time:'11:00-22:00', recommend:'茴香豆、东坡肉、临湖小院', lat:39.9360, lng:116.3870},
+            {name:'姚记炒肝（鼓楼）', addr:'鼓楼东南角', price:'约30元/人', time:'06:30-20:00', recommend:'炒肝、包子、卤煮火烧', lat:39.9450, lng:116.3950},
+            {name:'南锣鼓巷小吃', addr:'南锣鼓巷', price:'约30元/人', time:'10:00-21:00', recommend:'文宇奶酪、炸灌肠、创意小吃', lat:39.9400, lng:116.4030},
+            {name:'铁手咖啡（五道营）', addr:'五道营胡同', price:'约50元/人', time:'10:00-22:00', recommend:'手冲咖啡、甜点、胡同小院', lat:39.9420, lng:116.4180}
+          ]},
+        { area:'🏞️ 颐和园 · 圆明园 · 中关村片区', desc:'逛完颐和园、圆明园、北大清华，来领展或园内解决，或去清华食堂尝尝。',
+          shops:[
+            {name:'领展美食广场（中关村）', addr:'海淀区丹棱街甲1号B1', price:'约30-60元/人', time:'10:00-22:00', recommend:'麻辣烫、煲仔饭、面馆超全', lat:39.9810, lng:116.3090},
+            {name:'颐和园园内快餐茶室', addr:'颐和园内', price:'约40元/人', time:'园内营业时间', recommend:'快餐、茶饮、苏州街小吃', lat:39.9996, lng:116.2755},
+            {name:'清华观畴园餐厅', addr:'清华大学校内', price:'约30元/人', time:'11:00-13:00 / 17:00-19:00', recommend:'食堂菜、支持微信支付宝', lat:40.0030, lng:116.3260}
+          ]},
+        { area:'⛩️ 天坛片区', desc:'天坛南门外的涮肉一绝，逛完古建来一顿铜锅最熨帖。',
+          shops:[
+            {name:'南门涮肉（天坛店）', addr:'天坛南门附近', price:'约100元/人', time:'11:00-22:00', recommend:'手切鲜羊肉、麻酱烧饼', lat:39.8820, lng:116.4080}
+          ]},
+        { area:'🐦 奥林匹克片区', desc:'鸟巢水立方看夜景，新奥购物中心吃饭选择多。',
+          shops:[
+            {name:'新奥购物中心餐饮', addr:'奥林匹克公园内', price:'约60-120元/人', time:'11:00-21:00', recommend:'各式中餐火锅、亲子友好', lat:39.9920, lng:116.3950},
+            {name:'南门涮肉（奥运村店）', addr:'奥林匹克公园附近', price:'约100元/人', time:'11:00-22:00', recommend:'手切鲜羊肉、糖蒜', lat:39.9950, lng:116.4000}
+          ]}
+      ]
+    }
+  ],
     streets: [
       { id:'qianmen', name:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--red)" stroke-width="2" style="vertical-align:middle;margin-right:4px;"><path d="M8 2h8M4 7h16M7 7v10a3 3 0 0 0 3 3h4a3 3 0 0 0 3-3V7M12 20v2"/></svg>前门大街 · 大栅栏', desc:'北京商业活化石，800米古街比邻正阳门。👣前门大街有杜莎蜡像馆、故宫文创限定周边；🍜鲜鱼口藏着炸酱面炒肝卤煮；🎭大栅栏老字号云集还能听相声。全聚德外卖窗口不用排队！', addr:'北京市东城区前门大街', photos:[
         'images/Beijing_Qianmen_Street_Dashil_2026-06-10T08-28-00.jpg',
@@ -1609,6 +1668,8 @@ function switchTab(pageId, el) {
   closeDaySlotPicker();
   closeCustomPicker();
   closeSlotEdit();
+  closeEdit();
+  closeAdd();
   document.getElementById(pageId).classList.add('active');
   el.classList.add('active');
   if (pageId === 'page-spots') { setTimeout(initMap, 100); }
@@ -1625,30 +1686,64 @@ var markers = [];
 var infoWindow = null;
 var activeSpotId = null;
 var mapInitialized = false;
+var mapInitStarted = false;
 
 function initMap() {
   if (mapInitialized) return;
   if (typeof AMap === 'undefined') {
-    setTimeout(initMap, 500);
+    // 高德脚本尚未加载，继续等待（同时启动超时兜底）
+    if (!mapInitStarted) {
+      mapInitStarted = true;
+      var c0 = document.getElementById('mapContainer');
+      if (c0 && !c0.querySelector('.map-fallback') && !c0.querySelector('.map-loading')) {
+        c0.innerHTML = '<div class="map-fallback map-loading"><div class="map-fallback-icon">🗺️</div><div class="map-fallback-title">地图加载中…</div><div class="map-fallback-desc">正在连接高德地图服务</div></div>';
+      }
+      setTimeout(function() { if (!mapInitialized) showMapFallback(); }, 10000);
+    }
+    setTimeout(initMap, 600);
     return;
   }
-  mapInitialized = true;
+  try {
+    mapInitialized = true;
+    var c = document.getElementById('mapContainer');
+    if (c) c.innerHTML = '';
+    map = new AMap.Map('mapContainer', {
+      center: [116.39, 39.91],
+      zoom: 12,
+      resizeEnable: true,
+      showIndoorMap: false,
+      showLabel: false
+    });
 
-  map = new AMap.Map('mapContainer', {
-    center: [116.39, 39.91],
-    zoom: 12,
-    resizeEnable: true,
-    showIndoorMap: false,
-    showLabel: false
-  });
+    map.on('complete', function() {
+      addMarkers();
+      var positions = DATA.spots.filter(function(s){return s.lat<50}).map(function(s) { return [s.lng, s.lat]; });
+      if (positions.length > 0) { map.setFitView(null, false, [40, 40, 40, 100]); }
+    });
+    console.log('高德地图初始化成功');
+  } catch (e) {
+    console.error('高德地图初始化失败：', e);
+    mapInitialized = false;
+    showMapFallback();
+  }
+}
 
-  map.on('complete', function() {
-    addMarkers();
-    var positions = DATA.spots.filter(function(s){return s.lat<50}).map(function(s) { return [s.lng, s.lat]; });
-    if (positions.length > 0) { map.setFitView(null, false, [40, 40, 40, 100]); }
-  });
+function showMapFallback() {
+  var c = document.getElementById('mapContainer');
+  if (!c || c.querySelector('.map-fallback')) return;
+  c.innerHTML = '<div class="map-fallback">'
+    + '<div class="map-fallback-icon">🗺️</div>'
+    + '<div class="map-fallback-title">地图加载失败</div>'
+    + '<div class="map-fallback-desc">无法连接高德地图服务。请确认：<br>① 设备已联网；② 高德 Key 有效且未限制当前域名；③ 安全密钥配置正确。</div>'
+    + '<button class="map-fallback-btn" onclick="retryMap()">重试</button>'
+    + '</div>';
+}
 
-  console.log('高德地图初始化成功');
+function retryMap() {
+  mapInitialized = false; mapInitStarted = false;
+  var c = document.getElementById('mapContainer');
+  if (c) c.innerHTML = '';
+  initMap();
 }
 
 function addMarkers() {
@@ -1943,7 +2038,7 @@ function openSlotDetail(slotId, slotType, dayIdx, slotIdx) {
     for (var di = 0; di < DATA.food.dishes.length; di++) {
       var d = DATA.food.dishes[di];
       for (var si = 0; si < d.shops.length; si++) {
-        if (slotId === d.id + '_' + d.shops[si].name.replace(/[^a-zA-Z0-9]/g,'_')) {
+        if (slotId === d.id + '_' + d.shops[si].name.replace(/[^a-zA-Z0-9一-龥]/g,'_')) {
           dishIcon = d.icon; dishName = d.name; break;
         }
       }
@@ -2031,7 +2126,7 @@ function showFoodDetail(dishId) {
     '</div>' +
     '<div class="mf-card-body open">';
   dish.shops.forEach(function(s) {
-    var shopId = dish.id + '_' + s.name.replace(/[^a-zA-Z0-9]/g,'_');
+    var shopId = dish.id + '_' + s.name.replace(/[^a-zA-Z0-9一-龥]/g,'_');
     html += '<div class="mf-shop-card" onclick="event.stopPropagation();showShopDetail(\'' + shopId + '\')">' +
       '<div style="display:flex;align-items:center;">' +
         '<span class="mf-shop-name">' + s.name + '</span>' +
@@ -2135,7 +2230,7 @@ function showShopDetail(shopId, dishIcon, dishName) {
   for (var di = 0; di < DATA.food.dishes.length; di++) {
     var d = DATA.food.dishes[di];
     for (var si = 0; si < d.shops.length; si++) {
-      if (shopId === d.id + '_' + d.shops[si].name.replace(/[^a-zA-Z0-9]/g,'_')) {
+      if (shopId === d.id + '_' + d.shops[si].name.replace(/[^a-zA-Z0-9一-龥]/g,'_')) {
         shop = d.shops[si];
         if (!dishIcon) dishIcon = d.icon;
         if (!dishName) dishName = d.name;
@@ -2773,11 +2868,25 @@ function addFoodShopToPlan(shopId) {
   // 先在菜品中查找
   for (var di = 0; di < DATA.food.dishes.length; di++) {
     var d = DATA.food.dishes[di];
-    for (var si = 0; si < d.shops.length; si++) {
-      if (shopId === d.id + '_' + d.shops[si].name.replace(/[^a-zA-Z0-9]/g,'_')) {
+    for (var si = 0; si < (d.shops || []).length; si++) {
+      if (shopId === d.id + '_' + d.shops[si].name.replace(/[^a-zA-Z0-9一-龥]/g,'_')) {
         shopName = d.shops[si].name;
         dishName = d.name;
         break;
+      }
+    }
+    // 在景点周边美食分组中查找
+    if (!shopName && d.nearby) {
+      for (var ngi = 0; ngi < d.nearby.length; ngi++) {
+        var nShops = d.nearby[ngi].shops || [];
+        for (var nsi = 0; nsi < nShops.length; nsi++) {
+          if (shopId === d.id + '_' + nShops[nsi].name.replace(/[^a-zA-Z0-9一-龥]/g,'_')) {
+            shopName = nShops[nsi].name;
+            dishName = d.name;
+            break;
+          }
+        }
+        if (shopName) break;
       }
     }
   }
@@ -2953,13 +3062,13 @@ function openPicker(type, preselectId) {
     header = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;"><path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/></svg> 选择美食/餐厅';
     DATA.food.dishes.forEach(function(d) {
       d.shops.forEach(function(shop) {
-        listHtml += '<div class="picker-item" data-id="' + d.id + '_' + shop.name.replace(/[^a-zA-Z0-9]/g,'_') + '" onclick="togglePickerItem(this,this.dataset.id)">' +
+        listHtml += '<div class="picker-item" data-id="' + d.id + '_' + shop.name.replace(/[^a-zA-Z0-9一-龥]/g,'_') + '" onclick="togglePickerItem(this,this.dataset.id)">' +
           '<div class="picker-info"><div class="picker-name">' + d.icon + ' ' + shop.name + '</div><div class="picker-detail">' + d.name + '</div></div>' +
         '</div>';
       });
     });
     DATA.food.streets.forEach(function(st) {
-      listHtml += '<div class="picker-item" data-id="street_' + st.name.replace(/[^a-zA-Z0-9]/g,'_') + '" onclick="togglePickerItem(this,this.dataset.id)">' +
+      listHtml += '<div class="picker-item" data-id="street_' + st.name.replace(/[^a-zA-Z0-9一-龥]/g,'_') + '" onclick="togglePickerItem(this,this.dataset.id)">' +
         '<div class="picker-info"><div class="picker-name">' + st.name.split(' ')[0] + '</div><div class="picker-detail">' + st.recommend + '</div></div>' +
       '</div>';
     });
@@ -3581,7 +3690,7 @@ function findSlotData(type, id) {
     for (var di = 0; di < DATA.food.dishes.length; di++) {
       var d = DATA.food.dishes[di];
       for (var si = 0; si < d.shops.length; si++) {
-        if (id === d.id + '_' + d.shops[si].name.replace(/[^a-zA-Z0-9]/g,'_')) {
+        if (id === d.id + '_' + d.shops[si].name.replace(/[^a-zA-Z0-9一-龥]/g,'_')) {
           return {name: d.shops[si].name, detail: d.name + ' · ' + d.desc, lat: d.shops[si].lat || null, lng: d.shops[si].lng || null};
         }
       }
@@ -3594,7 +3703,7 @@ function findSlotData(type, id) {
         }
       }
       // 兼容旧的街区ID格式
-      if (id === 'street_' + st.name.replace(/[^a-zA-Z0-9]/g,'_')) {
+      if (id === 'street_' + st.name.replace(/[^a-zA-Z0-9一-龥]/g,'_')) {
         return {name: st.name, detail: st.desc, lat: st.lat || null, lng: st.lng || null};
       }
     }
@@ -3748,7 +3857,7 @@ function findFoodCoords(foodId) {
   for (var di = 0; di < DATA.food.dishes.length; di++) {
     var d = DATA.food.dishes[di];
     for (var si = 0; si < d.shops.length; si++) {
-      if (foodId === d.id + '_' + d.shops[si].name.replace(/[^a-zA-Z0-9]/g,'_')) {
+      if (foodId === d.id + '_' + d.shops[si].name.replace(/[^a-zA-Z0-9一-龥]/g,'_')) {
         return d.shops[si];
       }
     }
@@ -4040,7 +4149,11 @@ function addFoodMarkers() {
   var seen = {};
   // 从 dishes 收集
   DATA.food.dishes.forEach(function(d) {
-    d.shops.forEach(function(s) {
+    var dishShops = (d.shops || []).slice();
+    if (d.nearby) {
+      d.nearby.forEach(function(g) { if (g.shops) dishShops = dishShops.concat(g.shops); });
+    }
+    dishShops.forEach(function(s) {
       if (s.lat && s.lng && s.lat < 50) {
         var key = s.lat.toFixed(4) + ',' + s.lng.toFixed(4);
         if (!seen[key]) {
@@ -4118,23 +4231,33 @@ function toggleWarning() {
   document.getElementById('warningText').style.display = warningExpanded ? 'block' : 'none';
   document.getElementById('warningToggle').textContent = warningExpanded ? '收起' : '展开';
 }
+function foodImgError(img) {
+  var icon = decodeURIComponent(img.getAttribute('data-icon') || '');
+  var ph = document.createElement('div');
+  ph.className = 'dish-thumb-placeholder';
+  ph.innerHTML = icon || '🍜';
+  if (img.parentNode) img.parentNode.replaceChild(ph, img);
+}
+
 function renderFood() {
   document.getElementById('warningText').textContent = DATA.food.warning;
   if (foodTab === 'dishes') {
-    document.getElementById('foodContent').innerHTML = DATA.food.dishes.map(function(d) {
+    // 特色美食：过滤掉每日餐饮指南和早餐早点（已移到独立Tab）
+    var dishesOnly = DATA.food.dishes.filter(function(d) { return d.id !== 'jiudianzhoubian' && d.id !== 'zaocan'; });
+    document.getElementById('foodContent').innerHTML = dishesOnly.map(function(d) {
       var hasPhotos = d.photos && d.photos.length > 0;
-      var thumb = d.photos && d.photos[0] ? '<div class="dish-thumb"><img src="'+d.photos[0]+'" alt="'+d.name+'" loading="lazy" /></div>' : '<div class="dish-thumb"><div class="dish-thumb-placeholder">'+d.icon+'</div></div>';
+      var thumb = d.photos && d.photos[0] ? '<div class="dish-thumb"><img src="'+d.photos[0]+'" alt="'+d.name+'" loading="lazy" onerror="foodImgError(this)" data-icon="'+encodeURIComponent(d.icon)+'" /></div>' : '<div class="dish-thumb"><div class="dish-thumb-placeholder">'+d.icon+'</div></div>';
       return '<div class="dish-card" onclick="'+(hasPhotos ? 'showFoodDetail(\''+d.id+'\')' : '')+'">' + thumb +
         '<div class="dish-card-body"><span class="dish-name">' + d.name + '</span><span class="dish-desc">' + d.desc + '</span>' +
-        '<div class="dish-shops"><span class="shops-label">推荐店铺</span><div class="shop-tags">' + d.shops.map(function(s) { return '<span class="shop-tag" onclick="event.stopPropagation();addFoodShopToPlan(\''+d.id+'_'+s.name.replace(/[^a-zA-Z0-9]/g,'_')+'\')">' + s.name + '</span>'; }).join('') + '</div></div></div></div>';
+        '<div class="dish-shops"><span class="shops-label">推荐店铺</span><div class="shop-tags">' + d.shops.map(function(s) { return '<span class="shop-tag" onclick="event.stopPropagation();addFoodShopToPlan(\''+d.id+'_'+s.name.replace(/[^a-zA-Z0-9一-龥]/g,'_')+'\')">' + s.name + '</span>'; }).join('') + '</div></div></div></div>';
     }).join('');
-  } else {
+  } else if (foodTab === 'streets') {
     document.getElementById('foodContent').innerHTML = DATA.food.streets.map(function(s) {
       var hasPhotos = s.photos && s.photos.length > 0;
       var shopCount = s.shops ? s.shops.length : 0;
       var shopPreview = s.shops ? s.shops.slice(0, 3).map(function(sh){ return sh.name; }).join('、') : '';
       var onclick = 'onclick="showStreetDetail(\''+s.id+'\')"';
-      var thumb = s.photos && s.photos[0] ? '<div class="street-thumb"><img src="'+s.photos[0]+'" alt="'+s.name+'" loading="lazy" /></div>' : '<div class="street-thumb"><div class="street-thumb-placeholder"><svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="#CCC" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div></div>';
+      var thumb = s.photos && s.photos[0] ? '<div class="street-thumb"><img src="'+s.photos[0]+'" alt="'+s.name+'" loading="lazy" onerror="foodImgError(this)" data-icon="'+encodeURIComponent('🏪')+'" /></div>' : '<div class="street-thumb"><div class="street-thumb-placeholder"><svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="#CCC" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div></div>';
       return '<div class="street-card" ' + onclick + ' style="cursor:pointer;">' + thumb +
         '<div class="street-card-body">' +
         '<div class="street-header">' +
@@ -4147,6 +4270,45 @@ function renderFood() {
         '<div class="street-card-arrow">查看详情 →</div>' +
       '</div></div>';
     }).join('');
+  } else if (foodTab === 'dailyDining') {
+    // 每日餐饮指南：酒店周边一日三餐 + 景点周边美食
+    var dailyDining = DATA.food.dishes.find(function(d) { return d.id === 'jiudianzhoubian'; });
+    if (dailyDining) {
+      var html = '<div style="margin-bottom:16px;">' +
+        '<div class="dish-card">' +
+          '<div class="dish-thumb"><div class="dish-thumb-placeholder">' + dailyDining.icon + '</div></div>' +
+          '<div class="dish-card-body"><span class="dish-name">' + dailyDining.name + '</span><span class="dish-desc">' + dailyDining.desc + '</span>' +
+          '<div class="dish-shops"><span class="shops-label">一日三餐安排</span><div class="shop-tags">' +
+          dailyDining.shops.map(function(s) {
+            return '<span class="shop-tag" onclick="event.stopPropagation();addFoodShopToPlan(\'jiudianzhoubian_'+s.name.replace(/[^a-zA-Z0-9一-龥]/g,'_')+'\')">' + s.name + '</span>';
+          }).join('') +
+          '</div></div></div></div></div>';
+
+      if (dailyDining.nearby && dailyDining.nearby.length) {
+        html += '<div style="margin:20px 0 12px;font-size:15px;font-weight:700;color:var(--text1);display:flex;align-items:center;gap:6px;">📍 景点周边美食</div>';
+        html += dailyDining.nearby.map(function(g) {
+          // 提取片区名首个 emoji 作为缩略图，其余文字作为标题，与 .dish-card 风格统一
+          var parts = g.area.split(' ');
+          var lead = parts[0];
+          var rest = g.area.slice(lead.length).trim();
+          var gHtml = '<div class="dish-card">' +
+            '<div class="dish-thumb"><div class="dish-thumb-placeholder">' + lead + '</div></div>' +
+            '<div class="dish-card-body">' +
+              '<span class="dish-name">' + rest + '</span>' +
+              (g.desc ? '<span class="dish-desc">' + g.desc + '</span>' : '') +
+              '<div class="dish-shops"><span class="shops-label">周边美食</span><div class="shop-tags" style="gap:8px;">';
+          gHtml += g.shops.map(function(s) {
+            return '<span class="shop-tag" onclick="event.stopPropagation();addFoodShopToPlan(\'jiudianzhoubian_'+s.name.replace(/[^a-zA-Z0-9一-龥]/g,'_')+'\')">' + s.name + '</span>';
+          }).join('');
+          gHtml += '</div></div></div></div>';
+          return gHtml;
+        }).join('');
+      }
+
+      document.getElementById('foodContent').innerHTML = html;
+    } else {
+      document.getElementById('foodContent').innerHTML = '<div style="text-align:center;padding:40px;color:#999;">暂无每日餐饮指南数据</div>';
+    }
   }
 }
 
