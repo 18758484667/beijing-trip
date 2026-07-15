@@ -4344,15 +4344,8 @@ function renderFood() {
       // 按品牌分组
       var brandGroups = {};
       d.shops.forEach(function(s) {
-        var brand = s.name;
-        // 提取品牌：括号前 / 中文名第一个词
-        var m = s.name.match(/^([\u4e00-\u9fa5A-Za-z]{2,8}?)(?:[（(]|$)/);
-        if (m && m[1] !== '四季民福' && m[1].length < 5) {
-          var testName = s.name.replace(/[（(][^）)]*[）)]/g, '').trim();
-          if (testName.length > 2 && testName.length < 12) {
-            brand = testName;
-          }
-        }
+        // 提取品牌：取括号前的内容作为品牌
+        var brand = s.name.split(/[（(]/)[0].trim();
         if (!brandGroups[brand]) brandGroups[brand] = [];
         brandGroups[brand].push(s);
       });
