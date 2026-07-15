@@ -1377,6 +1377,36 @@ var DATA = {
             {name:'新奥购物中心餐饮', addr:'奥林匹克公园内', price:'约60-120元/人', time:'11:00-21:00', recommend:'各式中餐火锅、亲子友好', lat:39.9920, lng:116.3950},
             {name:'南门涮肉（奥运村店）', addr:'奥林匹克公园附近', price:'约100元/人', time:'11:00-22:00', recommend:'手切鲜羊肉、糖蒜', lat:39.9950, lng:116.4000}
           ]}
+      ],
+      // 三餐美食推荐
+      meals: [
+        { meal:'🌅 早餐推荐', desc:'北京的早晨从一碗炒肝开始，配二两包子或炸酱面，老北京的烟火气就藏在胡同的苍蝇馆子里。',
+          items:[
+            {name:'和记炒肝', dish:'炒肝+包子+豆腐脑', tip:'酒店楼下50米，6:30开门，本地人大排长龙'},
+            {name:'天兴居', dish:'炒肝+包子', tip:'鲜鱼口街百年老店，炒肝发源地'},
+            {name:'姚记炒肝', dish:'炒肝+卤煮+包子', tip:'鼓楼脚下，美国副总统拜登同款'},
+            {name:'尹三豆汁', dish:'豆汁+焦圈+咸菜', tip:'天坛北门，老北京经典三件套，挑战你的味蕾'},
+            {name:'锦芳小吃', dish:'豆汁焦圈、面茶、驴打滚', tip:'前门鲜鱼口，一站式体验老北京早点'},
+            {name:'护国寺小吃', dish:'豌豆黄、艾窝窝、面茶', tip:'总店在护国寺街，几十种小吃任选'}
+          ]},
+        { meal:'☀️ 午餐推荐', desc:'中午适合来顿扎实的——烤鸭、涮肉或者炸酱面，补充体力下午接着逛。',
+          items:[
+            {name:'味道1918餐厅', dish:'中西式套餐（团购约50元）', tip:'酒店二楼，靠窗位view好，团购性价比高'},
+            {name:'天桥老金涮肉', dish:'手切鲜羊肉+麻酱烧饼', tip:'酒店西100米阡儿胡同，本地人涮肉首选'},
+            {name:'烤肉刘', dish:'炙子烤肉+牛舌+酸菜羊肉', tip:'阡儿胡同内，旁边京天红买炸糕做甜点'},
+            {name:'四季民福烤鸭店', dish:'烤鸭+鸭架汤+芥末鸭掌', tip:'故宫/前门/灯市口都有店，人均150元性价比之选'},
+            {name:'海碗居', dish:'老北京炸酱面+炸灌肠', tip:'增光路总店或甘家口店，面条筋道菜码丰富'},
+            {name:'方砖厂69号炸酱面', dish:'黑猪肉丁炸酱面+乾隆白菜', tip:'方砖厂胡同总店最正宗，免费续面'}
+          ]},
+        { meal:'🌙 晚餐推荐', desc:'晚餐可以吃得隆重些，铜锅涮肉、烤鸭大餐，或者去簋街感受北京的夜生活。',
+          items:[
+            {name:'全聚德/四季民福/大鸭梨', dish:'烤鸭全套宴', tip:'前门大街老字号云集，晚上吃完正好看正阳门夜景'},
+            {name:'南门涮肉', dish:'手切鲜羊肉+糖蒜+烧饼', tip:'天坛总店或后海店，炭火铜锅氛围感拉满'},
+            {name:'东来顺', dish:'手切鲜羊肉+它似蜜', tip:'王府井、前门都有店，百年清真涮肉老字号'},
+            {name:'烤肉宛/烤肉季', dish:'烤羊肉+芫爆散丹', tip:'烤肉宛南礼士路，烤肉季什刹海银锭桥畔'},
+            {name:'簋街', dish:'麻辣小龙虾+馋嘴蛙', tip:'胡大饭馆或花家怡园，营业到凌晨2点'},
+            {name:'前门大街/北京坊', dish:'都一处烧麦+河沿肉饼+吴裕泰冰淇淋', tip:'步行20分钟，饭后消食逛前门夜景'}
+          ]}
       ]
     }
   ],
@@ -4355,6 +4385,27 @@ function renderFood() {
           gHtml += '</div></div></div></div>';
           return gHtml;
         }).join('');
+
+        // 三餐美食推荐
+        if (dailyDining.meals && dailyDining.meals.length > 0) {
+          html += '<div style="margin:20px 0 12px;font-size:15px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:6px;">🕐 三餐美食推荐</div>';
+          html += dailyDining.meals.map(function(m) {
+            var mh = '<div class="dish-card" style="margin-bottom:12px;">';
+            mh += '<div class="dish-thumb"><div class="dish-thumb-placeholder">' + m.meal.split(' ')[0] + '</div></div>';
+            mh += '<div class="dish-card-body">';
+            mh += '<span class="dish-name">' + m.meal + '</span>';
+            mh += '<span class="dish-desc">' + m.desc + '</span>';
+            mh += '<div class="dish-shops">';
+            mh += m.items.map(function(it) {
+              return '<div style="display:flex;align-items:center;padding:6px 0;border-bottom:1px solid #F5F0E8;">' +
+                '<div style="flex:1;"><span style="font-weight:600;font-size:14px;">' + it.name + '</span>' +
+                '<span style="color:#D4783A;font-size:13px;margin-left:6px;">' + it.dish + '</span></div>' +
+                '<span style="font-size:11px;color:#999;text-align:right;max-width:45%;">' + it.tip + '</span></div>';
+            }).join('');
+            mh += '</div></div></div>';
+            return mh;
+          }).join('');
+        }
       }
 
       document.getElementById('foodContent').innerHTML = html;
