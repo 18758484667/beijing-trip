@@ -4320,6 +4320,19 @@ function heroImgError(img, emoji) {
   if (img.parentNode) img.parentNode.replaceChild(ph, img);
 }
 
+// 品牌分店折叠展开
+function toggleBrandShop(headerEl) {
+  var content = headerEl.nextElementSibling;
+  var arrow = headerEl.querySelector('span:last-child');
+  if (content.style.display === 'none' || !content.style.display) {
+    content.style.display = 'block';
+    if (arrow) arrow.innerHTML = '▾';
+  } else {
+    content.style.display = 'none';
+    if (arrow) arrow.innerHTML = '▸';
+  }
+}
+
 function renderFood() {
   document.getElementById('warningText').textContent = DATA.food.warning;
   if (foodTab === 'dishes') {
@@ -4328,9 +4341,44 @@ function renderFood() {
     document.getElementById('foodContent').innerHTML = dishesOnly.map(function(d) {
       var hasPhotos = d.photos && d.photos.length > 0;
       var thumb = d.photos && d.photos[0] ? '<div class="dish-thumb"><img src="'+d.photos[0]+'" alt="'+d.name+'" loading="lazy" onerror="foodImgError(this)" data-icon="🍽️" /></div>' : '<div class="dish-thumb"><div class="dish-thumb-placeholder">'+d.icon+'</div></div>';
+      // 按品牌分组
+      var brandGroups = {};
+      d.shops.forEach(function(s) {
+        var brand = s.name;
+        // 提取品牌：括号前 / 中文名第一个词
+        var m = s.name.match(/^([\u4e00-\u9fa5A-Za-z]{2,8}?)(?:[（(]|$)/);
+        if (m && m[1] !== '四季民福' && m[1].length < 5) {
+          var testName = s.name.replace(/[（(][^）)]*[）)]/g, '').trim();
+          if (testName.length > 2 && testName.length < 12) {
+            brand = testName;
+          }
+        }
+        if (!brandGroups[brand]) brandGroups[brand] = [];
+        brandGroups[brand].push(s);
+      });
+      var brandNames = Object.keys(brandGroups);
+      var brandTags = brandNames.map(function(brand, bi) {
+        var shops = brandGroups[brand];
+        var shopsHtml = shops.map(function(s) {
+          return '<div style="padding:6px 0;border-bottom:1px solid #F5F0E8;font-size:13px;cursor:pointer;" onclick="event.stopPropagation();addFoodShopToPlan(\''+d.id+'_'+s.name.replace(/[^a-zA-Z0-9一-龥]/g,'_')+'\')">' +
+            '<div style="font-weight:600;color:var(--text);">' + s.name + '</div>' +
+            (s.addr ? '<div style="font-size:11px;color:#999;margin-top:2px;">📍 ' + s.addr + '</div>' : '') +
+            (s.price ? '<div style="font-size:11px;color:#D4783A;margin-top:1px;">💰 ' + s.price + '</div>' : '') +
+            '</div>';
+        }).join('');
+        // 默认前3个品牌展开，其余折叠
+        var isOpen = bi < 3 ? 'block' : 'none';
+        return '<div style="background:#F8F4F0;border-radius:8px;padding:0;margin-bottom:6px;border:1px solid var(--border);">' +
+          '<div onclick="toggleBrandShop(this)" style="padding:8px 10px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;font-size:14px;font-weight:600;">' +
+          '<span>' + brand + ' <span style="font-size:11px;color:#999;font-weight:400;">(' + shops.length + '家)</span></span>' +
+          '<span style="color:#999;font-size:12px;">' + (bi < 3 ? '▾' : '▸') + '</span></div>' +
+          '<div style="display:' + isOpen + ';padding:0 10px 6px;background:#FFF;border-radius:0 0 8px 8px;">' + shopsHtml + '</div></div>';
+      }).join('');
       return '<div class="dish-card" onclick="'+(hasPhotos ? 'showFoodDetail(\''+d.id+'\')' : '')+'">' + thumb +
         '<div class="dish-card-body"><span class="dish-name">' + d.name + '</span><span class="dish-desc">' + d.desc + '</span>' +
-        '<div class="dish-shops"><span class="shops-label">推荐店铺</span><div class="shop-tags">' + d.shops.map(function(s) { return '<span class="shop-tag" onclick="event.stopPropagation();addFoodShopToPlan(\''+d.id+'_'+s.name.replace(/[^a-zA-Z0-9一-龥]/g,'_')+'\')">' + s.name + '</span>'; }).join('') + '</div></div></div></div>';
+        '<div style="margin-top:6px;font-size:12px;color:#888;">共 ' + d.shops.length + ' 家分店，点击展开查看</div>' +
+        '<div style="margin-top:6px;">' + brandTags + '</div>' +
+        '</div></div>';
     }).join('');
   } else if (foodTab === 'streets') {
     document.getElementById('foodContent').innerHTML = DATA.food.streets.map(function(s) {
