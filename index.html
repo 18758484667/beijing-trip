@@ -484,6 +484,11 @@
     .tl-action { font-size: 14px; color: #CCC; cursor: pointer; padding: 2px; }
     .tl-action:active { color: var(--red); }
 
+    /* 地点之间的注意点 */
+    .plan-note { position: relative; margin: 4px 0 6px; padding: 8px 12px 8px 34px; background: #FFFDF5; border: 1px dashed #E8D5A8; border-radius: 10px; font-size: 13px; color: #8A6D3B; line-height: 1.6; }
+    .plan-note .plan-note-icon { position: absolute; left: 11px; top: 8px; font-size: 14px; }
+    .plan-note.note-warn { background: #FFF7F5; border-color: #F0C9B8; color: #A0522D; }
+
     /* 拖拽排序 */
     .plan-slot { display: flex; align-items: flex-start; padding: 8px 0; gap: 6px; cursor: pointer; border-bottom: 1px solid #F5F0E8; position: relative; user-select: none; -webkit-user-select: none; }
     .plan-slot:last-child { border-bottom: none; }
@@ -921,7 +926,8 @@
 // ============================================================
 var SUPABASE_URL = 'https://mjsylaoqkurfdvxtmgan.supabase.co';
 var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1qc3lsYW9xa3VyZmR2eHRtZ2FuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExMjc5MDAsImV4cCI6MjA5NjcwMzkwMH0.bzzf97ETW3Gz4GkcMonJG-zYUvmhJjVa7lFrwruk_VE';
-var supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+// CDN 加载失败时 supabase 为 undefined，自动降级为纯本地模式，避免整页白屏
+var supabase = (typeof window !== 'undefined' && window.supabase) ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
 
 // 数据存储：优先使用 Supabase，降级到 localStorage
 var useSupabase = true; // 设为 false 可强制使用 localStorage
@@ -929,7 +935,7 @@ var SUPABASE_TABLE = 'trip_data';
 
 // 通用的 Supabase 读数据函数
 async function loadFromCloud(key) {
-  if (!useSupabase) return null;
+  if (!useSupabase || !supabase) return null;
   try {
     var { data, error } = await supabase.from(SUPABASE_TABLE).select('data').eq('id', key).single();
     if (error || !data) return null;
@@ -942,7 +948,7 @@ async function loadFromCloud(key) {
 
 // 通用的 Supabase 写数据函数
 async function saveToCloud(key, value) {
-  if (!useSupabase) return false;
+  if (!useSupabase || !supabase) return false;
   try {
     var { error } = await supabase.from(SUPABASE_TABLE).upsert({ id: key, data: value, updated_at: new Date().toISOString() });
     if (error) throw error;
@@ -2264,25 +2270,35 @@ function openSlotDetail(slotId, slotType, dayIdx, slotIdx) {
   if (!slot) return;
 
   if (slotType === 'spot') {
-    // 景点 → 原有景点详情页
-    showSpotDetail(slotId);
+    // 景点 → 原有景点详情页（找不到则显示简单详情）
+    // 模板内置地点用 slot.spotId 关联到景点数据
+    var spotDataId = slot.spotId || slotId;
+    var spot = DATA.spots.find(function(s) { return s.id === spotDataId; });
+    if (spot) { showSpotDetail(spotDataId); return; }
+    showSimpleSlotDetail(slot);
   } else if (slotType === 'food') {
-    // 美食 → 原有店铺详情页
-    var dishIcon = '', dishName = '';
+    // 美食 → 原有店铺详情页（找不到则显示简单详情）
+    var found = false;
     for (var di = 0; di < DATA.food.dishes.length; di++) {
       var d = DATA.food.dishes[di];
       for (var si = 0; si < d.shops.length; si++) {
-        if (slotId === d.id + '_' + d.shops[si].name.replace(/[^a-zA-Z0-9一-龥]/g,'_')) {
-          dishIcon = d.icon; dishName = d.name; break;
+        if (slotId === d.id + '_' + d.shops[si].name.replace(/[^a-zA-Z0-9一-龥]/g,'_')) { found = true; break; }
+      }
+      if (found) break;
+    }
+    if (!found) {
+      for (var sti = 0; sti < DATA.food.streets.length; sti++) {
+        var st = DATA.food.streets[sti];
+        for (var sj = 0; sj < st.shops.length; sj++) {
+          if (slotId === 'street_' + st.id + '_' + st.shops[sj].name.replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g,'_')) { found = true; break; }
         }
+        if (found) break;
       }
     }
-    showShopDetail(slotId, dishIcon, dishName);
-  } else if (slotType === 'hotel') {
-    // 住宿 → 简单详情
+    if (found) { showShopDetail(slotId, '', ''); return; }
     showSimpleSlotDetail(slot);
   } else {
-    // 交通/自定义 → 简单详情
+    // 住宿/交通/自定义 → 简单详情
     showSimpleSlotDetail(slot);
   }
 }
@@ -2617,6 +2633,183 @@ function addStreetShopToPlan(streetId, shopName) {
 // ============================================================
 // 行程规划系统（核心新功能）
 // ============================================================
+// ============================================================
+// 内置行程模板（来自 resource/ 每日行程）
+// 注意点 notes: afterSlotId 指向该注意点显示在哪个地点之后
+// ============================================================
+var PLAN_TEMPLATE_VERSION = 1;
+var PLAN_TEMPLATE_DAYS = [
+  {
+    dayNum: 1,
+    label: '第一天 出发',
+    slots: [
+      { id:'d1_s1', type:'transport', slotType:'morning', name:'中河路地铁站 → 宁波栎社机场', startTime:'12:10', endTime:'13:00', duration:'约50分钟', detail:'1号线（高桥西方向）至鼓楼站，换乘2号线（栎社国际机场方向）至终点站；出站经联络通道直达T2出发大厅' },
+      { id:'d1_s2', type:'transport', slotType:'noon', name:'T2航站楼 值机与行李托运', startTime:'13:00', endTime:'14:00', detail:'国航人工柜台办理（携带婴儿必须人工办理，不可自助）；国内航班截载为起飞前30分钟，带娃多预留时间；国航免费托运1件婴儿车，可柜台托运或推到登机口再交运' },
+      { id:'d1_s3', type:'transport', slotType:'afternoon', name:'过安检', startTime:'14:00', endTime:'14:30', detail:'一位成人抱着孩子快速通过，其他行李由同行人员携带' },
+      { id:'d1_s4', type:'other', slotType:'afternoon', name:'候机与登机', startTime:'14:30', endTime:'17:30', detail:'找到登机口后给宝宝喂食、换尿布，航站楼内设母婴室；CA1542 17:30 准时起飞' },
+      { id:'d1_s5', type:'transport', slotType:'evening', name:'首都机场T3 取行李', startTime:'20:00', endTime:'20:50', detail:'跟随“到达”标识前往行李提取大厅（T3较大，步行距离较长）；可使用机场免费手推车' },
+      { id:'d1_s6', type:'transport', slotType:'evening', name:'首都机场T3 → 北京东方饭店', startTime:'20:50', endTime:'21:40', detail:'打车约40-50分钟（晚间不堵车），费用约100-130元（含高速费）' },
+      { id:'d1_s7', type:'hotel', slotType:'evening', name:'北京东方饭店 办理入住', startTime:'21:40', endTime:'22:00', lat:39.889, lng:116.384, detail:'虎坊桥/前门区域，民国风情酒店' },
+      { id:'d1_s8', type:'other', slotType:'evening', name:'酒店休整', startTime:'22:00', endTime:'22:45', detail:'给宝宝喂食、换轻便鞋；手机、充电宝充电；简单洗漱' }
+    ],
+    notes: [
+      { id:'d1_n1', afterSlotId:'d1_s1', icon:'🚕', text:'备选方案：行李较多或带小宝宝不便换乘，可直接打车/网约车前往机场，车程约50分钟、费用约100元' },
+      { id:'d1_n2', afterSlotId:'d1_s5', icon:'🚕', text:'T3带婴儿车打车指南：推荐停车楼B2网约车H区（必须走直梯/无障碍电梯，扶梯禁止婴儿车，出电梯拍下通道编号发给司机）；备选4层出发层10号门（限停8分钟、人等车）；出租车最省心，随到随走100-130元' },
+      { id:'d1_n3', afterSlotId:'d1_s8', icon:'🌙', text:'到达较晚（约21:40），前门大街、大栅栏、鲜鱼口等大多21:30-22:00关门，今晚不再外出，顺延至第二天傍晚游览' }
+    ]
+  },
+  {
+    dayNum: 2,
+    label: '第二天 天安门·国博·牛街',
+    slots: [
+      { id:'d2_s1', type:'other', slotType:'morning', name:'起床', startTime:'07:30' },
+      { id:'d2_s2', type:'food', slotType:'morning', name:'酒店早餐', startTime:'08:00' },
+      { id:'d2_s3', type:'transport', slotType:'morning', name:'出发：东方饭店 → 天安门广场', startTime:'08:40', detail:'打车前往' },
+      { id:'d2_s4', type:'spot', slotType:'morning', name:'天安门广场', spotId:'tiananmen', startTime:'09:10', endTime:'10:30', lat:39.9054, lng:116.3976, detail:'从1号口安检进入；看天安门城楼、金水桥、华表；走地下通道进入广场；看人民英雄纪念碑、人民大会堂、国家博物馆外观；全家拍照，慢慢逛不赶时间' },
+      { id:'d2_s5', type:'spot', slotType:'noon', name:'步行进入国家博物馆', spotId:'guobowuguan', startTime:'10:30', lat:39.908, lng:116.397 },
+      { id:'d2_s6', type:'food', slotType:'noon', name:'国博午餐', startTime:'11:00', endTime:'12:00', memo:'提前避开午餐高峰；小宝喂饭、老人休息（这是今天最舒服的一小时）' },
+      { id:'d2_s7', type:'spot', slotType:'afternoon', name:'国家博物馆（馆内参观）', startTime:'12:00', endTime:'15:30', detail:'重点：古代中国、青铜器、玉器；不用追求全部看完' },
+      { id:'d2_s8', type:'other', slotType:'afternoon', name:'中间回酒店休息', startTime:'15:40', detail:'国博逛完先回酒店休息，傍晚再打车前往牛街' },
+      { id:'d2_s9', type:'spot', slotType:'afternoon', name:'牛街', startTime:'16:00', endTime:'17:30', lat:39.893, lng:116.372, detail:'先逛街、买伴手礼；白记买驴打滚、艾窝窝、豌豆黄等；看看北京最有名的清真街' },
+      { id:'shuanrou_聚宝源_牛街_', type:'food', slotType:'evening', name:'聚宝源（牛街）', startTime:'17:30', lat:39.893, lng:116.372, detail:'手切鲜羊肉（必点）、精品肥牛、羊上脑、鲜毛肚、冻豆腐、白菜、茼蒿或豆苗、宽粉、芝麻烧饼、酸梅汤；一家六口基本够吃', memo:'建议尽量早点到，比18点以后更容易等到位置' },
+      { id:'d2_s11', type:'transport', slotType:'evening', name:'返回东方饭店', startTime:'19:00', detail:'打车回酒店，早点休息' }
+    ],
+    notes: [
+      { id:'d2_n1', afterSlotId:'d2_s2', icon:'🍱', text:'出发前提前买好肯德基当午餐' },
+      { id:'d2_n2', afterSlotId:'d2_s9', icon:'💡', text:'先逛街买伴手礼、再吃饭，这样不会一到牛街就开始排队；排队不夸张时顺便买些点心带回酒店或第二天吃' }
+    ]
+  },
+  {
+    dayNum: 3,
+    label: '第三天 慕田峪长城',
+    slots: [
+      { id:'d3_s1', type:'other', slotType:'morning', name:'起床', startTime:'07:00' },
+      { id:'d3_s2', type:'food', slotType:'morning', name:'早餐', startTime:'07:15', memo:'吃饱一点，今天上午体力消耗最大' },
+      { id:'d3_s3', type:'transport', slotType:'morning', name:'包车出发：东方饭店 → 慕田峪长城', startTime:'07:45', detail:'约1.5小时车程' },
+      { id:'d3_s4', type:'transport', slotType:'morning', name:'到达景区（摆渡车+缆车上山）', startTime:'09:15', detail:'尽量早点，避开后面的排队高峰' },
+      { id:'d3_s5', type:'spot', slotType:'morning', name:'慕田峪长城', spotId:'mutianyu', startTime:'09:45', endTime:'12:00', lat:40.44, lng:116.56, detail:'路线：14号敌楼→17号敌楼→返回14号→缆车下山；不挑战英雄坡，老人孩子压力小，风景最好的一段之一' },
+      { id:'d3_s6', type:'food', slotType:'noon', name:'午餐（景区附近）', startTime:'12:20', memo:'找评价不错、环境干净、有空调的农家菜馆即可，不用追求网红，重点是补充体力' },
+      { id:'d3_s7', type:'transport', slotType:'afternoon', name:'返回北京市区', startTime:'13:20', memo:'小宝可以在车上午睡' },
+      { id:'d3_s8', type:'spot', slotType:'afternoon', name:'孔庙&国子监', startTime:'15:00', endTime:'16:20', lat:39.945, lng:116.407, detail:'建议慢慢逛，非常安静，适合从长城的节奏切换下来' },
+      { id:'d3_s9', type:'spot', slotType:'afternoon', name:'五道营胡同', spotId:'wudaoying', startTime:'16:20', endTime:'17:20', lat:39.942, lng:116.418, detail:'买一杯饮料、吃个冰淇淋、逛逛文创店、拍拍胡同，不用赶' },
+      { id:'d3_s10', type:'food', slotType:'evening', name:'晚餐：七寻八找胡同菜', startTime:'17:30', lat:39.943, lng:116.41, detail:'鸡里蹦（招牌）、饭盒带鱼、乾隆白菜、京味小炒肉或酱牛肉、时令蔬菜、疙瘩汤、米饭/主食；口味均衡，老人小朋友都能吃' },
+      { id:'d3_s11', type:'transport', slotType:'evening', name:'返回东方饭店', startTime:'19:00', detail:'早点休息' }
+    ],
+    notes: [
+      { id:'d3_n1', afterSlotId:'d3_s4', icon:'🚠', text:'尽量早点到景区，避开后面的排队高峰' },
+      { id:'d3_n2', afterSlotId:'d3_s9', icon:'🍽', text:'建议提前电话问七寻八找是否可以预约，或17:20左右到店，避开18点后的高峰' }
+    ]
+  },
+  {
+    dayNum: 4,
+    label: '第四天 故宫',
+    slots: [
+      { id:'d4_s1', type:'other', slotType:'morning', name:'起床', startTime:'07:30' },
+      { id:'d4_s2', type:'food', slotType:'morning', name:'早餐', startTime:'08:00', memo:'建议吃饱一点；可提前一天买好香蕉、小面包、饼干（或酒店允许带走水果就拿一两个）' },
+      { id:'d4_s3', type:'transport', slotType:'morning', name:'出发：东方饭店 → 东华门/午门', startTime:'08:45', detail:'直接打车到东华门附近，步行到午门；预计9:10左右到' },
+      { id:'d4_s4', type:'spot', slotType:'morning', name:'午门 安检检票', spotId:'gugong', startTime:'09:10', endTime:'09:30', lat:39.9163, lng:116.3972, memo:'上洗手间（很重要）——进入故宫后卫生间没有门口方便' },
+      { id:'d4_s5', type:'spot', slotType:'morning', name:'故宫博物院（中轴线）', startTime:'09:30', detail:'午门→太和门→太和殿→中和殿→保和殿→乾清宫→交泰殿→坤宁宫→御花园→神武门；不要一开始就拐去东西六宫，否则越走越累；讲解器建议租2台轮流听' },
+      { id:'d4_s6', type:'food', slotType:'noon', name:'故宫内简餐', startTime:'11:30', detail:'不用正式吃饭，找地方坐下吃面包、香蕉、饼干' },
+      { id:'d4_s7', type:'spot', slotType:'afternoon', name:'景山公园', spotId:'jingshan', startTime:'13:30', lat:39.9225, lng:116.3964, detail:'从神武门出来；路线：南门进→万春亭→拍照→原路下山，控制在40分钟左右' },
+      { id:'d4_s8', type:'food', slotType:'afternoon', name:'午餐（景山/地安门一带）', startTime:'14:30', memo:'认真选——今天是体力消耗最大的一天，推荐在景山、地安门一带吃' },
+      { id:'d4_s9', type:'spot', slotType:'afternoon', name:'东交民巷', spotId:'dongjiaominxiang', startTime:'16:00', lat:39.902, lng:116.408, detail:'慢慢散步' },
+      { id:'d4_s10', type:'other', slotType:'afternoon', name:'咖啡馆休息', startTime:'17:00', detail:'找一家咖啡馆或饮品店，老人休息、小宝休息' },
+      { id:'d4_s11', type:'food', slotType:'evening', name:'晚餐（简单）', startTime:'18:00', memo:'如果中午吃得丰盛，晚上可以轻松一点' }
+    ],
+    notes: [
+      { id:'d4_n1', afterSlotId:'d4_s3', icon:'🚕', text:'打车到东华门附近（文体中心），沿城墙走约5分钟到午门；不要直接开到午门口' },
+      { id:'d4_n2', afterSlotId:'d4_s4', icon:'🚻', text:'安检检票后先上洗手间——很重要，故宫内卫生间不如门口方便' }
+    ]
+  },
+  {
+    dayNum: 5,
+    label: '第五天 颐和园·圆明园·清华北大',
+    slots: [
+      { id:'d5_s1', type:'other', slotType:'morning', name:'起床', startTime:'07:30', memo:'不用太赶，今天是整趟旅行节奏最舒缓的一天' },
+      { id:'d5_s2', type:'food', slotType:'morning', name:'酒店早餐', startTime:'08:00' },
+      { id:'d5_s3', type:'transport', slotType:'morning', name:'出发：东方饭店 → 颐和园东宫门', startTime:'08:30', detail:'建议打车，约45-60分钟' },
+      { id:'d5_s4', type:'spot', slotType:'morning', name:'颐和园', spotId:'yiheyuan', startTime:'09:20', endTime:'12:40', lat:39.9996, lng:116.2755, detail:'东宫门→仁寿殿→乐寿堂（10分钟即可）→长廊（最经典）→清晏舫（石舫）→游船码头→十七孔桥→铜牛→新建宫门出；不爬佛香阁；游船排队30分钟以内建议乘船，否则直接步行' },
+      { id:'d5_s5', type:'food', slotType:'noon', name:'午餐（新建宫门附近）', startTime:'12:50', endTime:'13:50', memo:'能坐下来休息、有空调、小宝方便喂食、老人可以缓一缓' },
+      { id:'d5_s6', type:'spot', slotType:'afternoon', name:'圆明园', spotId:'yuanmingyuan', startTime:'14:10', endTime:'15:40', lat:39.9999, lng:116.298, detail:'东门进→黑天鹅观赏区→全景沙盘（建议看，帮助理解圆明园规模）→西洋楼遗址（大水法/海晏堂/黄花阵）→南门出；游船可选；不追求走完整个园子，精华就在西洋楼区域' },
+      { id:'d5_s7', type:'spot', slotType:'afternoon', name:'清华/北大校门', spotId:'qinghua', startTime:'16:00', endTime:'17:00', lat:39.999, lng:116.324, detail:'清华大学校门拍照、看看校园氛围' },
+      { id:'d5_s8', type:'food', slotType:'evening', name:'晚餐（海淀附近）', startTime:'18:00', memo:'已走不少路，不建议再专程回市中心吃饭，选评价好的京味菜或家常菜即可' },
+      { id:'d5_s9', type:'transport', slotType:'evening', name:'返回酒店', startTime:'19:30', detail:'早点休息' }
+    ],
+    notes: [
+      { id:'d5_n1', afterSlotId:'d5_s3', icon:'🌤', text:'尽量9:20前到达，避开旅行团和中午高温' },
+      { id:'d5_n2', afterSlotId:'d5_s6', icon:'☀️', text:'高温版（34℃以上）：午餐后若明显疲劳，取消圆明园游船只游西洋楼；清华北大门口停留10-15分钟早点回酒店。凉爽天气可在昆明湖边多停留、游船作为加分项' }
+    ]
+  },
+  {
+    dayNum: 6,
+    label: '第六天 恭王府·什刹海·胡同',
+    slots: [
+      { id:'d6_s1', type:'other', slotType:'morning', name:'起床', startTime:'07:30' },
+      { id:'d6_s2', type:'food', slotType:'morning', name:'酒店早餐', startTime:'08:00' },
+      { id:'d6_s3', type:'transport', slotType:'morning', name:'出发：东方饭店 → 恭王府', startTime:'08:40', detail:'推荐地铁：广安门内站（7号线）→菜市口换乘4号线→平安里换乘6号线→北海北站，全程约40分钟，出站步行约8分钟' },
+      { id:'d6_s4', type:'spot', slotType:'morning', name:'恭王府', spotId:'gongwangfu', startTime:'09:30', endTime:'11:30', lat:39.935, lng:116.383, detail:'重点：银安殿、嘉乐堂、后花园、福字碑；树荫很多，比下午舒服，预计2小时' },
+      { id:'d6_s5', type:'spot', slotType:'noon', name:'烟袋斜街', startTime:'11:40', endTime:'12:00', lat:39.941, lng:116.394, detail:'步行即可，看看特色小店，不用急着买东西，控制20分钟左右' },
+      { id:'d6_s6', type:'food', slotType:'noon', name:'午餐（兼午休）', startTime:'12:00', endTime:'13:30', memo:'不赶；选有空调、环境舒服的餐厅——小宝喂奶、换尿布，老人和大宝休息，大家补充水分' },
+      { id:'d6_s7', type:'spot', slotType:'afternoon', name:'鼓楼', spotId:'gulou', startTime:'13:40', endTime:'14:10', lat:39.945, lng:116.395, detail:'外观即可' },
+      { id:'d6_s8', type:'spot', slotType:'afternoon', name:'南锣鼓巷', startTime:'14:15', endTime:'15:30', lat:39.94, lng:116.403, detail:'慢慢逛，可买文创、冰箱贴、小零食；不用追网红店，控制一小时左右' },
+      { id:'d6_s9', type:'spot', slotType:'afternoon', name:'什刹海', spotId:'shichahai', startTime:'15:40', endTime:'17:40', lat:39.9384, lng:116.387, detail:'步行15-20分钟回什刹海，把最悠闲的时间留在这里：湖边散步、拍全家福、看荷花（8月还有）、坐游船（可选，小宝状态好推荐）' },
+      { id:'kaorou_烤肉季_什刹海店_', type:'food', slotType:'evening', name:'晚餐：烤肉季（什刹海店）', startTime:'18:00', lat:39.938, lng:116.389, detail:'炙子烤羊肉、炙子烤牛肉、芝麻烧饼、杏仁豆腐；和前几天的聚宝源形成两种不同的北京特色' },
+      { id:'d6_s11', type:'transport', slotType:'evening', name:'返回酒店', startTime:'19:30', memo:'如果还有体力，可以沿什刹海夜景走十几分钟再离开，晚上特别有氛围' }
+    ],
+    notes: [
+      { id:'d6_n1', afterSlotId:'d6_s3', icon:'🚇', text:'如果当天觉得换乘麻烦，也可以直接打车，约35-50分钟' },
+      { id:'d6_n2', afterSlotId:'d6_s8', icon:'💡', text:'南锣鼓巷主街又贵又一般，周边胡同小店更有惊喜，不必追网红店' }
+    ]
+  },
+  {
+    dayNum: 7,
+    label: '第七天 天坛·前门·返程',
+    slots: [
+      { id:'d7_s1', type:'other', slotType:'morning', name:'起床、早餐', startTime:'08:00' },
+      { id:'d7_s2', type:'spot', slotType:'morning', name:'天坛公园', spotId:'tiantan', startTime:'09:00', endTime:'11:00', lat:39.8822, lng:116.4066, detail:'东门进→祈年殿→丹陛桥→皇穹宇→回音壁→圜丘→东门出，控制在约2小时' },
+      { id:'d7_s3', type:'food', slotType:'noon', name:'午餐', startTime:'11:15', endTime:'12:30', memo:'天坛出来找一家坐得舒服的餐厅，这顿不用追求北京特色大餐，舒服、空调、能坐下来更重要' },
+      { id:'d7_s4', type:'spot', slotType:'afternoon', name:'前门+大栅栏', spotId:'qianmendajie', startTime:'13:00', endTime:'15:00', lat:39.897, lng:116.398, detail:'正阳门→前门大街→大栅栏→选几个感兴趣的店看看→15:00左右结束；看正阳门外观、前门大街建筑、大栅栏老街、老字号、买一点纪念品' },
+      { id:'d7_s5', type:'transport', slotType:'afternoon', name:'回东方饭店取行李', startTime:'15:00', endTime:'15:30', detail:'这一步很重要——拿行李、上厕所、最后检查一次房间有没有遗漏' },
+      { id:'d7_s6', type:'transport', slotType:'afternoon', name:'出发去大兴机场附近酒店', startTime:'16:00', lat:39.51, lng:116.41, detail:'傍晚舒服地转移到机场附近，第二天轻松坐12:55的飞机' },
+      { id:'d7_s7', type:'hotel', slotType:'evening', name:'入住机场附近酒店', startTime:'17:00', lat:39.51, lng:116.41, detail:'大兴机场附近酒店' },
+      { id:'d7_s8', type:'food', slotType:'evening', name:'晚餐', startTime:'18:00' },
+      { id:'d7_s9', type:'other', slotType:'evening', name:'休息', detail:'早点休息' }
+    ],
+    notes: [
+      { id:'d7_n1', afterSlotId:'d7_s2', icon:'☀️', text:'如果天气特别热，把路线缩短，重点看祈年殿即可' },
+      { id:'d7_n2', afterSlotId:'d7_s4', icon:'🧳', text:'前门逛完后先回东方饭店取行李、上厕所、检查房间有没有遗漏，再出发去机场附近酒店；不赶飞机，16:00出发完全来得及' }
+    ]
+  }
+];
+function getPlanTemplateByDayNum(n) {
+  for (var i = 0; i < PLAN_TEMPLATE_DAYS.length; i++) {
+    if (PLAN_TEMPLATE_DAYS[i].dayNum === n) return PLAN_TEMPLATE_DAYS[i];
+  }
+  return null;
+}
+function cloneTemplateSlots(slots) { return JSON.parse(JSON.stringify(slots || [])); }
+function cloneTemplateNotes(notes) { return JSON.parse(JSON.stringify(notes || [])); }
+
+// 将模板内容填充到"还没有安排"的天（不覆盖用户已有内容）
+function applyPlanTemplate(plan) {
+  if (!plan || !plan.days) return plan;
+  if ((plan.templateVersion || 0) >= PLAN_TEMPLATE_VERSION) return plan;
+  for (var i = 0; i < plan.days.length; i++) {
+    var day = plan.days[i];
+    if (!day.slots || day.slots.length === 0) {
+      var t = getPlanTemplateByDayNum(day.dayNum);
+      if (t) {
+        day.slots = cloneTemplateSlots(t.slots);
+        day.notes = cloneTemplateNotes(t.notes);
+        if (t.label && (!day.label || /^第\d+天$/.test(day.label))) day.label = t.label;
+      }
+    }
+    if (!Array.isArray(day.notes)) day.notes = [];
+  }
+  plan.templateVersion = PLAN_TEMPLATE_VERSION;
+  return plan;
+}
+
 var planCache = null;
 
 // 修复plan数据：确保每天slots是独立数组（防止旧数据引用共享问题）
@@ -2626,8 +2819,12 @@ function sanitizePlan(plan) {
     if (!Array.isArray(plan.days[i].slots)) {
       plan.days[i].slots = [];
     }
+    if (!Array.isArray(plan.days[i].notes)) {
+      plan.days[i].notes = [];
+    }
     // 确保每个day的slots是独立副本
     plan.days[i].slots = plan.days[i].slots.slice();
+    plan.days[i].notes = plan.days[i].notes.slice();
   }
   return plan;
 }
@@ -2637,12 +2834,12 @@ async function getPlan() {
   if (planCache) return planCache;
   try {
     var cloud = await loadFromCloud('plan');
-    if (cloud) { planCache = sanitizePlan(cloud); return planCache; }
+    if (cloud) { planCache = sanitizePlan(applyPlanTemplate(cloud)); return planCache; }
   } catch(e) {}
   // 降级到本地
   try {
     var data = localStorage.getItem('beijing_trip_plan_v2');
-    if (data) { planCache = sanitizePlan(JSON.parse(data)); return planCache; }
+    if (data) { planCache = sanitizePlan(applyPlanTemplate(JSON.parse(data))); return planCache; }
   } catch(e) {}
   planCache = createDefaultPlan();
   return planCache;
@@ -2654,7 +2851,7 @@ function getPlanSync() {
   // 尝试从localStorage同步加载
   try {
     var data = localStorage.getItem('beijing_trip_plan_v2');
-    if (data) { planCache = sanitizePlan(JSON.parse(data)); return planCache; }
+    if (data) { planCache = sanitizePlan(applyPlanTemplate(JSON.parse(data))); return planCache; }
   } catch(e) {}
   planCache = createDefaultPlan();
   return planCache;
@@ -2698,10 +2895,18 @@ function createDefaultPlan() {
       date: formatDate(d),
       dateISO: d.toISOString().split('T')[0],
       slots: [],
+      notes: [],
       weather: null
     });
+    // 用内置行程模板填充当天内容（地点 + 地点间注意点）
+    var tpl = getPlanTemplateByDayNum(i);
+    if (tpl) {
+      days[days.length - 1].label = tpl.label;
+      days[days.length - 1].slots = cloneTemplateSlots(tpl.slots);
+      days[days.length - 1].notes = cloneTemplateNotes(tpl.notes);
+    }
   }
-  return { totalDays: totalDays, days: days };
+  return { totalDays: totalDays, days: days, templateVersion: PLAN_TEMPLATE_VERSION };
 }
 
 // 获取行程起始日期
@@ -2752,7 +2957,8 @@ function isItemInPlan(itemId) {
   var day = plan.days[dayIdx];
   if (!day) return false;
   for (var s = 0; s < day.slots.length; s++) {
-    if (day.slots[s].id === itemId) return true;
+    // 模板内置地点通过 spotId 关联到景点数据
+    if (day.slots[s].id === itemId || day.slots[s].spotId === itemId) return true;
   }
   return false;
 }
@@ -2798,12 +3004,19 @@ function onTripDateChange() {
   var oldPlan = getPlanSync();
   var oldDays = oldPlan.days || [];
   var newDays = newPlan.days;
+  // 模板已应用过（templateVersion 达标）时，用户清空过的天应保持为空
+  var oldTplApplied = (oldPlan.templateVersion || 0) >= PLAN_TEMPLATE_VERSION;
   for (var i = 0; i < newDays.length; i++) {
     var newDateISO = newDays[i].dateISO;
     for (var j = 0; j < oldDays.length; j++) {
       if (oldDays[j].dateISO === newDateISO) {
         if (oldDays[j].slots && oldDays[j].slots.length > 0) {
           newDays[i].slots = oldDays[j].slots;
+          newDays[i].notes = oldDays[j].notes || [];
+        } else if (oldTplApplied) {
+          // 该天被用户清空过，不重新填充模板
+          newDays[i].slots = [];
+          newDays[i].notes = [];
         }
         if (oldDays[j].weather) {
           newDays[i].weather = oldDays[j].weather;
@@ -2984,6 +3197,15 @@ function renderDayDetail(dayIdx) {
     if (slot.detail) html += '<div style="font-size:13px;color:#888;margin-top:1px;">' + slot.detail + '</div>';
     if (slot.memo) html += '<div style="font-size:12px;color:#aaa;margin-top:1px;">📝 ' + slot.memo + '</div>';
     html += '</div>';
+
+    // 地点之间的注意点
+    if (day.notes && day.notes.length > 0) {
+      day.notes.forEach(function(n) {
+        if (n.afterSlotId === slot.id) {
+          html += '<div class="plan-note' + (n.tone === 'warn' ? ' note-warn' : '') + '"><span class="plan-note-icon">' + (n.icon || '💡') + '</span><span class="plan-note-text">' + n.text + '</span></div>';
+        }
+      });
+    }
   });
 
   html += '</div></div>';
@@ -3263,7 +3485,12 @@ function addToPlan(itemId) {
 function removeSlot(dayIdx, slotIdx) {
   if (currentMode === 'view') { showToast('当前为查看模式，无法编辑行程'); return; }
   var plan = getPlanSync();
+  var removed = plan.days[dayIdx].slots[slotIdx];
   plan.days[dayIdx].slots.splice(slotIdx, 1);
+  // 删除挂在被移除地点之后的注意点
+  if (removed && removed.id && Array.isArray(plan.days[dayIdx].notes)) {
+    plan.days[dayIdx].notes = plan.days[dayIdx].notes.filter(function(n) { return n.afterSlotId !== removed.id; });
+  }
   currentDayDetailIndex = dayIdx;
   savePlan(plan);
   showToast('已移除');
@@ -3274,6 +3501,7 @@ function clearDay(dayIdx) {
   if (!confirm('确定清空第' + (dayIdx+1) + '天的所有安排吗？')) return;
   var plan = getPlanSync();
   plan.days[dayIdx].slots = [];
+  plan.days[dayIdx].notes = [];
   currentDayDetailIndex = dayIdx;
   savePlan(plan);
   showToast('已清空');
@@ -5352,7 +5580,7 @@ async function initApp() {
   // 2. 从云端加载行程数据
   try {
     var cloudPlan = await loadFromCloud('plan');
-    if (cloudPlan) { planCache = sanitizePlan(cloudPlan); }
+    if (cloudPlan) { planCache = sanitizePlan(applyPlanTemplate(cloudPlan)); }
   } catch(e) { console.warn('云端行程加载失败:', e.message); }
 
   // 3. 从云端加载预算数据
