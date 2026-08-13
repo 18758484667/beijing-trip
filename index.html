@@ -1733,17 +1733,13 @@ var DATA = {
 var currentMode = 'view'; // 'plan' | 'view'
 
 async function getMode() {
-  try {
-    var cloud = await loadFromCloud('mode');
-    if (cloud) return cloud.mode || 'view';
-  } catch(e) {}
+  // 模式改为本机记忆：每台设备各自决定查看/规划，互不影响
   try { return localStorage.getItem('beijing_trip_mode') || 'view'; } catch(e) { return 'view'; }
 }
 
 async function setMode(mode) {
   currentMode = mode;
   try { localStorage.setItem('beijing_trip_mode', mode); } catch(e) {}
-  saveToCloud('mode', { mode: mode });
   applyMode(mode);
 }
 
@@ -1758,7 +1754,7 @@ function applyMode(mode) {
     if (dateBar) dateBar.style.display = 'none';
     if (dateInfo) dateInfo.style.display = 'none';
     if (menuIcon) menuIcon.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
-    if (menuText) menuText.textContent = '规划中模式';
+    if (menuText) menuText.textContent = '仅查看模式 · 自动同步';
     document.getElementById('tabPlanLabel').textContent = '行程';
   } else {
     document.body.classList.remove('view-mode');
@@ -1767,7 +1763,7 @@ function applyMode(mode) {
     if (dateBar) dateBar.style.display = '';
     if (dateInfo) dateInfo.style.display = '';
     if (menuIcon) menuIcon.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>';
-    if (menuText) menuText.textContent = '仅查看模式';
+    if (menuText) menuText.textContent = '规划模式 · 编辑中';
     document.getElementById('tabPlanLabel').textContent = '规划';
   }
   var planPage = document.getElementById('page-plan');
@@ -1783,7 +1779,7 @@ function applyMode(mode) {
 function toggleMode() {
   var newMode = currentMode === 'plan' ? 'view' : 'plan';
   setMode(newMode);
-  showToast(newMode === 'view' ? '已切换为查看模式，家人只能查看行程' : '已切换为规划模式，可以编辑行程');
+  showToast(newMode === 'view' ? '已切换为查看模式（自动同步行程）' : '已切换为规划模式，可以编辑行程');
   closeMoreMenu();
 }
 
@@ -1824,7 +1820,7 @@ function switchTab(pageId, el) {
   document.getElementById(pageId).classList.add('active');
   el.classList.add('active');
   if (pageId === 'page-spots') { setTimeout(initMap, 100); }
-  if (pageId === 'page-plan') { initPlanDatePickers(); renderPlanList(); }
+  if (pageId === 'page-plan') { initPlanDatePickers(); renderPlanList(); refreshPlanFromCloud(); }
   if (pageId === 'page-food') { initFoodMap(); }
   if (pageId === 'page-toolbox') { renderToolbox(); }
 }
@@ -3112,6 +3108,35 @@ async function savePlan(plan) {
   } else {
     renderPlanList();
   }
+}
+
+// 云同步：查看模式下定时从云端拉取最新行程并刷新（规划模式下不自动覆盖）
+var lastPlanCloudHash = null;
+
+async function refreshPlanFromCloud(force) {
+  // 规划模式下不自动覆盖，避免打断正在编辑的内容
+  if (currentMode === 'plan' && !force) return;
+  try {
+    var cloud = await loadFromCloud('plan');
+    if (!cloud || !cloud.days || !cloud.days.length) return;
+    var hash = JSON.stringify(cloud);
+    if (hash === lastPlanCloudHash) return;
+    if (planCache && hash === JSON.stringify(planCache)) { lastPlanCloudHash = hash; return; }
+    lastPlanCloudHash = hash;
+    planCache = sanitizePlan(applyPlanTemplate(JSON.parse(JSON.stringify(cloud))));
+    try { localStorage.setItem('beijing_trip_plan_v2', JSON.stringify(planCache)); } catch(e) {}
+    var ddPage = document.getElementById('dayDetailPage');
+    if (ddPage && ddPage.classList.contains('show')) {
+      renderDayDetail(currentDayDetailIndex);
+      renderPlanList();
+    } else {
+      renderPlanList();
+    }
+    var planPage = document.getElementById('page-plan');
+    if (planPage && planPage.classList.contains('active')) {
+      showToast('行程已自动更新');
+    }
+  } catch(e) { console.warn('云端行程刷新失败:', e.message); }
 }
 
 function createDefaultPlan() {
@@ -5829,7 +5854,7 @@ async function initApp() {
   // 2. 从云端加载行程数据
   try {
     var cloudPlan = await loadFromCloud('plan');
-    if (cloudPlan) { planCache = sanitizePlan(applyPlanTemplate(cloudPlan)); }
+    if (cloudPlan) { planCache = sanitizePlan(applyPlanTemplate(cloudPlan)); lastPlanCloudHash = JSON.stringify(cloudPlan); }
   } catch(e) { console.warn('云端行程加载失败:', e.message); }
 
   // 3. 从云端加载预算数据
@@ -5865,6 +5890,11 @@ async function initApp() {
   setTimeout(initMap, 300);
   // 延迟查询天气（避免阻塞页面加载）
   setTimeout(function() { fetchWeatherForPlan(); }, 1000);
+  // 云同步：查看模式下每30秒自动拉取最新行程；切回页面时立即刷新
+  setInterval(function() { refreshPlanFromCloud(); }, 30000);
+  document.addEventListener('visibilitychange', function() {
+    if (document.visibilityState === 'visible') refreshPlanFromCloud(true);
+  });
   console.log('京城游记 H5 页面加载完成 - 共' + DATA.spots.length + '个景点（数据来源：Supabase + 本地）');
 }
 
