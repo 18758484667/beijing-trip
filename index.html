@@ -1054,7 +1054,7 @@ var DATA = {
   // ---- 全部景点（按区域/主题分类）----
   spots: [
     // === 天安门-故宫片区（地铁1号线）===
-    { id:'gugong', name:'故宫博物院', subtitle:'世界文化遗产·紫禁城', price:'60元', duration:'3-4小时', time:'8:30-17:00', closedDay:'周一闭馆', address:'东城区景山前街4号', reservation:'提前7天20:00在「故宫博物院」小程序抢票', lat:39.9163, lng:116.3972, phone:'010-85007421', website:'https://www.dpm.org.cn', icon:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--red)" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6"/><path d="M9 11h6"/></svg>',
+    { id:'gugong', name:'故宫博物院', subtitle:'世界文化遗产·紫禁城', price:'60元', duration:'3-4小时', time:'8:30-17:00', closedDay:'周一闭馆', address:'东城区景山前街4号', reservation:'提前7天20:00在「故宫博物院」小程序抢票', guide:{ apps:[{name:'故宫智能导览', steps:['微信 → 底部「发现」→「小程序」','搜索「故宫智能导览」并打开','选择「故宫/紫禁城」→ 播放免费语音解说']},{name:'数字故宫', steps:['微信搜索「数字故宫」小程序','打开后点「导览」→ 语音讲解 / AR实景导航','故宫官方出品，购票+导览一体']}], alt:'也可在午门租语音讲解器，或请人工讲解；导览小程序内容以实际为准' }, lat:39.9163, lng:116.3972, phone:'010-85007421', website:'https://www.dpm.org.cn', icon:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--red)" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6"/><path d="M9 11h6"/></svg>',
       photos:[
         'images/Beijing_Forbidden_City_Hall_of_2026-06-10T08-24-29.jpg',
         'images/Red_walls_and_golden_roof_tile_2026-06-10T08-27-38.jpg',
@@ -1790,6 +1790,13 @@ var DATA = {
     { icon:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#E74C3C" stroke-width="2"><circle cx="12" cy="8" r="5"/><path d="M3 21v-2a7 7 0 0 1 7-7h4a7 7 0 0 1 7 7v2"/></svg>', title:'带娃提示', color:'#27AE60', items:['推车选轻便折叠款故宫石板路推车会颠','景点内有母婴室故宫颐和园都有','备好零食湿巾防蚊液北京夏天蚊子多'] },
     { icon:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/></svg>', title:'防暑降温', color:'#E67E22', items:['随身带水！景区内水贵提前买好','中午最热时段（11:00-14:00）安排室内或回酒店','带小风扇冰贴实测有效'] },
     { icon:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>', title:'避坑指南', color:'#8E44AD', items:['不要在南锣鼓巷主街吃饭贵且一般','拒绝黄牛带路快速通道都是骗人的','景区周边一日游大巴慎报强制购物'] },
+    { icon:'🎧', title:'免费解说', color:'#16A085', items:[
+      '打开步骤：微信 → 底部「发现」→「小程序」→ 搜索名字 → 打开 → 选当前景点播放解说',
+      '故宫：微信搜索「故宫智能导览」小程序，免费语音讲解',
+      '故宫官方「数字故宫」小程序：购票+导览一体，还有AR实景导航',
+      '多景点通用：微信搜索「慧智导览」小程序，打开后按当前位置选导览',
+      '其他景点的免费导览小程序持续补充中；现场也可租讲解器/请人工讲解'
+    ] },
     { icon:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>', title:'实用APP', color:'#2E86C1', items:['高德地图：导航查公交地铁','支付宝：刷地铁码景区码','大众点评：找美食看评价','故宫博物院小程序：预约门票'] },
     { icon:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>', title:'花费参考', color:'#1ABC9C', items:['故宫60元景山2元天坛28元（联票）','烤鸭人均100-150元涮肉人均80-120元','地铁单程3-7元打车市内一般30-60元','5大2小7天预算约8000-18000元（含机票）'] }
   ]
@@ -2206,6 +2213,27 @@ function showSpotDetail(spotId) {
         '<span class="mf-card-arrow open">▼</span>' +
       '</div>' +
       '<div class="mf-card-body open">' + restHtml + '</div>' +
+      '</div>';
+  }
+
+  // 免费解说（微信小程序导览）
+  if (spot.guide && spot.guide.apps && spot.guide.apps.length > 0) {
+    var guideHtml = '';
+    spot.guide.apps.forEach(function(app, gi) {
+      guideHtml += '<div style="background:#F8F4F0;border-radius:10px;padding:10px 12px;margin-bottom:8px;">' +
+        '<div style="font-size:16px;font-weight:700;color:#333;margin-bottom:4px;">🎧 ' + app.name + '</div>' +
+        '<div style="font-size:15px;color:#666;line-height:1.7;">' +
+          app.steps.map(function(s, si) { return '<div style="margin-bottom:2px;">' + (si+1) + '. ' + s + '</div>'; }).join('') +
+        '</div></div>';
+    });
+    if (spot.guide.alt) guideHtml += '<div style="font-size:14px;color:#999;line-height:1.6;margin-top:2px;">' + spot.guide.alt + '</div>';
+    html += '<div class="mf-card">' +
+      '<div class="mf-card-header" onclick="toggleMfCard(this)">' +
+        '<span class="mf-card-header-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#E74C3C" stroke-width="2"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg></span>' +
+        '<span class="mf-card-header-text">免费解说（微信小程序）</span>' +
+        '<span class="mf-card-arrow open">▼</span>' +
+      '</div>' +
+      '<div class="mf-card-body open">' + guideHtml + '</div>' +
       '</div>';
   }
 
