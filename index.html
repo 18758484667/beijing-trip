@@ -2718,7 +2718,7 @@ function addStreetShopToPlan(streetId, shopName) {
 // 内置行程模板（来自 resource/ 每日行程）
 // 注意点 notes: afterSlotId 指向该注意点显示在哪个地点之后
 // ============================================================
-var PLAN_TEMPLATE_VERSION = 6;
+var PLAN_TEMPLATE_VERSION = 7;
 // Day1 T3打车指南（完整版，来自 resource/Day1 出发.md）
 function getPlanT3GuideDetail() {
   return '打车约40-50分钟（晚间不堵车），费用约100-130元（含高速费）。\n\n【首都机场T3 带婴儿车打车指南】\n\n🚕 路线一：网约车（核心推荐）\n上车点：T3停车楼B2层网约车H区\n1. 到达层（2层）A/B/C出口 → 朝“停车场”标识走，经“北京服务”通道进入停车楼连廊\n2. 连廊中务必寻找直梯/无障碍电梯（扶梯禁止婴儿车）\n3. 直梯下到B2层，出电梯即到网约车H区（分东、西两侧）\n4. 提前与司机电话确认在东侧还是西侧（如东侧H12通道靠近直梯出口），并告知在直梯口等待\n\n💬 推荐话术（可直接复制发给司机）：\n“师傅您好，我带婴儿车坐直梯下来的，在H区东侧H12通道直梯口，您开过来我就在电梯口等您。”\n\n🚗 路线二：备选捷径（4层出发层上车）\n· 接单后第一时间电话司机，询问是否愿意到4层出发层（10号门附近）接您\n· 从到达层坐直梯上到4层，从10号门出去等车\n· 注意：出发层限停8分钟，必须人等车，快走到时再通知司机开过来\n· 夜间运管较松但仍有被拒可能，被拒则返回路线一\n\n🚖 路线三：出租车（最省心，带娃首选）\n· 到达层出门后，沿“出租车”指示牌到室外候车区\n· 带婴儿车可走无障碍通道，工作人员安排优先上车\n· 无需预约随到随走，费用约100-130元（含高速费），比网约车稍贵但省心\n\n⚠️ 带婴儿车特别避坑提醒（T3版）\n· 误走扶梯 → 认准直梯/无障碍电梯标识，找不到就问穿制服的工作人员\n· 停车楼直梯排队 → 取完行李后尽早出发，不要在到达层滞留\n· 和司机互相找不到 → 出电梯后拍下通道编号和周围标志，直接发给司机\n· 去1层找网约车 → T3一层有快速通道但网约车定位不在此处，切勿前往';
@@ -2754,7 +2754,7 @@ var PLAN_TEMPLATE_DAYS = [
     label: '第二天 天安门·国博·牛街',
     slots: [
       { id:'d2_s1', type:'other', slotType:'morning', name:'起床', startTime:'07:30' },
-      { id:'d2_s2', type:'food', slotType:'morning', name:'酒店早餐', startTime:'08:00' },
+      { id:'d2_s2', type:'food', slotType:'morning', name:'酒店附近早餐店', startTime:'08:00', detail:'东方饭店附近：楼下50米「和记炒肝」（炒肝+小笼包+豆腐脑，约25元/人）；或酒店二楼「味道1918」中西自助（约50元/人，06:30-10:00）' },
       { id:'d2_s3', type:'transport', slotType:'morning', name:'出发：东方饭店 → 天安门广场', startTime:'08:40', detail:'打车前往' },
       { id:'d2_s4', type:'spot', slotType:'morning', name:'天安门广场', spotId:'tiananmen', startTime:'09:10', endTime:'10:30', lat:39.9054, lng:116.3976, detail:'从1号口安检进入；看天安门城楼、金水桥、华表；走地下通道进入广场；看人民英雄纪念碑、人民大会堂、国家博物馆外观；全家拍照，慢慢逛不赶时间' },
       { id:'d2_s5', type:'spot', slotType:'noon', name:'步行进入国家博物馆', spotId:'guobowuguan', startTime:'10:30', lat:39.908, lng:116.397 },
@@ -2775,7 +2775,7 @@ var PLAN_TEMPLATE_DAYS = [
     label: '第三天 慕田峪长城',
     slots: [
       { id:'d3_s1', type:'other', slotType:'morning', name:'起床', startTime:'07:00' },
-      { id:'d3_s2', type:'food', slotType:'morning', name:'早餐', startTime:'07:15', memo:'吃饱一点，今天上午体力消耗最大' },
+      { id:'d3_s2', type:'food', slotType:'morning', name:'酒店附近早餐店', startTime:'07:15', memo:'吃饱一点，今天上午体力消耗最大', detail:'东方饭店附近：楼下50米「和记炒肝」或酒店二楼「味道1918」自助，吃饱再出发' },
       { id:'d3_s3', type:'transport', slotType:'morning', name:'包车出发：东方饭店 → 慕田峪长城', startTime:'07:45', detail:'约1.5小时车程' },
       { id:'d3_s4', type:'transport', slotType:'morning', name:'到达景区（摆渡车+缆车上山）', startTime:'09:15', detail:'尽量早点，避开后面的排队高峰' },
       { id:'d3_s5', type:'spot', slotType:'morning', name:'慕田峪长城', spotId:'mutianyu', startTime:'09:45', endTime:'12:00', lat:40.44, lng:116.56, detail:'路线：14号敌楼→17号敌楼→返回14号→缆车下山；不挑战英雄坡，老人孩子压力小，风景最好的一段之一' },
@@ -2796,7 +2796,7 @@ var PLAN_TEMPLATE_DAYS = [
     label: '第四天 故宫',
     slots: [
       { id:'d4_s1', type:'other', slotType:'morning', name:'起床', startTime:'07:30' },
-      { id:'d4_s2', type:'food', slotType:'morning', name:'早餐', startTime:'08:00', memo:'建议吃饱一点；可提前一天买好香蕉、小面包、饼干（或酒店允许带走水果就拿一两个）' },
+      { id:'d4_s2', type:'food', slotType:'morning', name:'酒店附近早餐店', startTime:'08:00', memo:'建议吃饱一点；可提前一天买好香蕉、小面包、饼干（或酒店允许带走水果就拿一两个）', detail:'东方饭店附近：楼下50米「和记炒肝」或酒店二楼「味道1918」自助' },
       { id:'d4_s3', type:'transport', slotType:'morning', name:'出发：东方饭店 → 东华门/午门', startTime:'08:45', detail:'直接打车到东华门附近，步行到午门；预计9:10左右到' },
       { id:'d4_s4', type:'spot', slotType:'morning', name:'午门 安检检票', spotId:'gugong', startTime:'09:10', endTime:'09:30', lat:39.9163, lng:116.3972, memo:'上洗手间（很重要）——进入故宫后卫生间没有门口方便' },
       { id:'d4_s5', type:'spot', slotType:'morning', name:'故宫博物院（中轴线）', startTime:'09:30', detail:'午门→太和门→太和殿→中和殿→保和殿→乾清宫→交泰殿→坤宁宫→御花园→神武门；不要一开始就拐去东西六宫，否则越走越累；讲解器建议租2台轮流听' },
@@ -2818,7 +2818,7 @@ var PLAN_TEMPLATE_DAYS = [
     label: '第五天 颐和园·圆明园·清华北大',
     slots: [
       { id:'d5_s1', type:'other', slotType:'morning', name:'起床', startTime:'07:30', memo:'不用太赶，今天是整趟旅行节奏最舒缓的一天' },
-      { id:'d5_s2', type:'food', slotType:'morning', name:'酒店早餐', startTime:'08:00' },
+      { id:'d5_s2', type:'food', slotType:'morning', name:'酒店附近早餐店', startTime:'08:00', detail:'东方饭店附近：楼下50米「和记炒肝」（炒肝+小笼包+豆腐脑）；或酒店二楼「味道1918」中西自助' },
       { id:'d5_s3', type:'transport', slotType:'morning', name:'出发：东方饭店 → 颐和园东宫门', startTime:'08:30', detail:'建议打车，约45-60分钟' },
       { id:'d5_s4', type:'spot', slotType:'morning', name:'颐和园', spotId:'yiheyuan', startTime:'09:20', endTime:'12:40', lat:39.9996, lng:116.2755, detail:'东宫门→仁寿殿→乐寿堂（10分钟即可）→长廊（最经典）→清晏舫（石舫）→游船码头→十七孔桥→铜牛→新建宫门出；不爬佛香阁；游船排队30分钟以内建议乘船，否则直接步行' },
       { id:'d5_s5', type:'food', slotType:'noon', name:'午餐（新建宫门附近）', startTime:'12:50', endTime:'13:50', memo:'能坐下来休息、有空调、小宝方便喂食、老人可以缓一缓' },
@@ -2837,7 +2837,7 @@ var PLAN_TEMPLATE_DAYS = [
     label: '第六天 恭王府·什刹海·胡同',
     slots: [
       { id:'d6_s1', type:'other', slotType:'morning', name:'起床', startTime:'07:30' },
-      { id:'d6_s2', type:'food', slotType:'morning', name:'酒店早餐', startTime:'08:00' },
+      { id:'d6_s2', type:'food', slotType:'morning', name:'酒店附近早餐店', startTime:'08:00', detail:'东方饭店附近：楼下50米「和记炒肝」或酒店二楼「味道1918」自助' },
       { id:'d6_s3', type:'transport', slotType:'morning', name:'出发：东方饭店 → 恭王府', startTime:'08:40', detail:'推荐地铁：广安门内站（7号线）→菜市口换乘4号线→平安里换乘6号线→北海北站，全程约40分钟，出站步行约8分钟' },
       { id:'d6_s4', type:'spot', slotType:'morning', name:'恭王府', spotId:'gongwangfu', startTime:'09:30', endTime:'11:30', lat:39.935, lng:116.383, detail:'重点：银安殿、嘉乐堂、后花园、福字碑；树荫很多，比下午舒服，预计2小时' },
       { id:'d6_s5', type:'spot', slotType:'noon', name:'烟袋斜街', startTime:'11:40', endTime:'12:00', lat:39.941, lng:116.394, detail:'步行即可，看看特色小店，不用急着买东西，控制20分钟左右' },
@@ -2857,7 +2857,7 @@ var PLAN_TEMPLATE_DAYS = [
     dayNum: 7,
     label: '第七天 天坛·前门·返程',
     slots: [
-      { id:'d7_s1', type:'other', slotType:'morning', name:'起床、早餐', startTime:'08:00' },
+      { id:'d7_s1', type:'other', slotType:'morning', name:'起床、附近早餐店', startTime:'08:00', detail:'在东方饭店附近解决：楼下50米「和记炒肝」（炒肝+小笼包+豆腐脑）或酒店二楼「味道1918」自助' },
       { id:'d7_s2', type:'spot', slotType:'morning', name:'天坛公园', spotId:'tiantan', startTime:'09:00', endTime:'11:00', lat:39.8822, lng:116.4066, detail:'东门进→祈年殿→丹陛桥→皇穹宇→回音壁→圜丘→东门出，控制在约2小时' },
       { id:'d7_s3', type:'food', slotType:'noon', name:'午餐', startTime:'11:15', endTime:'12:30', memo:'天坛出来找一家坐得舒服的餐厅，这顿不用追求北京特色大餐，舒服、空调、能坐下来更重要' },
       { id:'d7_s4', type:'spot', slotType:'afternoon', name:'前门+大栅栏', spotId:'qianmendajie', startTime:'13:00', endTime:'15:00', lat:39.897, lng:116.398, detail:'正阳门→前门大街→大栅栏→选几个感兴趣的店看看→15:00左右结束；看正阳门外观、前门大街建筑、大栅栏老街、老字号、买一点纪念品' },
@@ -2876,7 +2876,7 @@ var PLAN_TEMPLATE_DAYS = [
     dayNum: 8,
     label: '第八天 返程',
     slots: [
-      { id:'d8_s1', type:'other', slotType:'morning', name:'起床、早餐', startTime:'08:00', endTime:'08:45', memo:'昨晚已入住大兴机场附近酒店，今天只需赶12:55的飞机，时间宽裕' },
+      { id:'d8_s1', type:'other', slotType:'morning', name:'起床、附近早餐店', startTime:'08:00', endTime:'08:45', memo:'昨晚已入住大兴机场附近酒店，今天只需赶12:55的飞机，时间宽裕', detail:'在机场附近酒店周边或酒店内解决早餐（机场周边餐饮选择少，可提前一晚买好面包牛奶），吃饱就好别耽误值机' },
       { id:'d8_s2', type:'transport', slotType:'morning', name:'退房，出发去大兴机场', startTime:'08:45', endTime:'09:45', detail:'从机场附近酒店打车/乘大兴机场线前往航站楼，路上预留充足时间；到达后上航站楼3层（地铁/高铁到达的旅客可在地下一层办值机+安检一体）' },
       { id:'d8_s3', type:'transport', slotType:'morning', name:'大兴机场 值机与行李托运', startTime:'09:45', endTime:'10:45', detail:'KN5991 中国联合航空（北京大兴→宁波），12:55起飞、15:15到达；中联航国内值机在航站楼3层值机区（R岛一带、近11号门，以现场指示为准）；值机截载通常为起飞前40-45分钟，带娃多预留时间' },
       { id:'d8_s4', type:'transport', slotType:'morning', name:'过安检、候机', startTime:'10:45', endTime:'12:30', detail:'大兴机场安检通道多、效率高；过完安检按登机口指示前往候机区，登机口附近给宝宝喂食、换尿布（航站楼内设母婴室）' },
@@ -3018,6 +3018,32 @@ function applyPlanTemplate(plan) {
         if (d16s.id === 'd8_s3' && d16s.detail && d16s.detail.indexOf('R岛') < 0) {
           d16s.detail = 'KN5991 中国联合航空（北京大兴→宁波），12:55起飞、15:15到达；中联航国内值机在航站楼3层值机区（R岛一带、近11号门，以现场指示为准）；值机截载通常为起飞前40-45分钟，带娃多预留时间';
         }
+      }
+    }
+  }
+  // 版本迁移 6→7：早餐统一改为酒店附近早餐店
+  var bfNames = { d2_s2:'酒店附近早餐店', d3_s2:'酒店附近早餐店', d4_s2:'酒店附近早餐店', d5_s2:'酒店附近早餐店', d6_s2:'酒店附近早餐店' };
+  var bfDetails = {
+    d2_s2: '东方饭店附近：楼下50米「和记炒肝」（炒肝+小笼包+豆腐脑，约25元/人）；或酒店二楼「味道1918」中西自助（约50元/人，06:30-10:00）',
+    d3_s2: '东方饭店附近：楼下50米「和记炒肝」或酒店二楼「味道1918」自助，吃饱再出发',
+    d4_s2: '东方饭店附近：楼下50米「和记炒肝」或酒店二楼「味道1918」自助',
+    d5_s2: '东方饭店附近：楼下50米「和记炒肝」（炒肝+小笼包+豆腐脑）；或酒店二楼「味道1918」中西自助',
+    d6_s2: '东方饭店附近：楼下50米「和记炒肝」或酒店二楼「味道1918」自助'
+  };
+  for (var d17i = 0; d17i < plan.days.length; d17i++) {
+    var d17 = plan.days[d17i];
+    if (!Array.isArray(d17.slots)) continue;
+    for (var d17j = 0; d17j < d17.slots.length; d17j++) {
+      var d17s = d17.slots[d17j];
+      if (d17s.id === 'd7_s1' && d17s.name && d17s.name.indexOf('起床、早餐') >= 0) {
+        d17s.name = '起床、附近早餐店';
+        d17s.detail = '在东方饭店附近解决：楼下50米「和记炒肝」（炒肝+小笼包+豆腐脑）或酒店二楼「味道1918」自助';
+      } else if (d17s.id === 'd8_s1' && d17s.name && d17s.name.indexOf('起床、早餐') >= 0) {
+        d17s.name = '起床、附近早餐店';
+        d17s.detail = '在机场附近酒店周边或酒店内解决早餐（机场周边餐饮选择少，可提前一晚买好面包牛奶），吃饱就好别耽误值机';
+      } else if (bfNames[d17s.id] && d17s.name && d17s.name.indexOf('早餐') >= 0) {
+        d17s.name = bfNames[d17s.id];
+        d17s.detail = bfDetails[d17s.id];
       }
     }
   }
