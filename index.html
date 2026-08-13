@@ -2718,10 +2718,15 @@ function addStreetShopToPlan(streetId, shopName) {
 // 内置行程模板（来自 resource/ 每日行程）
 // 注意点 notes: afterSlotId 指向该注意点显示在哪个地点之后
 // ============================================================
-var PLAN_TEMPLATE_VERSION = 2;
+var PLAN_TEMPLATE_VERSION = 3;
 // Day1 T3打车指南（完整版，来自 resource/Day1 出发.md）
 function getPlanT3GuideDetail() {
   return '打车约40-50分钟（晚间不堵车），费用约100-130元（含高速费）。\n\n【首都机场T3 带婴儿车打车指南】\n\n🚕 路线一：网约车（核心推荐）\n上车点：T3停车楼B2层网约车H区\n1. 到达层（2层）A/B/C出口 → 朝“停车场”标识走，经“北京服务”通道进入停车楼连廊\n2. 连廊中务必寻找直梯/无障碍电梯（扶梯禁止婴儿车）\n3. 直梯下到B2层，出电梯即到网约车H区（分东、西两侧）\n4. 提前与司机电话确认在东侧还是西侧（如东侧H12通道靠近直梯出口），并告知在直梯口等待\n\n💬 推荐话术（可直接复制发给司机）：\n“师傅您好，我带婴儿车坐直梯下来的，在H区东侧H12通道直梯口，您开过来我就在电梯口等您。”\n\n🚗 路线二：备选捷径（4层出发层上车）\n· 接单后第一时间电话司机，询问是否愿意到4层出发层（10号门附近）接您\n· 从到达层坐直梯上到4层，从10号门出去等车\n· 注意：出发层限停8分钟，必须人等车，快走到时再通知司机开过来\n· 夜间运管较松但仍有被拒可能，被拒则返回路线一\n\n🚖 路线三：出租车（最省心，带娃首选）\n· 到达层出门后，沿“出租车”指示牌到室外候车区\n· 带婴儿车可走无障碍通道，工作人员安排优先上车\n· 无需预约随到随走，费用约100-130元（含高速费），比网约车稍贵但省心\n\n⚠️ 带婴儿车特别避坑提醒（T3版）\n· 误走扶梯 → 认准直梯/无障碍电梯标识，找不到就问穿制服的工作人员\n· 停车楼直梯排队 → 取完行李后尽早出发，不要在到达层滞留\n· 和司机互相找不到 → 出电梯后拍下通道编号和周围标志，直接发给司机\n· 去1层找网约车 → T3一层有快速通道但网约车定位不在此处，切勿前往';
+}
+
+// Day4 前门大街·大栅栏 攻略（来自 resource/Day7 文档 + 应用内数据）
+function getPlanQianmenDetail() {
+  return '东交民巷沿正义路向南步行约15-20分钟即到前门，傍晚来正好。\n\n路线：正阳门 → 前门大街 → 大栅栏 → 北京坊，选感兴趣的逛，不用全逛。\n· 正阳门：前门地标，傍晚灯光好看，拍张照\n· 前门大街（800米古街）：故宫前门文创店（限定周边）、红星二锅头博物馆、六必居博物馆；可坐“前门1号”铛铛车代步（50元/人）\n· 大栅栏老字号街：“头顶马聚源、脚踩内联升”——瑞蚨祥、同仁堂、马聚源、内联升一字排开；三庆园听京剧、大观楼看复古胶片\n· 北京坊：PageOne书店3层落地窗拍正阳门，累了进去坐下休息（老人小宝歇脚）\n· 鲜鱼口美食街：天兴居炒肝包子、锦芳小吃驴打滚（2-3元）、吴裕泰茉莉花茶冰淇淋\n\n避坑提醒：\n· 烤鸭别去全聚德（游客多），去四季民福或紫光园\n· 傍晚大栅栏常能偶遇非遗糖画/面人手艺人，别错过\n· 逛累了随时进 PageOne / 老舍茶馆 休息，不用硬撑';
 }
 
 var PLAN_TEMPLATE_DAYS = [
@@ -2798,13 +2803,14 @@ var PLAN_TEMPLATE_DAYS = [
       { id:'d4_s6', type:'food', slotType:'noon', name:'故宫内简餐', startTime:'11:30', detail:'不用正式吃饭，找地方坐下吃面包、香蕉、饼干' },
       { id:'d4_s7', type:'spot', slotType:'afternoon', name:'景山公园', spotId:'jingshan', startTime:'13:30', lat:39.9225, lng:116.3964, detail:'从神武门出来；路线：南门进→万春亭→拍照→原路下山，控制在40分钟左右' },
       { id:'d4_s8', type:'food', slotType:'afternoon', name:'午餐（景山/地安门一带）', startTime:'14:30', memo:'认真选——今天是体力消耗最大的一天，推荐在景山、地安门一带吃' },
-      { id:'d4_s9', type:'spot', slotType:'afternoon', name:'东交民巷', spotId:'dongjiaominxiang', startTime:'16:00', lat:39.902, lng:116.408, detail:'慢慢散步' },
-      { id:'d4_s10', type:'other', slotType:'afternoon', name:'咖啡馆休息', startTime:'17:00', detail:'找一家咖啡馆或饮品店，老人休息、小宝休息' },
-      { id:'d4_s11', type:'food', slotType:'evening', name:'晚餐（简单）', startTime:'18:00', memo:'如果中午吃得丰盛，晚上可以轻松一点' }
+      { id:'d4_s9', type:'spot', slotType:'afternoon', name:'东交民巷', spotId:'dongjiaominxiang', startTime:'16:00', endTime:'17:00', lat:39.902, lng:116.408, detail:'慢慢散步，看欧式老建筑' },
+      { id:'d4_s10', type:'spot', slotType:'afternoon', name:'前门大街·大栅栏', spotId:'qianmendajie', startTime:'17:00', endTime:'18:30', lat:39.897, lng:116.398, detail: getPlanQianmenDetail() },
+      { id:'d4_s11', type:'food', slotType:'evening', name:'晚餐（前门·鲜鱼口）', startTime:'18:30', detail:'逛完直接在前门解决：\n· 便宜坊焖炉烤鸭（1416年老店，鲜鱼口）\n· 都一处烧麦（1738年老字号）\n· 四季民福烤鸭（前门店）\n· 吴裕泰茶点、锦芳小吃（鲜鱼口）', memo:'如果中午吃得丰盛，晚上可以轻松一点' }
     ],
     notes: [
       { id:'d4_n1', afterSlotId:'d4_s3', icon:'🚕', text:'打车到东华门附近（文体中心），沿城墙走约5分钟到午门；不要直接开到午门口' },
-      { id:'d4_n2', afterSlotId:'d4_s4', icon:'🚻', text:'安检检票后先上洗手间——很重要，故宫内卫生间不如门口方便' }
+      { id:'d4_n2', afterSlotId:'d4_s4', icon:'🚻', text:'安检检票后先上洗手间——很重要，故宫内卫生间不如门口方便' },
+      { id:'d4_n3', afterSlotId:'d4_s9', icon:'🏮', text:'东交民巷到前门步行约15-20分钟（沿正义路向南）；傍晚前门亮灯好看，大栅栏常能偶遇糖画/面人手艺人' }
     ]
   },
   {
@@ -2909,6 +2915,41 @@ function applyPlanTemplate(plan) {
         }
       }
     }
+  }
+  // 版本迁移 2→3：Day4 东交民巷后插入「前门大街·大栅栏」
+  if (plan.days.length > 3 && plan.days[3]) {
+    var d4 = plan.days[3];
+    if (Array.isArray(d4.slots)) {
+      // 移除旧“咖啡馆休息”条目
+      for (var d4i = d4.slots.length - 1; d4i >= 0; d4i--) {
+        if (d4.slots[d4i].id === 'd4_s10') d4.slots.splice(d4i, 1);
+      }
+      var d4HasQm = false;
+      var d4s9i = -1;
+      for (var d4j = 0; d4j < d4.slots.length; d4j++) {
+        var d4s = d4.slots[d4j];
+        if (d4s.name && d4s.name.indexOf('前门') >= 0) d4HasQm = true;
+        if (d4s.id === 'd4_s9') d4s9i = d4j;
+      }
+      if (!d4HasQm && d4s9i >= 0) {
+        d4.slots.splice(d4s9i + 1, 0, { id:'d4_s10', type:'spot', slotType:'afternoon', name:'前门大街·大栅栏', spotId:'qianmendajie', startTime:'17:00', endTime:'18:30', lat:39.897, lng:116.398, detail: getPlanQianmenDetail() });
+      }
+      for (var d4k = 0; d4k < d4.slots.length; d4k++) {
+        var d4sl = d4.slots[d4k];
+        if (d4sl.id === 'd4_s11') {
+          d4sl.name = '晚餐（前门·鲜鱼口）';
+          d4sl.startTime = '18:30';
+          d4sl.detail = '逛完直接在前门解决：\n· 便宜坊焖炉烤鸭（1416年老店，鲜鱼口）\n· 都一处烧麦（1738年老字号）\n· 四季民福烤鸭（前门店）\n· 吴裕泰茶点、锦芳小吃（鲜鱼口）';
+        }
+        if (d4sl.id === 'd4_s9' && !d4sl.endTime) d4sl.endTime = '17:00';
+      }
+    }
+    if (!Array.isArray(d4.notes)) d4.notes = [];
+    var d4HasN3 = false;
+    for (var d4n = 0; d4n < d4.notes.length; d4n++) {
+      if (d4.notes[d4n].id === 'd4_n3') d4HasN3 = true;
+    }
+    if (!d4HasN3) d4.notes.push({ id:'d4_n3', afterSlotId:'d4_s9', icon:'🏮', text:'东交民巷到前门步行约15-20分钟（沿正义路向南）；傍晚前门亮灯好看，大栅栏常能偶遇糖画/面人手艺人' });
   }
   plan.templateVersion = PLAN_TEMPLATE_VERSION;
   return plan;
