@@ -3225,7 +3225,7 @@ function createDefaultPlan() {
       dayNum: i,
       label: label,
       date: formatDate(d),
-      dateISO: d.toISOString().split('T')[0],
+      dateISO: localDateISO(d),
       slots: [],
       notes: [],
       weather: null
@@ -3247,7 +3247,8 @@ function getTripStartDate() {
     var saved = localStorage.getItem('bj_trip_start');
     if (saved) return new Date(saved);
   } catch(e) {}
-  return new Date();
+  // 默认：本次行程出发日 2026-08-15
+  return new Date('2026-08-15T00:00:00');
 }
 function setTripStartDate(date) {
   localStorage.setItem('bj_trip_start', date.toISOString());
@@ -3258,14 +3259,20 @@ function getTripEndDate() {
     var saved = localStorage.getItem('bj_trip_end');
     if (saved) return new Date(saved);
   } catch(e) {}
-  // 默认：出发日期+6天（7天行程）
-  var d = new Date(getTripStartDate());
-  d.setDate(d.getDate() + 6);
-  return d;
+  // 默认：本次行程返程日 2026-08-22
+  return new Date('2026-08-22T00:00:00');
 }
 function setTripEndDate(date) {
   localStorage.setItem('bj_trip_end', date.toISOString());
 }
+// 返回本地时区的 YYYY-MM-DD（避免 toISOString 的 UTC 偏移导致日期差一天）
+function localDateISO(date) {
+  var y = date.getFullYear();
+  var m = date.getMonth() + 1;
+  var d = date.getDate();
+  return y + '-' + (m < 10 ? '0' : '') + m + '-' + (d < 10 ? '0' : '') + d;
+}
+
 function formatDate(date) {
   var days = ['周日','周一','周二','周三','周四','周五','周六'];
   return (date.getMonth()+1) + '月' + date.getDate() + '日 ' + days[date.getDay()];
@@ -3303,8 +3310,8 @@ function initPlanDatePickers() {
   var startDate = getTripStartDate();
   var endDate = getTripEndDate();
   // 转为 YYYY-MM-DD 格式
-  startInput.value = startDate.toISOString().split('T')[0];
-  endInput.value = endDate.toISOString().split('T')[0];
+  startInput.value = localDateISO(startDate);
+  endInput.value = localDateISO(endDate);
   updateDateInfo();
 }
 
@@ -5653,7 +5660,7 @@ function findWeatherForDate(forecast, dateISO) {
   for (var i = 0; i < forecast.length; i++) {
     var f = forecast[i];
     var fDate = new Date(f.date);
-    if (fDate.toISOString().split('T')[0] === dateISO) {
+    if (localDateISO(fDate) === dateISO) {
       return {
         text: (f.maxtempC || '?') + '°/' + (f.mintempC || '?') + '° ' + (f.hourly && f.hourly[4] ? f.hourly[4].weatherDesc[0].value : ''),
         icon: getWeatherIcon(f.hourly && f.hourly[4] ? f.hourly[4].weatherCode : 0)
@@ -5894,6 +5901,50 @@ function renderTipsPouchInSub() {
 // ============================================================
 // 初始化
 // ============================================================
+// 修复行程日期：强制对齐到本次行程 8/15-8/22，并补齐缺失的天数（写回云端同步给家人）
+function repairPlanDatesAndDays() {
+  // 旧版本可能在本地存了“打开当天”的日期（如8月13日），清除后回落为行程默认日期
+  try {
+    var lsS = localStorage.getItem('bj_trip_start');
+    var lsE = localStorage.getItem('bj_trip_end');
+    if (lsS && lsS.indexOf('2026-08-15') !== 0) localStorage.removeItem('bj_trip_start');
+    if (lsE && lsE.indexOf('2026-08-22') !== 0) localStorage.removeItem('bj_trip_end');
+  } catch(e) {}
+  var startDate = getTripStartDate();
+  var endDate = getTripEndDate();
+  var expectedDays = Math.max(1, Math.round((endDate.getTime() - startDate.getTime()) / (1000*60*60*24)) + 1);
+  var plan = getPlanSync();
+  if (!plan || !plan.days) return;
+  var changed = false;
+  var expectedISO = localDateISO(startDate);
+  var firstISO = plan.days.length > 0 ? (plan.days[0].dateISO || plan.days[0].date || '') : '';
+  if (firstISO !== expectedISO) {
+    for (var d = 0; d < plan.days.length; d++) {
+      var dd = new Date(startDate); dd.setDate(dd.getDate() + d);
+      plan.days[d].date = formatDate(dd);
+      plan.days[d].dateISO = localDateISO(dd);
+    }
+    changed = true;
+  }
+  if (plan.days.length < expectedDays) {
+    for (var i = plan.days.length + 1; i <= expectedDays; i++) {
+      var t = getPlanTemplateByDayNum(i);
+      var dd2 = new Date(startDate); dd2.setDate(dd2.getDate() + (i - 1));
+      plan.days.push({
+        dayNum: i,
+        label: t && t.label ? t.label : ('第' + i + '天' + (i === expectedDays ? ' 返程' : '')),
+        date: formatDate(dd2),
+        dateISO: localDateISO(dd2),
+        slots: t ? cloneTemplateSlots(t.slots) : [],
+        notes: t ? cloneTemplateNotes(t.notes) : [],
+        weather: null
+      });
+    }
+    changed = true;
+  }
+  if (changed) savePlan(plan);
+}
+
 async function initApp() {
   // 0. 清除旧版本可能有问题的行程数据（一次性修复）
   try {
@@ -5932,21 +5983,9 @@ async function initApp() {
     }
   } catch(e) { console.warn('云端预算加载失败:', e.message); }
 
-  // 4. 确保planCache已初始化
+  // 4. 确保planCache已初始化 + 修复行程日期/补齐天数
   if (!planCache) getPlanSync();
-  // 补充旧数据中缺失的date字段
-  var plan = getPlanSync();
-  var needsUpdate = false;
-  var startDate = getTripStartDate();
-  for (var d = 0; d < plan.days.length; d++) {
-    if (!plan.days[d].date) {
-      var dd = new Date(startDate); dd.setDate(dd.getDate() + d);
-      plan.days[d].date = formatDate(dd);
-      plan.days[d].dateISO = dd.toISOString().split('T')[0];
-      needsUpdate = true;
-    }
-  }
-  if (needsUpdate) savePlan(plan);
+  repairPlanDatesAndDays();
   // 5. 渲染页面
   renderPanelList(DATA.spots);
   renderFood();
