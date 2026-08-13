@@ -2718,7 +2718,7 @@ function addStreetShopToPlan(streetId, shopName) {
 // 内置行程模板（来自 resource/ 每日行程）
 // 注意点 notes: afterSlotId 指向该注意点显示在哪个地点之后
 // ============================================================
-var PLAN_TEMPLATE_VERSION = 4;
+var PLAN_TEMPLATE_VERSION = 5;
 // Day1 T3打车指南（完整版，来自 resource/Day1 出发.md）
 function getPlanT3GuideDetail() {
   return '打车约40-50分钟（晚间不堵车），费用约100-130元（含高速费）。\n\n【首都机场T3 带婴儿车打车指南】\n\n🚕 路线一：网约车（核心推荐）\n上车点：T3停车楼B2层网约车H区\n1. 到达层（2层）A/B/C出口 → 朝“停车场”标识走，经“北京服务”通道进入停车楼连廊\n2. 连廊中务必寻找直梯/无障碍电梯（扶梯禁止婴儿车）\n3. 直梯下到B2层，出电梯即到网约车H区（分东、西两侧）\n4. 提前与司机电话确认在东侧还是西侧（如东侧H12通道靠近直梯出口），并告知在直梯口等待\n\n💬 推荐话术（可直接复制发给司机）：\n“师傅您好，我带婴儿车坐直梯下来的，在H区东侧H12通道直梯口，您开过来我就在电梯口等您。”\n\n🚗 路线二：备选捷径（4层出发层上车）\n· 接单后第一时间电话司机，询问是否愿意到4层出发层（10号门附近）接您\n· 从到达层坐直梯上到4层，从10号门出去等车\n· 注意：出发层限停8分钟，必须人等车，快走到时再通知司机开过来\n· 夜间运管较松但仍有被拒可能，被拒则返回路线一\n\n🚖 路线三：出租车（最省心，带娃首选）\n· 到达层出门后，沿“出租车”指示牌到室外候车区\n· 带婴儿车可走无障碍通道，工作人员安排优先上车\n· 无需预约随到随走，费用约100-130元（含高速费），比网约车稍贵但省心\n\n⚠️ 带婴儿车特别避坑提醒（T3版）\n· 误走扶梯 → 认准直梯/无障碍电梯标识，找不到就问穿制服的工作人员\n· 停车楼直梯排队 → 取完行李后尽早出发，不要在到达层滞留\n· 和司机互相找不到 → 出电梯后拍下通道编号和周围标志，直接发给司机\n· 去1层找网约车 → T3一层有快速通道但网约车定位不在此处，切勿前往';
@@ -2735,9 +2735,9 @@ var PLAN_TEMPLATE_DAYS = [
     label: '第一天 出发',
     slots: [
       { id:'d1_s1', type:'transport', slotType:'morning', name:'中河路地铁站 → 宁波栎社机场', startTime:'12:10', endTime:'13:00', duration:'约50分钟', detail:'1号线（高桥西方向）至鼓楼站，换乘2号线（栎社国际机场方向）至终点站；出站经联络通道直达T2出发大厅' },
-      { id:'d1_s2', type:'transport', slotType:'noon', name:'T2航站楼 值机与行李托运', startTime:'13:00', endTime:'14:00', detail:'国航人工柜台办理（携带婴儿必须人工办理，不可自助）；CA1542 属国航「甬京快线」，享专属值机柜台、专属安检通道、就近登机口；值机截载为起飞前30分钟（比普通航班早5分钟），带娃仍多预留时间；国航免费托运1件婴儿车，可柜台托运或推到登机口再交运' },
+      { id:'d1_s2', type:'transport', slotType:'noon', name:'T2航站楼 值机与行李托运', startTime:'13:00', endTime:'14:00', detail:'国航人工柜台办理（携带婴儿必须人工办理，不可自助）；CA1542 属国航「甬京快线」，享专属值机柜台、专属安检通道、就近登机口；值机截载为起飞前30分钟，带娃仍多预留时间；国航免费托运1件婴儿车，可柜台托运或推到登机口再交运' },
       { id:'d1_s3', type:'transport', slotType:'afternoon', name:'过安检', startTime:'14:00', endTime:'14:30', detail:'一位成人抱着孩子快速通过，其他行李由同行人员携带' },
-      { id:'d1_s4', type:'other', slotType:'afternoon', name:'候机与登机', startTime:'14:30', endTime:'17:30', detail:'候机时留意登机口大屏，CA1542 由宽体机空客330执飞（宁波T2 17:30起飞 → 首都T3 20:00到达）；甬京快线航班100%靠廊桥、就近登机口，登机更省力；登机口附近给宝宝喂食、换尿布，航站楼内设母婴室' },
+      { id:'d1_s4', type:'other', slotType:'afternoon', name:'候机与登机', startTime:'14:30', endTime:'17:30', detail:'候机时留意登机口大屏，CA1542 宁波T2 17:30起飞 → 首都T3 20:00到达；机型以当天执飞为准（近期多为空客A320/A321窄体机）；甬京快线享就近登机口，登机更省力；登机口附近给宝宝喂食、换尿布，航站楼内设母婴室' },
       { id:'d1_s5', type:'transport', slotType:'evening', name:'首都机场T3 取行李', startTime:'20:00', endTime:'20:50', detail:'跟随“到达”标识前往行李提取大厅（T3较大，步行距离较长）；可使用机场免费手推车' },
       { id:'d1_s6', type:'transport', slotType:'evening', name:'首都机场T3 → 北京东方饭店', startTime:'20:50', endTime:'21:40', detail: getPlanT3GuideDetail() },
       { id:'d1_s7', type:'hotel', slotType:'evening', name:'北京东方饭店 办理入住', startTime:'21:40', endTime:'22:00', lat:39.889, lng:116.384, detail:'虎坊桥/前门区域，民国风情酒店' },
@@ -2887,7 +2887,7 @@ var PLAN_TEMPLATE_DAYS = [
     ],
     notes: [
       { id:'d8_n1', afterSlotId:'d8_s3', icon:'🧳', text:'KN5991 为中联航点对点航班，行李规则以票面舱位为准：通常无免费托运行李，随身行李一般限1件10kg（20×40×55cm）；建议出发前在航旅纵横/航司App先网上值机，值机时向工作人员确认行李额度' },
-      { id:'d8_n2', afterSlotId:'d8_s4', icon:'⏰', text:'大兴机场值机截载较早（起飞前40-45分钟），12:55的航班建议10:45前到达安检口；行李多直接打车去机场，别掐点' }
+      { id:'d8_n2', afterSlotId:'d8_s4', icon:'⏰', text:'大兴机场值机截载较早（起飞前40-45分钟），12:55的航班建议10:45前到达安检口；出发前用航旅纵横/飞常准确认航班状态（该航班近期偶有取消），行李多直接打车去机场，别掐点' }
     ]
   }
 ];
@@ -2976,10 +2976,10 @@ function applyPlanTemplate(plan) {
       for (var d1i = 0; d1i < d1new.slots.length; d1i++) {
         var d1sl = d1new.slots[d1i];
         if (d1sl.id === 'd1_s2' && d1sl.detail && d1sl.detail.indexOf('甬京快线') < 0) {
-          d1sl.detail = '国航人工柜台办理（携带婴儿必须人工办理，不可自助）；CA1542 属国航「甬京快线」，享专属值机柜台、专属安检通道、就近登机口；值机截载为起飞前30分钟（比普通航班早5分钟），带娃仍多预留时间；国航免费托运1件婴儿车，可柜台托运或推到登机口再交运';
+          d1sl.detail = '国航人工柜台办理（携带婴儿必须人工办理，不可自助）；CA1542 属国航「甬京快线」，享专属值机柜台、专属安检通道、就近登机口；值机截载为起飞前30分钟，带娃仍多预留时间；国航免费托运1件婴儿车，可柜台托运或推到登机口再交运';
         }
         if (d1sl.id === 'd1_s4' && d1sl.detail && d1sl.detail.indexOf('空客330') < 0) {
-          d1sl.detail = '候机时留意登机口大屏，CA1542 由宽体机空客330执飞（宁波T2 17:30起飞 → 首都T3 20:00到达）；甬京快线航班100%靠廊桥、就近登机口，登机更省力；登机口附近给宝宝喂食、换尿布，航站楼内设母婴室';
+          d1sl.detail = '候机时留意登机口大屏，CA1542 宁波T2 17:30起飞 → 首都T3 20:00到达；机型以当天执飞为准（近期多为空客A320/A321窄体机）；甬京快线享就近登机口，登机更省力；登机口附近给宝宝喂食、换尿布，航站楼内设母婴室';
         }
       }
     }
@@ -2989,6 +2989,21 @@ function applyPlanTemplate(plan) {
     if (plan.days[d8i].dayNum === 8 && (!plan.days[d8i].label || /^第8天/.test(plan.days[d8i].label))) {
       var t8 = getPlanTemplateByDayNum(8);
       if (t8 && t8.label) plan.days[d8i].label = t8.label;
+    }
+  }
+  // 版本迁移 4→5：修正 CA1542 机型信息（近期为A320/A321窄体机，非空客330宽体机）
+  if (plan.days.length > 0 && plan.days[0]) {
+    var d1fix = plan.days[0];
+    if (Array.isArray(d1fix.slots)) {
+      for (var d1fi = 0; d1fi < d1fix.slots.length; d1fi++) {
+        var d1fs = d1fix.slots[d1fi];
+        if (d1fs.id === 'd1_s2' && d1fs.detail && d1fs.detail.indexOf('比普通航班早5分钟') >= 0) {
+          d1fs.detail = d1fs.detail.replace('（比普通航班早5分钟）', '');
+        }
+        if (d1fs.id === 'd1_s4' && d1fs.detail && d1fs.detail.indexOf('空客330') >= 0) {
+          d1fs.detail = '候机时留意登机口大屏，CA1542 宁波T2 17:30起飞 → 首都T3 20:00到达；机型以当天执飞为准（近期多为空客A320/A321窄体机）；甬京快线享就近登机口，登机更省力；登机口附近给宝宝喂食、换尿布，航站楼内设母婴室';
+        }
+      }
     }
   }
   plan.templateVersion = PLAN_TEMPLATE_VERSION;
