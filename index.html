@@ -2718,7 +2718,12 @@ function addStreetShopToPlan(streetId, shopName) {
 // 内置行程模板（来自 resource/ 每日行程）
 // 注意点 notes: afterSlotId 指向该注意点显示在哪个地点之后
 // ============================================================
-var PLAN_TEMPLATE_VERSION = 1;
+var PLAN_TEMPLATE_VERSION = 2;
+// Day1 T3打车指南（完整版，来自 resource/Day1 出发.md）
+function getPlanT3GuideDetail() {
+  return '打车约40-50分钟（晚间不堵车），费用约100-130元（含高速费）。\n\n【首都机场T3 带婴儿车打车指南】\n\n🚕 路线一：网约车（核心推荐）\n上车点：T3停车楼B2层网约车H区\n1. 到达层（2层）A/B/C出口 → 朝“停车场”标识走，经“北京服务”通道进入停车楼连廊\n2. 连廊中务必寻找直梯/无障碍电梯（扶梯禁止婴儿车）\n3. 直梯下到B2层，出电梯即到网约车H区（分东、西两侧）\n4. 提前与司机电话确认在东侧还是西侧（如东侧H12通道靠近直梯出口），并告知在直梯口等待\n\n💬 推荐话术（可直接复制发给司机）：\n“师傅您好，我带婴儿车坐直梯下来的，在H区东侧H12通道直梯口，您开过来我就在电梯口等您。”\n\n🚗 路线二：备选捷径（4层出发层上车）\n· 接单后第一时间电话司机，询问是否愿意到4层出发层（10号门附近）接您\n· 从到达层坐直梯上到4层，从10号门出去等车\n· 注意：出发层限停8分钟，必须人等车，快走到时再通知司机开过来\n· 夜间运管较松但仍有被拒可能，被拒则返回路线一\n\n🚖 路线三：出租车（最省心，带娃首选）\n· 到达层出门后，沿“出租车”指示牌到室外候车区\n· 带婴儿车可走无障碍通道，工作人员安排优先上车\n· 无需预约随到随走，费用约100-130元（含高速费），比网约车稍贵但省心\n\n⚠️ 带婴儿车特别避坑提醒（T3版）\n· 误走扶梯 → 认准直梯/无障碍电梯标识，找不到就问穿制服的工作人员\n· 停车楼直梯排队 → 取完行李后尽早出发，不要在到达层滞留\n· 和司机互相找不到 → 出电梯后拍下通道编号和周围标志，直接发给司机\n· 去1层找网约车 → T3一层有快速通道但网约车定位不在此处，切勿前往';
+}
+
 var PLAN_TEMPLATE_DAYS = [
   {
     dayNum: 1,
@@ -2729,13 +2734,13 @@ var PLAN_TEMPLATE_DAYS = [
       { id:'d1_s3', type:'transport', slotType:'afternoon', name:'过安检', startTime:'14:00', endTime:'14:30', detail:'一位成人抱着孩子快速通过，其他行李由同行人员携带' },
       { id:'d1_s4', type:'other', slotType:'afternoon', name:'候机与登机', startTime:'14:30', endTime:'17:30', detail:'找到登机口后给宝宝喂食、换尿布，航站楼内设母婴室；CA1542 17:30 准时起飞' },
       { id:'d1_s5', type:'transport', slotType:'evening', name:'首都机场T3 取行李', startTime:'20:00', endTime:'20:50', detail:'跟随“到达”标识前往行李提取大厅（T3较大，步行距离较长）；可使用机场免费手推车' },
-      { id:'d1_s6', type:'transport', slotType:'evening', name:'首都机场T3 → 北京东方饭店', startTime:'20:50', endTime:'21:40', detail:'打车约40-50分钟（晚间不堵车），费用约100-130元（含高速费）' },
+      { id:'d1_s6', type:'transport', slotType:'evening', name:'首都机场T3 → 北京东方饭店', startTime:'20:50', endTime:'21:40', detail: getPlanT3GuideDetail() },
       { id:'d1_s7', type:'hotel', slotType:'evening', name:'北京东方饭店 办理入住', startTime:'21:40', endTime:'22:00', lat:39.889, lng:116.384, detail:'虎坊桥/前门区域，民国风情酒店' },
       { id:'d1_s8', type:'other', slotType:'evening', name:'酒店休整', startTime:'22:00', endTime:'22:45', detail:'给宝宝喂食、换轻便鞋；手机、充电宝充电；简单洗漱' }
     ],
     notes: [
       { id:'d1_n1', afterSlotId:'d1_s1', icon:'🚕', text:'备选方案：行李较多或带小宝宝不便换乘，可直接打车/网约车前往机场，车程约50分钟、费用约100元' },
-      { id:'d1_n2', afterSlotId:'d1_s5', icon:'🚕', text:'T3带婴儿车打车指南：推荐停车楼B2网约车H区（必须走直梯/无障碍电梯，扶梯禁止婴儿车，出电梯拍下通道编号发给司机）；备选4层出发层10号门（限停8分钟、人等车）；出租车最省心，随到随走100-130元' },
+      { id:'d1_n2', afterSlotId:'d1_s5', icon:'🚕', text:'T3打车指南（完整版）已放入「首都机场T3 → 北京东方饭店」条目的详情页：B2网约车H区（必走直梯）/ 4层出发层备选 / 出租车最省心 + 避坑提醒' },
       { id:'d1_n3', afterSlotId:'d1_s8', icon:'🌙', text:'到达较晚（约21:40），前门大街、大栅栏、鲜鱼口等大多21:30-22:00关门，今晚不再外出，顺延至第二天傍晚游览' }
     ]
   },
@@ -2886,6 +2891,24 @@ function applyPlanTemplate(plan) {
       }
     }
     if (!Array.isArray(day.notes)) day.notes = [];
+  }
+  // 版本迁移 1→2：T3打车指南完整版写入 Day1「T3 → 酒店」条目详情页
+  if (plan.days.length > 0 && plan.days[0]) {
+    var dd1 = plan.days[0];
+    if (Array.isArray(dd1.slots)) {
+      for (var mi = 0; mi < dd1.slots.length; mi++) {
+        if (dd1.slots[mi].id === 'd1_s6' && (!dd1.slots[mi].detail || dd1.slots[mi].detail.indexOf('打车约40-50分钟') === 0)) {
+          dd1.slots[mi].detail = getPlanT3GuideDetail();
+        }
+      }
+    }
+    if (Array.isArray(dd1.notes)) {
+      for (var mj = 0; mj < dd1.notes.length; mj++) {
+        if (dd1.notes[mj].id === 'd1_n2') {
+          dd1.notes[mj].text = 'T3打车指南（完整版）已放入「首都机场T3 → 北京东方饭店」条目的详情页：B2网约车H区（必走直梯）/ 4层出发层备选 / 出租车最省心 + 避坑提醒';
+        }
+      }
+    }
   }
   plan.templateVersion = PLAN_TEMPLATE_VERSION;
   return plan;
