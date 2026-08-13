@@ -535,6 +535,7 @@
     .plan-slot-info { flex: 1; min-width: 0; }
     .plan-slot-name { font-size: 15px; font-weight: 600; display: block; color: var(--text); }
     .plan-slot-detail { font-size: 13px; color: var(--text2); }
+    .plan-slot-clamp3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; word-break: break-word; }
     .plan-slot-remove { font-size: 18px; color: #CCC; cursor: pointer; padding: 2px 4px; flex-shrink: 0; }
     .plan-slot-remove:active { color: var(--red); }
     .plan-slot-edit { font-size: 14px; color: #CCC; cursor: pointer; padding: 2px 4px; flex-shrink: 0; }
@@ -3464,8 +3465,8 @@ function renderDayDetail(dayIdx) {
     html += '<span class="tl-action" onclick="event.stopPropagation();removeSlot(' + dayIdx + ',' + idx + ')"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span>';
     html += '</div>';
     html += '</div>';
-    if (slot.detail) html += '<div style="font-size:15px;color:#888;margin-top:1px;">' + slot.detail + '</div>';
-    if (slot.memo) html += '<div style="font-size:14px;color:#aaa;margin-top:1px;">📝 ' + slot.memo + '</div>';
+    if (slot.detail) html += '<div class="plan-slot-clamp3" style="font-size:15px;color:#888;margin-top:1px;">' + slot.detail + '</div>';
+    if (slot.memo) html += '<div class="plan-slot-clamp3" style="font-size:14px;color:#aaa;margin-top:1px;">📝 ' + slot.memo + '</div>';
     html += '</div>';
 
     // 地点之间的注意点
