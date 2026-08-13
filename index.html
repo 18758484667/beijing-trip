@@ -80,9 +80,19 @@
     body.view-mode .item-actions { display: none !important; }
     body.view-mode .plan-btn-clear { display: none !important; }
     body.view-mode .plan-clear-link { display: none !important; }
+    body.view-mode .hero-add-btn { display: none !important; }
+    body.view-mode .mf-add-bar { display: none !important; }
+    body.view-mode .mf-add-btn { display: none !important; }
+    body.view-mode .mf-shop-btn { display: none !important; }
+    body.view-mode .spot-info-add { display: none !important; }
     body.view-mode .plan-list-actions { display: none !important; }
     body.view-mode .plan-btn-clear { display: none !important; }
     body.view-mode .plan-clear-link { display: none !important; }
+    body.view-mode .hero-add-btn { display: none !important; }
+    body.view-mode .mf-add-bar { display: none !important; }
+    body.view-mode .mf-add-btn { display: none !important; }
+    body.view-mode .mf-shop-btn { display: none !important; }
+    body.view-mode .spot-info-add { display: none !important; }
     body.view-mode .shop-tag { pointer-events: none; opacity: 0.7; }
 
     #mapContainer { width: 100%; height: 55vh; min-height: 320px; background: #F0EAE0; border-radius: 0 0 16px 16px; overflow: hidden; }
@@ -577,6 +587,57 @@
     .picker-info { flex: 1; }
     .picker-name { font-size: 16px; font-weight: 600; color: var(--text); }
     .picker-detail { font-size: 14px; color: var(--text3); }
+  <!-- 适老化：全站字体按行程页标准统一放大 -->
+  .section-title { font-size: 22px; }
+  .panel-title { font-size: 20px; }
+  .panel-spot-name { font-size: 18px; }
+  .panel-spot-detail { font-size: 15px; }
+  .panel-spot-highlight { font-size: 14px; }
+  .detail-back-label { font-size: 15px; }
+  .hero-subtitle { font-size: 17px; }
+  .slot-type-chip { font-size: 14px; }
+  .slot-hero-time { font-size: 17px; }
+  .info-cell-label { font-size: 15px; }
+  .info-cell-val { font-size: 17px; }
+  .info-row-link { font-size: 15px; }
+  .mf-card-header { font-size: 19px; }
+  .mf-intro { font-size: 18px; }
+  .mf-route-text { font-size: 18px; }
+  .mf-tip-text { font-size: 18px; }
+  .mf-shop-name { font-size: 18px; }
+  .mf-shop-addr { font-size: 15px; }
+  .mf-shop-rec { font-size: 16px; }
+  .mf-shop-price { font-size: 15px; }
+  .mf-addr-row { font-size: 16px; }
+  .info-contact-item { font-size: 17px; }
+  .warning-title { font-size: 17px; }
+  .warning-text { font-size: 16px; }
+  .dish-name { font-size: 19px; }
+  .dish-desc { font-size: 15px; }
+  .shops-label { font-size: 15px; }
+  .shop-tag { font-size: 15px; }
+  .street-name { font-size: 19px; }
+  .street-desc { font-size: 15px; }
+  .street-addr { font-size: 14px; }
+  .street-shops-preview { font-size: 15px; }
+  .flight-airport { font-size: 15px; }
+  .flight-desc { font-size: 15px; }
+  .airport-distance { font-size: 15px; }
+  .airport-text { font-size: 16px; }
+  .food-tab { font-size: 14px; }
+  .transport-tab { font-size: 15px; }
+  .map-fallback-desc { font-size: 15px; }
+  .map-fallback-btn { font-size: 15px; }
+  .tab-item { font-size: 14px; }
+  .plan-note { font-size: 15px; }
+  .timeline-time { font-size: 15px; }
+  .plan-slot-detail { font-size: 15px; }
+  .plan-slot-memo { font-size: 14px; }
+  .plan-slot-name { font-size: 16px; }
+  .plan-day-card-label { font-size: 17px; }
+  .plan-day-card-count { font-size: 15px; }
+  .tl-name { font-size: 18px; }
+
   </style>
 </head>
 <body>
@@ -1945,7 +2006,7 @@ function showSpotInfoWindow(spot) {
     '<div style="font-size: 15px;color:var(--text2);margin-bottom:10px;line-height:1.5;word-break:break-all;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;"><circle cx="12" cy="10" r="3"/><path d="M12 2a8 8 0 0 0-8 8c0 5.4 8 12 8 12s8-6.6 8-12a8 8 0 0 0-8-8z"/></svg> ' + spot.address + '</div>' +
     '<div style="display:flex;gap:8px;">' +
       '<div onclick="showSpotDetail(\'' + spot.id + '\')" style="flex:1;background:linear-gradient(135deg,#B39DDB,#CE93D8);color:#FFF;text-align:center;padding:9px;border-radius:8px;font-size: 16px;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(126,87,194,0.25);">查看详情 ›</div>' +
-      '<div onclick="addToPlan(\'' + spot.id + '\')" style="background:linear-gradient(135deg,#FFB300,#FFC107);color:#FFF;text-align:center;padding:9px;border-radius:8px;font-size: 16px;font-weight:600;cursor:pointer;white-space:nowrap;box-shadow:0 2px 8px rgba(255,179,0,0.3);">+ 规划</div>' +
+      '<div class="spot-info-add" onclick="addToPlan(\'' + spot.id + '\')" style="background:linear-gradient(135deg,#FFB300,#FFC107);color:#FFF;text-align:center;padding:9px;border-radius:8px;font-size: 16px;font-weight:600;cursor:pointer;white-space:nowrap;box-shadow:0 2px 8px rgba(255,179,0,0.3);">+ 规划</div>' +
     '</div>';
 
   infoWindow = new AMap.InfoWindow({
