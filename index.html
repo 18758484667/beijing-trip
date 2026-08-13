@@ -165,6 +165,23 @@
     .hero-add-btn:active { transform: scale(0.9); }
     .hero-add-btn svg { width: 22px; height: 22px; stroke: #FFF; stroke-width: 2.5; }
     .detail-body { padding: 0 16px 24px; position: relative; z-index: 2; margin-top: -16px; }
+    /* ===== 行程项简单详情页（新样式） ===== */
+    .slot-hero { position: relative; padding: 64px 20px 30px; color: #FFF; overflow: hidden; }
+    .slot-hero::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 90px; background: linear-gradient(transparent, rgba(0,0,0,0.28)); pointer-events: none; }
+    .slot-hero-icon { width: 54px; height: 54px; border-radius: 16px; background: rgba(255,255,255,0.22); display: flex; align-items: center; justify-content: center; margin-bottom: 14px; position: relative; z-index: 1; box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
+    .slot-hero-icon svg { width: 26px; height: 26px; stroke: #FFF; }
+    .slot-type-chip { display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 1px; padding: 3px 12px; border-radius: 20px; background: rgba(255,255,255,0.25); margin-bottom: 10px; position: relative; z-index: 1; backdrop-filter: blur(6px); }
+    .slot-hero-name { font-size: 26px; font-weight: 700; line-height: 1.3; position: relative; z-index: 1; text-shadow: 0 1px 4px rgba(0,0,0,0.22); }
+    .slot-hero-time { margin-top: 10px; font-size: 14px; color: rgba(255,255,255,0.92); position: relative; z-index: 1; text-shadow: 0 1px 2px rgba(0,0,0,0.15); }
+    .slot-card { background: var(--card-bg); border-radius: var(--radius-md); padding: 16px 16px 14px; margin-bottom: 12px; box-shadow: var(--card-shadow); }
+    .slot-card-head { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+    .slot-card-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--red); flex-shrink: 0; }
+    .slot-card-text { font-size: 15px; line-height: 1.75; color: #5A5450; white-space: pre-line; word-break: break-word; }
+    .slot-card-memo { background: #FFFDF5; border: 1px solid var(--gold-border); }
+    .slot-card-memo .slot-card-dot { background: var(--gold); }
+    .slot-card-memo .slot-card-text { color: #8A6D3B; }
+    .slot-map-btn { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; padding: 14px; border: none; border-radius: var(--radius-md); background: linear-gradient(135deg, var(--red), var(--red-light)); color: #FFF; font-size: 16px; font-weight: 600; box-shadow: 0 4px 14px rgba(212,64,58,0.25); cursor: pointer; }
+    .slot-map-btn:active { transform: scale(0.98); opacity: 0.9; }
     /* 信息卡片 */
     .detail-info-card { background: var(--card-bg); border-radius: var(--radius-lg); padding: 0; margin-bottom: 14px; box-shadow: var(--card-shadow); overflow: hidden; }
     .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
@@ -2306,24 +2323,51 @@ function openSlotDetail(slotId, slotType, dayIdx, slotIdx) {
 // 简单详情（交通/住宿/自定义等无独立详情页的类型）
 function showSimpleSlotDetail(slot) {
   var typeLabels = { spot:'景点', food:'美食', hotel:'住宿', transport:'交通', other:'其他' };
-  var typeColors = { spot:'#E74C3C', food:'#E67E22', hotel:'#1976D2', transport:'#7B1FA2', other:'#388E3C' };
+  var typeGrads = {
+    spot: 'linear-gradient(135deg,#E74C3C,#FF8A65)',
+    food: 'linear-gradient(135deg,#E67E22,#F6C96E)',
+    hotel: 'linear-gradient(135deg,#2E6E9E,#5A9EC8)',
+    transport: 'linear-gradient(135deg,#5D5347,#8A7E70)',
+    other: 'linear-gradient(135deg,#1ABC9C,#48C9B0)'
+  };
+  var type = slot.type || 'other';
+  var grad = typeGrads[type] || typeGrads.other;
   var html = '';
-  html += '<div class="detail-back detail-back-plain" onclick="goBackFromDetail()">' +
-    '<div class="detail-back-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#555" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg></div>' +
+  html += '<div class="detail-back" id="detailBackBar" onclick="goBackFromDetail()">' +
+    '<div class="detail-back-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#FFF" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg></div>' +
     '<span class="detail-back-label">返回行程</span></div>';
-  html += '<div class="detail-body" style="padding-bottom:24px;">';
-  html += '<span style="display:inline-block;padding:3px 10px;border-radius:12px;font-size:12px;font-weight:600;color:#FFF;background:' + (typeColors[slot.type]||'#999') + ';">' + (typeLabels[slot.type]||'') + '</span>';
-  html += '<h2 style="font-size:22px;font-weight:700;color:var(--text);margin:8px 0 4px;">' + slot.name + '</h2>';
-  if (slot.startTime) {
-    html += '<div style="font-size:14px;color:var(--text2);margin:6px 0;">⏰ ' + slot.startTime + (slot.endTime ? ' → ' + slot.endTime : '') + (slot.duration ? ' · 约' + slot.duration : '') + '</div>';
+  // 顶部渐变横幅
+  html += '<div class="slot-hero" style="background:' + grad + ';">';
+  html += '<div class="slot-hero-icon">' + getSlotIcon(type) + '</div>';
+  html += '<div class="slot-type-chip">' + (typeLabels[type] || '其他') + '</div>';
+  html += '<div class="slot-hero-name">' + slot.name + '</div>';
+  var timeParts = [];
+  if (slot.startTime) timeParts.push(slot.startTime);
+  if (slot.endTime) timeParts.push('→ ' + slot.endTime);
+  if (slot.duration) timeParts.push('约' + slot.duration);
+  if (timeParts.length > 0) html += '<div class="slot-hero-time">⏰ ' + timeParts.join(' ') + '</div>';
+  html += '</div>';
+
+  html += '<div class="detail-body">';
+  if (slot.detail) {
+    html += '<div class="slot-card"><div class="slot-card-head"><span class="slot-card-dot"></span>详情</div><div class="slot-card-text">' + slot.detail + '</div></div>';
   }
-  if (slot.detail) html += '<div style="font-size:15px;color:#555;line-height:1.7;margin:8px 0;padding:12px;background:#F8F8F8;border-radius:10px;">' + slot.detail + '</div>';
-  if (slot.memo) html += '<div style="font-size:14px;color:#888;padding:12px;background:#FFF8E1;border-radius:10px;">💬 ' + slot.memo + '</div>';
-  if (slot.lat && slot.lng) html += '<button onclick="jumpToMap(' + slot.lng + ',' + slot.lat + ')" style="width:100%;padding:12px;border-radius:10px;border:1px solid var(--red);background:#FFF;color:var(--red);font-size:15px;font-weight:600;margin-top:8px;cursor:pointer;">📍 在地图上查看</button>';
+  if (slot.memo) {
+    html += '<div class="slot-card slot-card-memo"><div class="slot-card-head"><span class="slot-card-dot"></span>注意点</div><div class="slot-card-text">' + slot.memo + '</div></div>';
+  }
+  if (slot.lat && slot.lng) {
+    html += '<button class="slot-map-btn" onclick="jumpToMap(' + slot.lng + ',' + slot.lat + ')"><span>📍</span>在地图上查看</button>';
+  }
   html += '</div>';
   document.getElementById('detailContent').innerHTML = html;
   document.getElementById('detailPage').classList.add('show');
   document.getElementById('detailPage').scrollTop = 0;
+  // 返回按钮滚动吸顶效果（与其他详情页一致）
+  var backBar = document.getElementById('detailBackBar');
+  if (backBar) {
+    var dp = document.getElementById('detailPage');
+    dp.onscroll = function() { backBar.classList.toggle('scrolled', dp.scrollTop > 120); };
+  }
 }
 
 function jumpToMap(lng, lat) {
