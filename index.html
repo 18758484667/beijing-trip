@@ -79,8 +79,10 @@
     body.view-mode .budget-actions { display: none !important; }
     body.view-mode .item-actions { display: none !important; }
     body.view-mode .plan-btn-clear { display: none !important; }
+    body.view-mode .plan-clear-link { display: none !important; }
     body.view-mode .plan-list-actions { display: none !important; }
     body.view-mode .plan-btn-clear { display: none !important; }
+    body.view-mode .plan-clear-link { display: none !important; }
     body.view-mode .shop-tag { pointer-events: none; opacity: 0.7; }
 
     #mapContainer { width: 100%; height: 55vh; min-height: 320px; background: #F0EAE0; border-radius: 0 0 16px 16px; overflow: hidden; }
@@ -415,6 +417,8 @@
     .plan-btn:active { transform: scale(0.97); }
     .plan-btn-spots { background: linear-gradient(135deg, var(--red), var(--red-light)); color: #FFF; border-color: var(--red); }
     .plan-btn-clear { background: #F0EAE0; color: var(--text3); }
+    .plan-clear-link { text-align: center; padding: 6px 0 16px; font-size: 11px; color: #CCC; opacity: 0.55; cursor: pointer; user-select: none; }
+    .plan-clear-link:active { opacity: 1; color: #999; }
 
     /* 行程列表页 */
     .plan-list-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 16px 12px; background: var(--card-bg); position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--border); }
@@ -602,7 +606,6 @@
   <div class="page" id="page-plan">
     <div class="plan-list-header">
       <span class="plan-list-title">行程规划</span>
-      <button class="plan-btn plan-btn-clear" onclick="clearPlan()" style="padding:6px 12px;font-size:13px;">清空全部</button>
     </div>
     <div class="plan-date-bar" id="planDateBar">
       <div class="plan-date-item">
@@ -617,6 +620,7 @@
     </div>
     <div class="plan-date-info" id="planDateInfo"></div>
     <div id="planListContent" class="page-container"></div>
+    <div class="plan-clear-link" onclick="clearPlan()">清空全部</div>
   </div>
 
   <!-- ===== 日详情页 ===== -->
@@ -3775,7 +3779,7 @@ function clearDay(dayIdx) {
 
 function clearPlan() {
   if (currentMode === 'view') { showToast('当前为查看模式，无法编辑行程'); return; }
-  if (!confirm('确定清空所有天的行程安排吗？')) return;
+  if (!confirm('确定清空全部行程吗？\n此操作会删除所有天的安排，并同步到家人手机，无法撤销！')) return;
   currentDayDetailIndex = 0;
   savePlan(createDefaultPlan());
   showToast('已重置全部行程');
