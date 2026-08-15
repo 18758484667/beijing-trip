@@ -2924,7 +2924,7 @@ function addStreetShopToPlan(streetId, shopName) {
 // 内置行程模板（来自 resource/ 每日行程）
 // 注意点 notes: afterSlotId 指向该注意点显示在哪个地点之后
 // ============================================================
-var PLAN_TEMPLATE_VERSION = 9;
+var PLAN_TEMPLATE_VERSION = 10;
 // Day1 T3打车指南（完整版，来自 resource/Day1 出发.md）
 function getPlanT3GuideDetail() {
   return '打车约40-50分钟（晚间不堵车），费用约100-130元（含高速费）。\n\n【首都机场T3 带婴儿车打车指南】\n\n🚕 路线一：网约车（核心推荐）\n上车点：T3停车楼B2层网约车H区\n1. 到达层（2层）A/B/C出口 → 朝“停车场”标识走，经“北京服务”通道进入停车楼连廊\n2. 连廊中务必寻找直梯/无障碍电梯（扶梯禁止婴儿车）\n3. 直梯下到B2层，出电梯即到网约车H区（分东、西两侧）\n4. 提前与司机电话确认在东侧还是西侧（如东侧H12通道靠近直梯出口），并告知在直梯口等待\n\n💬 推荐话术（可直接复制发给司机）：\n“师傅您好，我带婴儿车坐直梯下来的，在H区东侧H12通道直梯口，您开过来我就在电梯口等您。”\n\n🚗 路线二：备选捷径（4层出发层上车）\n· 接单后第一时间电话司机，询问是否愿意到4层出发层（10号门附近）接您\n· 从到达层坐直梯上到4层，从10号门出去等车\n· 注意：出发层限停8分钟，必须人等车，快走到时再通知司机开过来\n· 夜间运管较松但仍有被拒可能，被拒则返回路线一\n\n🚖 路线三：出租车（最省心，带娃首选）\n· 到达层出门后，沿“出租车”指示牌到室外候车区\n· 带婴儿车可走无障碍通道，工作人员安排优先上车\n· 无需预约随到随走，费用约100-130元（含高速费），比网约车稍贵但省心\n\n⚠️ 带婴儿车特别避坑提醒（T3版）\n· 误走扶梯 → 认准直梯/无障碍电梯标识，找不到就问穿制服的工作人员\n· 停车楼直梯排队 → 取完行李后尽早出发，不要在到达层滞留\n· 和司机互相找不到 → 出电梯后拍下通道编号和周围标志，直接发给司机\n· 去1层找网约车 → T3一层有快速通道但网约车定位不在此处，切勿前往';
@@ -2944,16 +2944,16 @@ var PLAN_TEMPLATE_DAYS = [
       { id:'d1_s2', type:'transport', slotType:'noon', name:'T2航站楼 值机与行李托运', startTime:'13:00', endTime:'14:00', detail:'国航人工柜台办理（携带婴儿必须人工办理，不可自助）；国航值机在T2出发层F岛一带，CA1542 属「甬京快线」，享专属值机柜台、专属安检通道、就近登机口；值机截载为起飞前30分钟，带娃仍多预留时间；国航免费托运1件婴儿车，可柜台托运或推到登机口再交运' },
       { id:'d1_s3', type:'transport', slotType:'afternoon', name:'过安检', startTime:'14:00', endTime:'14:30', detail:'一位成人抱着孩子快速通过，其他行李由同行人员携带' },
       { id:'d1_s4', type:'other', slotType:'afternoon', name:'候机与登机', startTime:'14:30', endTime:'17:30', detail:'候机时留意登机口大屏，CA1542 宁波T2 17:30起飞 → 首都T3 20:00到达；机型以当天执飞为准（近期多为空客A320/A321窄体机）；甬京快线享就近登机口，登机更省力；登机口附近给宝宝喂食、换尿布，航站楼内设母婴室' },
-      { id:'d1_s5', type:'transport', slotType:'evening', name:'首都机场T3 取行李', startTime:'20:00', endTime:'20:50', detail:'跟随“到达”标识前往行李提取大厅（T3较大，步行距离较长）；可使用机场免费手推车' },
-      { id:'d1_s6', type:'transport', slotType:'evening', name:'首都机场T3 → 北京东方饭店', startTime:'20:50', endTime:'21:40', detail: getPlanT3GuideDetail() },
+      { id:'d1_s5', type:'transport', slotType:'evening', name:'首都机场T3 取行李', startTime:'20:00', endTime:'20:50', detail:'下机后跟随“到达/国内到达”指示牌走（T3较大，步行约5-10分钟）。\n\n【取行李】\n1. 进入行李提取大厅（2层），先看大屏确认 CA1542 对应的行李转盘\n2. 在对应转盘等行李，可用机场免费手推车；宝宝和老人先在旁边座位休息\n\n【去到达层出口（接机点）】\n3. 取完行李，跟随“出口”绿色指示牌前行约3-5分钟\n4. 国内到达出口为 A 口 / C 口（B 口是国际到达），出口上方屏幕会显示你的航班对应哪个口\n5. 出 A/C 口即到达层（2层）接机区——接机司机在此举牌等候（车牌 京AFS1014）\n6. 出闸前给司机打个电话确认他在 A 口还是 C 口，出来直接上车' },
+      { id:'d1_s6', type:'transport', slotType:'evening', name:'接机专车 → 北京东方饭店', startTime:'20:50', endTime:'21:40', detail:'接机专车已订好：司机在到达层（2层）A/C出口举牌等候（车牌 京AFS1014），出闸即上车，车程约40-50分钟（晚间不堵车）。\n\n【备选：如接机有变，可参考T3打车指南】\n' + getPlanT3GuideDetail() },
       { id:'d1_s7', type:'hotel', slotType:'evening', name:'北京东方饭店 办理入住', startTime:'21:40', endTime:'22:00', lat:39.889, lng:116.384, detail:'虎坊桥/前门区域，民国风情酒店' },
-      { id:'d1_s8', type:'food', slotType:'evening', name:'晚餐（外卖）', startTime:'22:00', endTime:'22:45', detail:'到酒店后先在外卖平台下单（虎坊桥/前门一带老字号基本都送：和记炒肝、天桥老金涮肉、京天红炸糕等），宝宝先吃自带辅食；外卖到了趁热吃，不外出' },
+      { id:'d1_s8', type:'food', slotType:'evening', name:'晚餐（飞机餐）', startTime:'22:00', endTime:'22:45', detail:'CA1542 航班提供机上晚餐（起飞后发放，约18:00-19:00用餐），到达后不用再叫外卖；到酒店简单洗漱，吃点水果/自带零食即可，早点休息' },
       { id:'d1_s9', type:'other', slotType:'evening', name:'酒店休整', startTime:'22:45', endTime:'23:30', detail:'给宝宝喂食、换轻便鞋；手机、充电宝充电；简单洗漱' }
     ],
     notes: [
       { id:'d1_n1', afterSlotId:'d1_s1', icon:'🚕', text:'备选方案：行李较多或带小宝宝不便换乘，可直接打车/网约车前往机场，车程约50分钟、费用约100元' },
-      { id:'d1_n2', afterSlotId:'d1_s5', icon:'🚕', text:'T3打车指南（完整版）已放入「首都机场T3 → 北京东方饭店」条目的详情页：B2网约车H区（必走直梯）/ 4层出发层备选 / 出租车最省心 + 避坑提醒' },
-      { id:'d1_n3', afterSlotId:'d1_s9', icon:'🌙', text:'到达较晚（约21:40），前门大街、大栅栏、鲜鱼口等大多21:30-22:00关门，今晚不再外出，晚餐直接点外卖到酒店；这些地方顺延至第二天傍晚游览' }
+      { id:'d1_n2', afterSlotId:'d1_s5', icon:'🚘', text:'接机专车已订：司机在首都机场T3到达层（2层）A/C出口举牌等候（车牌 京AFS1014），取完行李出闸即上车；打车指南（备选）在「接机专车 → 北京东方饭店」详情页' },
+      { id:'d1_n3', afterSlotId:'d1_s9', icon:'🌙', text:'到达较晚（约21:40），前门大街、大栅栏、鲜鱼口等大多21:30-22:00关门，今晚不再外出；飞机上已含晚餐，到酒店不用再叫外卖，简单休整；这些地方顺延至第二天傍晚游览' }
     ]
   },
   {
@@ -3270,14 +3270,14 @@ function applyPlanTemplate(plan) {
       for (var i = 0; i < m8d1.slots.length; i++) if (m8d1.slots[i].id === 'd1_s8') m8idx = i;
       if (m8idx >= 0) {
         m8d1.slots.splice(m8idx, 1,
-          { id:'d1_s8', type:'food', slotType:'evening', name:'晚餐（外卖）', startTime:'22:00', endTime:'22:45', detail:'到酒店后先在外卖平台下单（虎坊桥/前门一带老字号基本都送：和记炒肝、天桥老金涮肉、京天红炸糕等），宝宝先吃自带辅食；外卖到了趁热吃，不外出' },
+          { id:'d1_s8', type:'food', slotType:'evening', name:'晚餐（飞机餐）', startTime:'22:00', endTime:'22:45', detail:'CA1542 航班提供机上晚餐（起飞后发放，约18:00-19:00用餐），到达后不用再叫外卖；到酒店简单洗漱，吃点水果/自带零食即可，早点休息' },
           { id:'d1_s9', type:'other', slotType:'evening', name:'酒店休整', startTime:'22:45', endTime:'23:30', detail:'给宝宝喂食、换轻便鞋；手机、充电宝充电；简单洗漱' }
         );
         if (Array.isArray(m8d1.notes)) {
           for (var ni = 0; ni < m8d1.notes.length; ni++) {
             if (m8d1.notes[ni].id === 'd1_n3') {
               m8d1.notes[ni].afterSlotId = 'd1_s9';
-              m8d1.notes[ni].text = '到达较晚（约21:40），前门大街、大栅栏、鲜鱼口等大多21:30-22:00关门，今晚不再外出，晚餐直接点外卖到酒店；这些地方顺延至第二天傍晚游览';
+              m8d1.notes[ni].text = '到达较晚（约21:40），前门大街、大栅栏、鲜鱼口等大多21:30-22:00关门，今晚不再外出；飞机上已含晚餐，到酒店不用再叫外卖，简单休整；这些地方顺延至第二天傍晚游览';
             }
           }
         }
@@ -3345,6 +3345,42 @@ function applyPlanTemplate(plan) {
         if (m9s.id === 'd5_s8' && m9s.detail && m9s.detail.indexOf('清华观畴园') >= 0) {
           m9s.name = '晚餐（中关村·领展）';
           m9s.detail = '领展美食广场（中关村丹棱街甲1号B1，约30-60元/人，麻辣烫/煲仔饭/面馆超全）——清华/北大不开放进校，逛完校门打车约10分钟到中关村，正好吃晚饭；校内食堂去不了';
+        }
+      }
+    }
+  }
+  // 版本迁移 9→10：Day1 接机专车（到达层举牌 京AFS1014）+ 取行李到到达层出口指引 + 飞机餐（不叫外卖）
+  if (plan.days.length > 0 && plan.days[0]) {
+    var m10d1 = plan.days[0];
+    if (m10d1.dayNum === 1) {
+      function m10slot(id) {
+        if (!Array.isArray(m10d1.slots)) return null;
+        for (var mi = 0; mi < m10d1.slots.length; mi++) if (m10d1.slots[mi].id === id) return m10d1.slots[mi];
+        return null;
+      }
+      var m10s5 = m10slot('d1_s5');
+      if (m10s5 && m10s5.detail && m10s5.detail.indexOf('到达层出口') < 0) {
+        m10s5.detail = '下机后跟随“到达/国内到达”指示牌走（T3较大，步行约5-10分钟）。\n\n【取行李】\n1. 进入行李提取大厅（2层），先看大屏确认 CA1542 对应的行李转盘\n2. 在对应转盘等行李，可用机场免费手推车；宝宝和老人先在旁边座位休息\n\n【去到达层出口（接机点）】\n3. 取完行李，跟随“出口”绿色指示牌前行约3-5分钟\n4. 国内到达出口为 A 口 / C 口（B 口是国际到达），出口上方屏幕会显示你的航班对应哪个口\n5. 出 A/C 口即到达层（2层）接机区——接机司机在此举牌等候（车牌 京AFS1014）\n6. 出闸前给司机打个电话确认他在 A 口还是 C 口，出来直接上车';
+      }
+      var m10s6 = m10slot('d1_s6');
+      if (m10s6) {
+        m10s6.name = '接机专车 → 北京东方饭店';
+        m10s6.detail = '接机专车已订好：司机在到达层（2层）A/C出口举牌等候（车牌 京AFS1014），出闸即上车，车程约40-50分钟（晚间不堵车）。\n\n【备选：如接机有变，可参考T3打车指南】\n' + getPlanT3GuideDetail();
+      }
+      var m10s8 = m10slot('d1_s8');
+      if (m10s8) {
+        m10s8.name = '晚餐（飞机餐）';
+        m10s8.detail = 'CA1542 航班提供机上晚餐（起飞后发放，约18:00-19:00用餐），到达后不用再叫外卖；到酒店简单洗漱，吃点水果/自带零食即可，早点休息';
+      }
+      if (Array.isArray(m10d1.notes)) {
+        for (var m10n = 0; m10n < m10d1.notes.length; m10n++) {
+          if (m10d1.notes[m10n].id === 'd1_n2') {
+            m10d1.notes[m10n].icon = '🚘';
+            m10d1.notes[m10n].text = '接机专车已订：司机在首都机场T3到达层（2层）A/C出口举牌等候（车牌 京AFS1014），取完行李出闸即上车；打车指南（备选）在「接机专车 → 北京东方饭店」详情页';
+          }
+          if (m10d1.notes[m10n].id === 'd1_n3') {
+            m10d1.notes[m10n].text = '到达较晚（约21:40），前门大街、大栅栏、鲜鱼口等大多21:30-22:00关门，今晚不再外出；飞机上已含晚餐，到酒店不用再叫外卖，简单休整；这些地方顺延至第二天傍晚游览';
+          }
         }
       }
     }
@@ -6211,7 +6247,13 @@ async function initApp() {
   // 2. 从云端加载行程数据
   try {
     var cloudPlan = await loadFromCloud('plan');
-    if (cloudPlan) { planCache = sanitizePlan(applyPlanTemplate(cloudPlan)); lastPlanCloudHash = JSON.stringify(cloudPlan); }
+    if (cloudPlan) {
+      var cloudOldVer = cloudPlan.templateVersion || 0;
+      planCache = sanitizePlan(applyPlanTemplate(cloudPlan));
+      lastPlanCloudHash = JSON.stringify(cloudPlan);
+      // 模板版本升级触发迁移后，规划模式下立即写回云端，家人查看模式即可同步最新行程
+      if (cloudOldVer < PLAN_TEMPLATE_VERSION && currentMode === 'plan') savePlan(planCache);
+    }
   } catch(e) { console.warn('云端行程加载失败:', e.message); }
 
   // 3. 从云端加载预算数据
